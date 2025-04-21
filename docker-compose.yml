@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: centro_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-centro_formacion}
+      POSTGRES_USER: ${DB_USERNAME:-usuario}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "54321:5432" # o el puerto que prefieras
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: centro_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "8000:8000" # PHP artisan serve
+      - "5173:5173" # Vite o PHP artisan serve
+    depends_on:
+      - db
+
+volumes:
+  db_data:

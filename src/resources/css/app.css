@@ -1,0 +1,31 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+  --bs-primary: #1c398e;
+  --bs-primary-rgb: 28, 57, 142;
+  --bs-success: #92ccaf;
+  --bs-success-rgb: 22, 104, 113;
+  --bs-info: #B5E09B;
+  --bs-warning: #EBC944;
+  --bs-light: #3d7604;
+  --bs-dark: #273618;
+  --bs-body-bg: #39452d;
+  --bs-body-color: #273618;
+  --bs-link-color: #5BAD4E;
+  --bs-link-hover-color: #7BB853;
+}
+
+/* Tus estilos personalizados aquí */
+body {
+    /* ejemplo */
+    /*padding-top: 6px; /* Si usas navbar fija */
+    
+}
+.hover-lift { /* Ejemplo del efecto que mencionamos */
+    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
