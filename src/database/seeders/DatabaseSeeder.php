@@ -12,21 +12,30 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Limpiar tablas antes (opcional, útil para desarrollo)
+        // DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // Desactivar claves foráneas (MySQL) - PostgreSQL tiene TRUNCATE ... CASCADE
+        // AlumnoCurso::truncate();
+        // Curso::truncate();
+        // Alumno::truncate();
+        // Profesor::truncate();
+        // PreinscritoSepe::truncate();
+        // DB::statement('SET FOREIGN_KEY_CHECKS=1;'); // Reactivar claves foráneas (MySQL)
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $this->command->info("Iniciando el proceso de Seeding...");
 
-        // Llamar al seeder de Profesores
         $this->call([
-            ProfesorSeeder::class,
-            // Puedes añadir aquí llamadas a otros seeders en el orden correcto
-            // AlumnoSeeder::class,
-            // CursoSeeder::class,
-            // AlumnoCursoSeeder::class,
-            // ...etc
+            // 1. Entidades base sin dependencias externas (o solo User si aplica)
+            ProfesorSeeder::class,       // Debe ir antes de CursoSeeder
+            AlumnoSeeder::class,         // Debe ir antes de AlumnoCursoSeeder
+            PreinscritoSepeSeeder::class,// Independiente en este punto
+
+            // 2. Entidades que dependen de las anteriores
+            CursoSeeder::class,          // Depende de ProfesorSeeder
+
+            // 3. Entidades de relación (pivote)
+            AlumnoCursoSeeder::class,    // Depende de AlumnoSeeder y CursoSeeder
         ]);
+
+        $this->command->info("¡Seeding completado!");
     }
 }
