@@ -50,16 +50,13 @@ body {
     text-decoration: none;
 }
 
-/* Colores personalizados por sección 
-.square-btn.btn-primary { background: #2563eb; color: #fff; }
-.square-btn.btn-success { background: #059669; color: #fff; }
-.square-btn.btn-info    { background: #0ea5e9; color: #fff; }
-.square-btn.btn-warning { background: #f59e42; color: #fff; }*/
 
-.square-btn.btn-primary { background: #166871; color: #fff; }
-.square-btn.btn-success { background: rgb(41, 76, 121); color: #fff; }
-.square-btn.btn-info    { background: rgb(41, 76, 121); color: #fff; }
-.square-btn.btn-warning { background: rgb(41, 76, 121); color: #fff; }
+/* Colores personalizados por sección */
+.square-btn.btn-primary { background: #2563eb; color: #fff; } /* Azul */
+.square-btn.btn-success { background: #059669; color: #fff; } /* Verde */
+.square-btn.btn-info    { background: #0ea5e9; color: #fff; } /* Celeste */
+.square-btn.btn-warning { background: #f59e42; color: #fff; } /* Naranja/Amarillo */
+
 
 /* Responsive: botones y tarjeta más pequeños en móvil */
 @media (max-width: 600px) {

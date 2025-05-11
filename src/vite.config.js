@@ -8,13 +8,13 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    server: { // <--- ¡AÑADE O MODIFICA ESTA SECCIÓN!
+    // --- Añadir esta sección ---
+    server: {
+        host: '0.0.0.0', // Escucha en todas las interfaces de red
+        port: 5173,      // Puerto estándar de Vite
         hmr: {
-            host: 'localhost', // Indica al cliente HMR que se conecte a localhost
-        },
-        host: '0.0.0.0', // Hace que Vite escuche en todas las interfaces dentro del contenedor
-        watch: {
-          usePolling: true // Ayuda a detectar cambios de archivo en Docker/WSL
+            host: 'localhost', // El host que usará el navegador para conectar a HMR
         }
     }
+    // --- Fin de la sección ---
 });

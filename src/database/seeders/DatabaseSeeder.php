@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             // 1. Entidades base sin dependencias externas (o solo User si aplica)
+            UserSeeder::class,
             ProfesorSeeder::class,       // Debe ir antes de CursoSeeder
             AlumnoSeeder::class,         // Debe ir antes de AlumnoCursoSeeder
             PreinscritoSepeSeeder::class,// Independiente en este punto
