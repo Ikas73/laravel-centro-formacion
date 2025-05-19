@@ -51,63 +51,71 @@
         
 
 <!-- Filtros, Buscador y Botón de Acción -->
-<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-    {{-- Lado Izquierdo: Buscador y Filtros --}}
-    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-        {{-- Buscador --}}
-        <div class="relative w-full sm:w-64">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                <i class="bi bi-search text-gray-400"></i>
-            </span>
-            <input type="text" name="search" id="search"
-                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                   placeholder="Buscar por nombre o ID">
+{{-- ¡ENVOLVEMOS TODO EN UN ÚNICO FORMULARIO GET! --}}
+<form method="GET" action="{{ route('admin.alumnos.index') }}" class="mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        {{-- Lado Izquierdo: Buscador y Filtros --}}
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            {{-- Buscador --}}
+            <div class="relative w-full sm:w-64">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <i class="bi bi-search text-gray-400"></i>
+                </span>
+                <input type="text" name="search" id="search"
+                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                       placeholder="Buscar por nombre o ID"
+                       value="{{ $searchTerm ?? '' }}"> {{-- Usar $searchTerm pasado del controlador --}}
+            </div>
+
+            {{-- Filtro Grados (Dropdown <select>) --}}
+            <div class="w-full sm:w-auto">
+                <select name="grado" id="grado"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2">
+                    <option value="">Todos los Grados</option>
+                    @foreach ($opcionesGrado as $grado)
+                        <option value="{{ $grado }}" {{ ($filtroGrado == $grado) ? 'selected' : '' }}>
+                            {{ $grado }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Filtro Estados (Dropdown <select>) --}}
+            <div class="w-full sm:w-auto">
+                <select name="estado_filtro" id="estado_filtro"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2">
+                    <option value="">Todos los Estados</option>
+                    @foreach ($opcionesEstado as $estado)
+                        <option value="{{ $estado }}" {{ ($filtroEstado == $estado) ? 'selected' : '' }}>
+                            {{ $estado }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Botón para aplicar filtros/búsqueda --}}
+            <button type="submit"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Filtrar/Buscar
+            </button>
+
         </div>
 
-        {{-- Filtro Grados (Ejemplo con Botón, podría ser un <select>) --}}
-        {{-- Necesitarás JS para manejar el dropdown si es un botón --}}
-        <div class="relative">
-            <button type="button"
-                    class="inline-flex justify-center w-full sm:w-auto rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Todos los Grados
-                <i class="bi bi-chevron-down ms-2 -me-1"></i>
-            </button>
-            {{-- Menú Dropdown (Oculto por defecto, manejar con JS/Alpine) --}}
-            {{-- <div class="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <div class="py-1" role="none">
-                    <a href="#" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">1º Año</a>
-                    <a href="#" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">2º Año</a>
-                    <a href="#" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">3º Año</a>
-                </div>
-            </div> --}}
-        </div>
-
-        {{-- Filtro Estados (Ejemplo con Botón) --}}
-        <div class="relative">
-            <button type="button"
-                    class="inline-flex justify-center w-full sm:w-auto rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Todos los Estados
-                <i class="bi bi-chevron-down ms-2 -me-1"></i>
-            </button>
-            {{-- Menú Dropdown --}}
+        {{-- Lado Derecho: Botón Añadir Nuevo Alumno (fuera del form de búsqueda/filtros) --}}
+        <div class="w-full sm:w-auto flex-shrink-0 mt-3 sm:mt-0">
+            <a href="{{ route('admin.alumnos.create') }}"
+               class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <i class="bi bi-plus-lg me-2"></i>
+                Añadir Nuevo Alumno
+            </a>
         </div>
     </div>
-
-    {{-- Lado Derecho: Botón Añadir Nuevo Alumno --}}
-    <div class="w-full sm:w-auto flex-shrink-0">
-        <a href="{{ route('admin.alumnos.create') }}"
-           class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            <i class="bi bi-plus-lg me-2"></i>
-            Añadir Nuevo Alumno
-        </a>
-    </div>
-</div>
+</form>
 <!-- Fin Filtros y Buscador -->
 
 {{-- El placeholder de la Tabla de Alumnos sigue igual por ahora --}}
 
-        {{-- Tabla de Alumnos - Placeholder --}}
-        {{-- Sustituye el div placeholder de la Tabla con esto: --}}
+        {{-- Tabla de Alumnos - Placeholder --}}        
 
 <!-- Tabla de Alumnos -->
 <div class="bg-white rounded-lg shadow overflow-x-auto"> {{-- Contenedor de la tabla para sombra y overflow --}}
@@ -213,12 +221,11 @@
         {{-- Sustituye el div placeholder de la Paginación con esto: --}}
 
 <!-- Paginación -->
-@if ($alumnos->hasPages()) {{-- Solo muestra la paginación si hay más de una página --}}
-    <div class="mt-6 px-2 py-3 bg-white rounded-lg shadow"> {{-- Contenedor para la paginación, similar a una tarjeta --}}
-        {{ $alumnos->links() }}
-        {{-- Laravel por defecto usa vistas de paginación compatibles con Tailwind si Breeze está instalado --}}
-        {{-- Si necesitas pasar parámetros de query string (ej: de búsqueda/filtros), puedes hacer: --}}
-        {{-- {{ $alumnos->appends(request()->query())->links() }} --}}
+@if ($alumnos->hasPages())
+    <div class="mt-6 px-2 py-3 bg-white rounded-lg shadow">
+        {{-- ANTES: {{ $alumnos->links() }} --}}
+        {{-- AHORA (para mantener el filtro de búsqueda): --}}
+        {{ $alumnos->appends(request()->query())->links() }}
     </div>
 @endif
 <!-- Fin Paginación -->

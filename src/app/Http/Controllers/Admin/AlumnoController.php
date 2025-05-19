@@ -1,43 +1,87 @@
 <?php
 
-namespace App\Http\Controllers\Admin; // Asegúrate que el namespace es correcto
+namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller; // Importar el controlador base
-use App\Models\Alumno;           // Importar el modelo Alumno
-use App\Models\Profesor;         // Para el KPI de ratio (ejemplo)
+use App\Http\Controllers\Controller;
+use App\Models\Alumno;
+use App\Models\Profesor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AlumnoController extends Controller
 {
-    /**
-     * Muestra una lista del recurso.
-     */
-    public function index(Request $request) // Añadimos Request para futura búsqueda/filtrado
+    public function index(Request $request)
     {
-        // 1. Obtener Alumnos Paginados
-        // Por ahora, obtenemos todos. Más adelante añadiremos filtros y búsqueda.
-        $alumnos = Alumno::orderBy('apellido1', 'asc')->orderBy('nombre', 'asc')->paginate(7); // Paginado, 10 por página, ordenado
+        $searchTerm = $request->input('search');
+        // --- NUEVO: Obtener valores de filtro de la request ---
+        $filtroGrado = $request->input('grado');
+        $filtroEstado = $request->input('estado_filtro'); // Usamos 'estado_filtro' para no colisionar con el campo 'estado' del modelo
 
-        // 2. Calcular KPIs (Valores iniciales/placeholders)
-        $totalAlumnosActivos = Alumno::where('estado', 'Activo')->count(); // Asumiendo que tienes un campo 'estado'
-        // Si no tienes 'estado', usa Alumno::count() por ahora
-        // $totalAlumnosActivos = Alumno::count();
+        $query = Alumno::query();
 
-        $nuevosAlumnosEsteMes = 0; // Placeholder, necesitarás lógica de fechas
+        // Aplicar filtro de búsqueda
+        if ($searchTerm) {
+            $lowerSearchTerm = strtolower($searchTerm);
+            $query->where(function ($q) use ($lowerSearchTerm) {
+                $q->where(DB::raw('LOWER(nombre)'), 'LIKE', "%{$lowerSearchTerm}%")
+                  ->orWhere(DB::raw('LOWER(apellido1)'), 'LIKE', "%{$lowerSearchTerm}%")
+                  ->orWhere(DB::raw('LOWER(apellido2)'), 'LIKE', "%{$lowerSearchTerm}%")
+                  ->orWhere(DB::raw('LOWER(dni)'), 'LIKE', "%{$lowerSearchTerm}%")
+                  ->orWhere(DB::raw('LOWER(email)'), 'LIKE', "%{$lowerSearchTerm}%");
+            });
+        }
+
+        // --- NUEVO: Aplicar filtro por Grado/Nivel Formativo ---
+        if ($filtroGrado) {
+            $query->where('nivel_formativo', $filtroGrado);
+        }
+
+        // --- NUEVO: Aplicar filtro por Estado ---
+        // Asegúrate de que tu tabla 'alumnos' tiene una columna 'estado'
+        // y que los valores coinciden con los de $opcionesEstado
+        if ($filtroEstado) {
+            $query->where('estado', $filtroEstado);
+        }
+
+        $alumnos = $query->orderBy('apellido1', 'asc')
+                         ->orderBy('nombre', 'asc')
+                         ->paginate(7)
+                         // ¡IMPORTANTE! appends ahora debe incluir todos los filtros y la búsqueda
+                         ->appends($request->query()); // Esto incluye search, grado, y estado_filtro si están presentes
+
+        // KPIs
+        $totalAlumnosActivos = Alumno::count(); // Simplificado por ahora
+        $nuevosAlumnosEsteMes = 0;
         $totalProfesores = Profesor::count();
-        $ratioAlumnoProfesor = ($totalProfesores > 0) ? round($totalAlumnosActivos / $totalProfesores, 1) . ':1' : 'N/A';
-        $tasaAsistencia = '94.5%'; // Placeholder
+        $ratioAlumnoProfesor = ($totalProfesores > 0 && $totalAlumnosActivos > 0) ? round($totalAlumnosActivos / $totalProfesores, 1) . ':1' : 'N/A';
+        $tasaAsistencia = '94.5%';
 
-        // 3. Pasar datos a la vista
+        // --- NUEVO: Obtener opciones para los filtros ---
+        // Obtener todos los niveles formativos distintos y no nulos de la tabla alumnos
+        $opcionesGrado = Alumno::select('nivel_formativo')
+                                ->whereNotNull('nivel_formativo')
+                                ->where('nivel_formativo', '!=', '')
+                                ->distinct()
+                                ->orderBy('nivel_formativo')
+                                ->pluck('nivel_formativo');
+
+        // Definir opciones de estado (o podrías obtenerlas de la BD si tienes una tabla de estados)
+        // Asegúrate de que estos valores coincidan con los que usas en tu AlumnoFactory y en el badge de la tabla
+        $opcionesEstado = ['Activo', 'Inactivo', 'Pendiente', 'Baja'];
+
+
         return view('admin.alumnos.index', compact(
             'alumnos',
             'totalAlumnosActivos',
             'nuevosAlumnosEsteMes',
             'ratioAlumnoProfesor',
-            'tasaAsistencia'
+            'tasaAsistencia',
+            'searchTerm',
+            'opcionesGrado',     // <--- NUEVO: Pasar opciones de grado
+            'opcionesEstado',    // <--- NUEVO: Pasar opciones de estado
+            'filtroGrado',       // <--- NUEVO: Pasar filtro de grado seleccionado
+            'filtroEstado'       // <--- NUEVO: Pasar filtro de estado seleccionado
         ));
     }
-
-    // ... otros métodos (create, store, show, edit, update, destroy) ...
-    // Los dejaremos vacíos o con un simple return view() por ahora.
+    // ... otros métodos ...
 }
