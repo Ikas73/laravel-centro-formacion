@@ -5,7 +5,7 @@
 {
 "label": "Ajustar permisos del proyecto",
 "type": "shell",
-"command": "sudo chown -R user1234:user1234 /home/user1234/proyectos/[01]Docker_Proyecto",
+"command": "sudo chown -R user1234:user1234 /home/user1234/proyectos/laravel-centro-formacion",
 "problemMatcher": []
 }
 ]

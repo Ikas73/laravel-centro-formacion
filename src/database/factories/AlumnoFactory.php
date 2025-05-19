@@ -42,6 +42,7 @@ class AlumnoFactory extends Factory
             'nacionalidad' => fake()->randomElement(['Española', 'Portuguesa', 'Marroquí', 'Colombiana', 'Otra']),
             'situacion_laboral' => fake()->randomElement($situacion),
             'nivel_formativo' => fake()->randomElement($nivel),
+            'estado' => fake()->randomElement(['Activo', 'Inactivo', 'Baja', 'Pendiente']), // Ejemplo de estados
         ];
     }
 }

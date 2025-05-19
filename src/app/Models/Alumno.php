@@ -35,6 +35,7 @@ class Alumno extends Model
         'nacionalidad',
         'situacion_laboral',
         'nivel_formativo',
+        'estado', 
     ];
 
     /**
