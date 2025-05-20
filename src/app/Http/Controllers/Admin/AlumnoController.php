@@ -50,7 +50,8 @@ class AlumnoController extends Controller
                          ->appends($request->query()); // Esto incluye search, grado, y estado_filtro si están presentes
 
         // KPIs
-        $totalAlumnosActivos = Alumno::count(); // Simplificado por ahora
+        // $totalAlumnosActivos = Alumno::count(); // Lo que tenías como placeholder
+        $totalAlumnosActivos = Alumno::where('estado', 'Activo')->count(); // Ahora debería funcionar
         $nuevosAlumnosEsteMes = 0;
         $totalProfesores = Profesor::count();
         $ratioAlumnoProfesor = ($totalProfesores > 0 && $totalAlumnosActivos > 0) ? round($totalAlumnosActivos / $totalProfesores, 1) . ':1' : 'N/A';
