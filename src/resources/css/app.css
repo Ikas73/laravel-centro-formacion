@@ -12,3 +12,14 @@
 @tailwind utilities;
 
 /* Aquí puedes añadir más CSS personalizado si quieres */
+/* Asegurar que el body y html ocupen todo el alto */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Centrar verticalmente el contenido */
+.min-h-screen {
+    min-height: 100vh;
+}
