@@ -211,9 +211,10 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{-- route('admin.alumnos.show', $alumno->id) --}}" class="text-gray-400 hover:text-blue-600 mr-3" title="Ver">
-                            <i class="bi bi-eye-fill"></i>
-                        </a>
+                    {{-- AHORA: --}}
+<a href="{{ route('admin.alumnos.show', $alumno->id) }}" class="text-gray-400 hover:text-blue-600 mr-3" title="Ver">
+    <i class="bi bi-eye-fill"></i>
+</a>
                         <a href="{{-- route('admin.alumnos.edit', $alumno->id) --}}" class="text-gray-400 hover:text-indigo-600 mr-3" title="Editar">
                             <i class="bi bi-pencil-fill"></i>
                         </a>

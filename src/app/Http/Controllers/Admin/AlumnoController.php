@@ -85,7 +85,7 @@ class AlumnoController extends Controller
         ));
     }
 
-    // En Admin/AlumnoController.php
+    
 
 /**
  * Muestra el formulario para crear un nuevo recurso.
@@ -102,7 +102,23 @@ public function create()
     return view('admin.alumnos.create');
 }
 
-// En Admin/AlumnoController.php
+
+
+/**
+ * Muestra el recurso especificado.
+ * Gracias al Route Model Binding, Laravel automáticamente busca y
+ * nos inyecta el objeto Alumno correspondiente al ID en la URL.
+ */
+public function show(Alumno $alumno) // Laravel inyecta el objeto Alumno
+{
+    // Aquí podrías cargar relaciones si las vas a mostrar en la vista de detalle
+    // Ejemplo: $alumno->load('cursosInscritos'); // Si tienes una relación así
+    // (Asumiendo que $alumno ya tiene la relación 'cursos' definida)
+    // $alumno->load('cursos'); // Para la relación ManyToMany
+
+    return view('admin.alumnos.show', compact('alumno'));
+}
+
 
 /**
  * Almacena un nuevo recurso creado en el almacenamiento.
