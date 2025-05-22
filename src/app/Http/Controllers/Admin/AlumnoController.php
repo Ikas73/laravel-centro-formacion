@@ -84,5 +84,65 @@ class AlumnoController extends Controller
             'filtroEstado'       // <--- NUEVO: Pasar filtro de estado seleccionado
         ));
     }
+
+    // En Admin/AlumnoController.php
+
+/**
+ * Muestra el formulario para crear un nuevo recurso.
+ */
+public function create()
+{
+    // Por ahora, solo necesitamos mostrar la vista.
+    // Más adelante, si el formulario necesita 'options' para <select> (ej: lista de estados),
+    // se pasarían aquí.
+    // Por ejemplo, si el estado se elige de una lista fija:
+    // $opcionesEstado = ['Activo', 'Inactivo', 'Pendiente', 'Baja'];
+    // return view('admin.alumnos.create', compact('opcionesEstado'));
+
+    return view('admin.alumnos.create');
+}
+
+// En Admin/AlumnoController.php
+
+/**
+ * Almacena un nuevo recurso creado en el almacenamiento.
+ */
+public function store(Request $request)
+{
+    // ------ 1. Validación de Datos ------
+    // Define aquí las reglas de validación para cada campo
+    // Asegúrate de que los nombres coincidan con los atributos 'name' del formulario
+    $validatedData = $request->validate([
+        'nombre' => 'required|string|max:100',
+        'apellido1' => 'required|string|max:100',
+        'apellido2' => 'nullable|string|max:100', // 'nullable' significa que puede estar vacío
+        'dni' => 'required|string|max:15|unique:alumnos,dni', // 'unique:alumnos,dni' asegura que el DNI no exista ya en la tabla 'alumnos'
+        'email' => 'required|email|max:100|unique:alumnos,email', // 'email' valida formato y 'unique' para que no se repita
+        'fecha_nacimiento' => 'required|date|before_or_equal:today', // Debe ser una fecha y no futura
+        'nivel_formativo' => 'required|string|max:100', // Ajusta si usas valores específicos (ej: 'in:ESO,Bachiller,...')
+        'estado' => 'required|string|in:Activo,Inactivo,Pendiente,Baja', // Asegura que el estado sea uno de los permitidos
+        // Añade aquí todas las demás columnas de tu tabla 'alumnos' que vengan del formulario con sus reglas
+        // Por ejemplo:
+        // 'num_seguridad_social' => 'nullable|string|max:20|unique:alumnos,num_seguridad_social',
+        // 'sexo' => 'nullable|string|in:Hombre,Mujer,Otro',
+        // 'direccion' => 'nullable|string',
+        // 'cp' => 'nullable|string|max:10',
+        // 'localidad' => 'nullable|string|max:100',
+        // 'provincia' => 'nullable|string|max:100',
+        // 'telefono' => 'nullable|string|max:20',
+        // 'nacionalidad' => 'nullable|string|max:50',
+        // 'situacion_laboral' => 'nullable|string|max:100',
+    ]);
+
+    // ------ 2. Creación del Alumno ------
+    // Si la validación pasa, $validatedData contendrá solo los datos validados.
+    // Asegúrate de que todos estos campos están en la propiedad $fillable de tu modelo Alumno.
+    Alumno::create($validatedData);
+
+    // ------ 3. Redirección con Mensaje de Éxito ------
+    return redirect()->route('admin.alumnos.index')
+                     ->with('success', '¡Alumno añadido correctamente!');
+                     // 'success' es el nombre de la variable de sesión flash.
+}
     // ... otros métodos ...
 }
