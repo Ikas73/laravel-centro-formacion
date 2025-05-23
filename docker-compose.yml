@@ -10,7 +10,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "54321:5432" # o el puerto que prefieras
+      - "49155:5432" # o el puerto que prefieras
 
   app:
     build:
