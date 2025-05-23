@@ -37,6 +37,7 @@ class Alumno extends Model
         'nivel_formativo',
         'estado', 
     ];
+    protected $table = 'alumnos'; // Ya lo tienes, si es necesario
 
     /**
     * Obtiene todos los registros de inscripción (tabla alumno_curso) para este alumno.

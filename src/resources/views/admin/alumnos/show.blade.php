@@ -17,6 +17,20 @@
 @endpush
 
 @section('content')
+{{-- Bloque de Mensajes Flash --}}
+    @if (session('success'))
+        <div class="mb-4 px-4 py-3 rounded-md relative bg-green-100 border border-green-400 text-green-800" role="alert">
+            <strong class="font-bold">¡Éxito!</strong>
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="mb-4 px-4 py-3 rounded-md relative bg-red-100 border border-red-400 text-red-800" role="alert">
+            <strong class="font-bold">¡Error!</strong>
+            <span class="block sm:inline">{{ session('error') }}</span>
+        </div>
+    @endif
+    {{-- Fin Bloque de Mensajes Flash --}}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Student Header Card -->
     <div class="student-card-gradient rounded-3xl p-6 md:p-8 text-white mb-8 relative overflow-hidden shadow-2xl">
