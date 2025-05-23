@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Curso extends Model
 {
@@ -36,8 +37,8 @@ class Curso extends Model
     ];
 
     /**
-    * Obtiene el profesor que imparte este curso.
-    */
+     * Obtiene el profesor que imparte este curso.
+     */
     public function profesor(): BelongsTo
     {
         // Laravel busca automáticamente una columna 'profesor_id' en esta tabla ('cursos')
@@ -46,8 +47,8 @@ class Curso extends Model
     }
 
     /**
-    * Obtiene todos los registros de inscripción (tabla alumno_curso) para este curso.
-    */
+     * Obtiene todos los registros de inscripción (tabla alumno_curso) para este curso.
+     */
     public function inscripciones(): HasMany
     {
         // Busca registros en 'alumno_curso' donde 'curso_id' coincida con el ID de este curso.
@@ -55,13 +56,13 @@ class Curso extends Model
     }
 
     /**
-    * Obtiene los alumnos inscritos directamente en este curso.
-    */
+     * Obtiene los alumnos inscritos directamente en este curso.
+     */
     public function alumnos(): BelongsToMany
     {
         // Define la relación inversa muchos-a-muchos.
         return $this->belongsToMany(Alumno::class, 'alumno_curso')
-                    ->withPivot('fecha_inscripcion', 'nota', 'estado') // Mismas opciones que antes
-                    ->withTimestamps(); // Mismas opciones que antes
+            ->withPivot('fecha_inscripcion', 'nota', 'estado') // Mismas opciones que antes
+            ->withTimestamps(); // Mismas opciones que antes
     }
 }

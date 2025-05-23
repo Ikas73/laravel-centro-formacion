@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\PreinscritoSepe; // Importar modelo
+use App\Models\PreinscritoSepe;
+use Illuminate\Database\Seeder; // Importar modelo
 
 class PreinscritoSepeSeeder extends Seeder
 {

@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-            // En el método up() de la nueva migración
+        // En el método up() de la nueva migración
         Schema::table('alumnos', function (Blueprint $table) {
             $table->string('estado')->nullable()->after('nivel_formativo'); // O después de la columna que prefieras
-        // Podrías poner un default: ->default('Activo');
-});
+            // Podrías poner un default: ->default('Activo');
+        });
     }
 
     /**
@@ -23,9 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-            // En el método down()
-    Schema::table('alumnos', function (Blueprint $table) {
-        $table->dropColumn('estado');
-    });
+        // En el método down()
+        Schema::table('alumnos', function (Blueprint $table) {
+            $table->dropColumn('estado');
+        });
     }
 };

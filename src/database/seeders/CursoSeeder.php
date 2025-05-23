@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Curso; // Importar modelo
+use App\Models\Curso;
+use Illuminate\Database\Seeder; // Importar modelo
 
 class CursoSeeder extends Seeder
 {

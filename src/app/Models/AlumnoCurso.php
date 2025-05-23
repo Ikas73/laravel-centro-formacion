@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -8,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AlumnoCurso extends Model
 {
     use HasFactory; // <-- AÑADIR ESTA LÍNEA
+
     protected $table = 'alumno_curso';
     // Aquí pueden ir tus propiedades $fillable, $hidden, relaciones, etc.
     // protected $fillable = [...];
@@ -26,8 +28,8 @@ class AlumnoCurso extends Model
     ];
 
     /**
-    * Obtiene el alumno asociado a esta inscripción.
-    */
+     * Obtiene el alumno asociado a esta inscripción.
+     */
     public function alumno(): BelongsTo
     {
         // Busca la clave foránea 'alumno_id' en esta tabla ('alumno_curso').
@@ -35,11 +37,11 @@ class AlumnoCurso extends Model
     }
 
     /**
-    * Obtiene el curso asociado a esta inscripción.
-    */
+     * Obtiene el curso asociado a esta inscripción.
+     */
     public function curso(): BelongsTo
     {
         // Busca la clave foránea 'curso_id' en esta tabla ('alumno_curso').
         return $this->belongsTo(Curso::class);
-}
+    }
 }

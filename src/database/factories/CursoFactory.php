@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Curso; // Verifica la ruta del modelo
 use App\Models\Profesor; // Necesario para asignar profesor
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CursoFactory extends Factory
 {
@@ -20,20 +20,19 @@ class CursoFactory extends Factory
 
         // Asegurarse que existen profesores antes de ejecutar este factory
         $profesorId = Profesor::inRandomOrder()->first()?->id; // Obtiene el ID de un profesor al azar
-         // Si no hay profesores, lanza un error o retorna null/default ID? Depende de tu lógica.
-         // Para evitar errores, el ProfesorSeeder DEBE ejecutarse antes.
-         if(!$profesorId) {
-             // Podrías crear un profesor aquí si no existe, pero es mejor asegurar el orden en DatabaseSeeder
-             throw new \Exception("No se encontraron profesores para asignar al curso. Asegúrate de ejecutar ProfesorSeeder primero.");
-         }
+        // Si no hay profesores, lanza un error o retorna null/default ID? Depende de tu lógica.
+        // Para evitar errores, el ProfesorSeeder DEBE ejecutarse antes.
+        if (! $profesorId) {
+            // Podrías crear un profesor aquí si no existe, pero es mejor asegurar el orden en DatabaseSeeder
+            throw new \Exception('No se encontraron profesores para asignar al curso. Asegúrate de ejecutar ProfesorSeeder primero.');
+        }
 
         $fechaInicio = fake()->dateTimeBetween('+1 week', '+6 months');
         $duracionDias = fake()->numberBetween(30, 180); // Duración en días
         $fechaFin = (clone $fechaInicio)->modify("+$duracionDias days");
 
-
         return [
-            'nombre' => fake()->catchPhrase() . ' ' . fake()->jobTitle(), // Nombre de curso inventado
+            'nombre' => fake()->catchPhrase().' '.fake()->jobTitle(), // Nombre de curso inventado
             'codigo' => fake()->unique()->bothify('??###??'), // Código único
             'descripcion' => fake()->paragraph(3),
             'modalidad' => fake()->randomElement($modalidades),
@@ -67,5 +66,5 @@ class CursoFactory extends Factory
                 'fecha_fin' => $fechaFinPasada->format('Y-m-d'),
             ];
         });
-}
+    }
 }

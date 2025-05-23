@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\PreinscritoSepe; // Verifica la ruta del modelo
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class PreinscritoSepeFactory extends Factory
 {
@@ -20,7 +19,7 @@ class PreinscritoSepeFactory extends Factory
             'nombre' => fake()->firstName(),
             'apellido1' => fake()->lastName(),
             'apellido2' => fake()->optional(0.7)->lastName(),
-            'dni' => fake()->unique()->numerify('########') . fake()->randomLetter(),
+            'dni' => fake()->unique()->numerify('########').fake()->randomLetter(),
             'fecha_nacimiento' => fake()->dateTimeBetween('-60 years', '-16 years')->format('Y-m-d'),
             'telefono' => fake()->boolean(90) // 90% de probabilidad de tener teléfono
                 ? fake()->unique()->numerify('6########') // Si es true, genera

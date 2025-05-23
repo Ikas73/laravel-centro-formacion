@@ -21,14 +21,14 @@ class DatabaseSeeder extends Seeder
         // PreinscritoSepe::truncate();
         // DB::statement('SET FOREIGN_KEY_CHECKS=1;'); // Reactivar claves foráneas (MySQL)
 
-        $this->command->info("Iniciando el proceso de Seeding...");
+        $this->command->info('Iniciando el proceso de Seeding...');
 
         $this->call([
             // 1. Entidades base sin dependencias externas (o solo User si aplica)
             UserSeeder::class,
             ProfesorSeeder::class,       // Debe ir antes de CursoSeeder
             AlumnoSeeder::class,         // Debe ir antes de AlumnoCursoSeeder
-            PreinscritoSepeSeeder::class,// Independiente en este punto
+            PreinscritoSepeSeeder::class, // Independiente en este punto
 
             // 2. Entidades que dependen de las anteriores
             CursoSeeder::class,          // Depende de ProfesorSeeder
@@ -37,6 +37,6 @@ class DatabaseSeeder extends Seeder
             AlumnoCursoSeeder::class,    // Depende de AlumnoSeeder y CursoSeeder
         ]);
 
-        $this->command->info("¡Seeding completado!");
+        $this->command->info('¡Seeding completado!');
     }
 }

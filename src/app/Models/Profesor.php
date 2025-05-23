@@ -19,7 +19,7 @@ class Profesor extends Model
 
     // Aquí pueden ir tus propiedades $fillable, $hidden, relaciones, etc.
     // protected $fillable = [...];
-    
+
     /**
      * Los atributos que son asignables masivamente.
      *
@@ -41,11 +41,9 @@ class Profesor extends Model
         // No incluir 'id', 'created_at', 'updated_at'
     ];
 
-
-
     /**
-    * Obtiene los cursos impartidos por este profesor.
-    */
+     * Obtiene los cursos impartidos por este profesor.
+     */
     public function cursos(): HasMany
     {
         // Laravel busca automáticamente la clave foránea 'profesor_id' en la tabla 'cursos'

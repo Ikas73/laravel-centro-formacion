@@ -1,0 +1,22 @@
+includes:
+    - /home/swebot/.config/composer/vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - database
+        - routes
+        - config
+
+    # Level 9 is the highest level
+    level: 5
+
+    # Optional:
+    # ignoreErrors:
+    #     - '#PHPDoc tag @var in file .*? has invalid type .#'
+
+    # Autoload files and directories
+    bootstrapFiles:
+        - bootstrap/app.php
+    scanFiles:
+        - config/app.php

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\AlumnoCurso; // Verifica la ruta del modelo
-use App\Models\Alumno; // Necesario
+use App\Models\Alumno; // Verifica la ruta del modelo
+use App\Models\AlumnoCurso; // Necesario
 use App\Models\Curso; // Necesario
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,8 +19,8 @@ class AlumnoCursoFactory extends Factory
         $alumnoId = Alumno::inRandomOrder()->first()?->id;
         $cursoId = Curso::inRandomOrder()->first()?->id;
 
-        if (!$alumnoId || !$cursoId) {
-             throw new \Exception("Asegúrate de que AlumnoSeeder y CursoSeeder se ejecutan primero.");
+        if (! $alumnoId || ! $cursoId) {
+            throw new \Exception('Asegúrate de que AlumnoSeeder y CursoSeeder se ejecutan primero.');
         }
 
         $estado = fake()->randomElement(['Inscrito', 'Completado', 'Baja', 'Pendiente']);

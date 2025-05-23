@@ -4,7 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Profesor; // Asegúrate que la ruta a tu modelo es correcta
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str; // Para el DNI de ejemplo
+
+// Para el DNI de ejemplo
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Profesor>
@@ -31,14 +32,14 @@ class ProfesorFactory extends Factory
             'Licenciatura en ADE', 'Grado en Marketing Digital', 'Máster en Finanzas',
             'Licenciatura en Filología Inglesa', 'Grado en Traducción e Interpretación',
             'Ingeniería Técnica Industrial', 'Grado en Electrónica Industrial',
-            'Licenciatura en Derecho', 'Máster en Derecho Laboral'
+            'Licenciatura en Derecho', 'Máster en Derecho Laboral',
         ];
         $especialidades = [
             'Desarrollo Backend (PHP/Java)', 'Desarrollo Frontend (React/Vue)', 'Bases de Datos SQL/NoSQL',
             'Administración de Empresas', 'Marketing Online y SEO', 'Contabilidad y Fiscalidad',
             'Inglés para Negocios (B2/C1)', 'Metodologías Ágiles (Scrum)',
             'Automatización Industrial', 'Sistemas Embebidos',
-            'Derecho Mercantil', 'Prevención de Riesgos Laborales'
+            'Derecho Mercantil', 'Prevención de Riesgos Laborales',
         ];
 
         // Generar sexo para usar nombres apropiados
@@ -51,7 +52,7 @@ class ProfesorFactory extends Factory
             'apellido2' => fake()->optional(0.7)->lastName(), // 70% de probabilidad de tener segundo apellido
             // DNI: formato realista (8 números + letra), pero letra aleatoria (no calculada)
             // unique() asegura que no se repitan DNI en esta ejecución del seeder
-            'dni' => fake()->unique()->numerify('########') . fake()->randomLetter(),
+            'dni' => fake()->unique()->numerify('########').fake()->randomLetter(),
             // NUSS: formato realista, pero números aleatorios
             'num_seguridad_social' => fake()->unique()->numerify('##/########/##'),
             // Fecha de nacimiento para edades entre 28 y 65 años

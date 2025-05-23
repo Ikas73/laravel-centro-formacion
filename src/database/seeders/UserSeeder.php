@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\User; // Importar User
+use App\Models\User;
+use Illuminate\Database\Seeder; // Importar User
 use Illuminate\Support\Facades\Hash; // Importar Hash
 
 class UserSeeder extends Seeder
@@ -21,7 +20,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin Principal', // El nombre que quieres
                 'password' => Hash::make('admin'), // La contraseña que quieres (hasheada)
-                'email_verified_at' => now() // Marcar como verificado
+                'email_verified_at' => now(), // Marcar como verificado
             ]
         );
 
