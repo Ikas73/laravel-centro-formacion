@@ -9,6 +9,7 @@ Este proyecto es una base profesional para el desarrollo de aplicaciones web mod
 - [Descripción General](#descripción-general)
 - [Tecnologías y Servicios](#tecnologías-y-servicios)
 - [Estructura del Proyecto](#estructura-del-proyecto)
+- [Principales Funcionalidades](#principales-funcionalidades)
 - [Requisitos Previos](#requisitos-previos)
 - [Instalación y Puesta en Marcha](#instalación-y-puesta-en-marcha)
 - [Comandos Útiles](#comandos-útiles)
@@ -26,7 +27,8 @@ Incluye:
 - **PHP 8.3** ejecutándose sobre FPM-Alpine.
 - **PostgreSQL 14** como base de datos relacional.
 - Gestión de dependencias con **Composer** y **npm**.
-- Soporte para desarrollo frontend moderno con **Vite**.
+- Soporte para desarrollo frontend moderno con **Vite** y **TailwindCSS**.
+- Panel de administración para gestión de alumnos, profesores, cursos y preinscripciones.
 
 ---
 
@@ -37,6 +39,8 @@ Incluye:
 - **PostgreSQL 14**
 - **Node.js & npm** (para assets frontend)
 - **Composer** (gestión de dependencias PHP)
+- **Vite** (build frontend)
+- **TailwindCSS** y **Bootstrap Icons**
 - Servicios adicionales fácilmente integrables: **Redis**, **pgAdmin**, etc.
 
 ---
@@ -44,8 +48,7 @@ Incluye:
 ## Estructura del Proyecto
 
 ```
-[01]Docker_Proyecto/
-│
+proyecto-laravel/
 ├── docker-compose.yml
 ├── Dockerfile
 ├── src/
@@ -66,6 +69,19 @@ Incluye:
 
 ---
 
+## Principales Funcionalidades
+
+- **Gestión de Alumnos:** Alta, listado, filtrado, búsqueda y paginación. Soporte para campos como nombre, apellidos, DNI, email, nivel formativo y estado (Activo, Inactivo, Pendiente, Baja).
+- **Gestión de Profesores y Cursos:** Estructura preparada para CRUD completo.
+- **Preinscripciones SEPE:** Migraciones y vistas para gestión de preinscritos.
+- **Panel de Administración:** Dashboard con KPIs, tarjetas resumen, ratio alumno-profesor y tasa de asistencia.
+- **Diseño Responsive:** Layouts personalizados con TailwindCSS y Bootstrap Icons.
+- **Autenticación y Seguridad:** Integración con sistema de usuarios de Laravel.
+- **Frontend Moderno:** Vite, TailwindCSS, Alpine.js y efectos visuales modernos.
+- **Soporte para migraciones y seeders personalizados.**
+
+---
+
 ## Requisitos Previos
 
 - [Docker](https://docs.docker.com/get-docker/) instalado
@@ -79,7 +95,7 @@ Incluye:
 1. **Clona el repositorio:**
     ```bash
     git clone <URL_DEL_REPOSITORIO>
-    cd [01]Docker_Proyecto
+    cd proyecto-laravel
     ```
 
 2. **Copia el archivo de entorno y configura variables:**
@@ -98,7 +114,7 @@ Incluye:
     docker exec -it centro_app composer install
     ```
 
-5. **Instala dependencias de frontend (opcional):**
+5. **Instala dependencias de frontend:**
     ```bash
     docker exec -it centro_app npm install
     docker exec -it centro_app npm run build
