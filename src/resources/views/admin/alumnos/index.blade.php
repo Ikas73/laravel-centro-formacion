@@ -210,19 +210,26 @@
                             {{ $estado }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {{-- AHORA: --}}
-<a href="{{ route('admin.alumnos.show', $alumno->id) }}" class="text-gray-400 hover:text-blue-600 mr-3" title="Ver">
-    <i class="bi bi-eye-fill"></i>
-</a>
-                        <a href="{{-- route('admin.alumnos.edit', $alumno->id) --}}" class="text-gray-400 hover:text-indigo-600 mr-3" title="Editar">
-                            <i class="bi bi-pencil-fill"></i>
-                        </a>
-                        {{-- El botón de eliminar usualmente requiere un formulario y confirmación --}}
-                        <button type="button" class="text-gray-400 hover:text-red-600" title="Eliminar" onclick="alert('Funcionalidad de eliminar pendiente para Alumno ID: {{ $alumno->id }}')">
-                            <i class="bi bi-trash-fill"></i>
-                        </button>
-                    </td>
+                    {{-- Celda de Acciones --}}
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+    <a href="{{ route('admin.alumnos.show', $alumno->id) }}" class="text-gray-400 hover:text-blue-600 mr-3" title="Ver">
+        <i class="bi bi-eye-fill"></i>
+    </a>
+    <a href="{{ route('admin.alumnos.edit', $alumno->id) }}" class="text-gray-400 hover:text-indigo-600 mr-3" title="Editar">
+        <i class="bi bi-pencil-fill"></i>
+    </a>
+
+    {{-- NUEVO: Formulario para Eliminar --}}
+    <form action="{{ route('admin.alumnos.destroy', $alumno->id) }}" method="POST"
+          class="inline"
+          onsubmit="return confirm('¿Estás seguro de que quieres eliminar a este alumno? Esta acción no se puede deshacer.');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="text-gray-400 hover:text-red-600" title="Eliminar">
+            <i class="bi bi-trash-fill"></i>
+        </button>
+    </form>
+</td>
                 </tr>
             @empty
                 <tr>
