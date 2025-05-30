@@ -13,13 +13,12 @@ class ProfesorController extends Controller
 {
     public function index(Request $request)
     {
-        Log::info("ProfesorController@index fue alcanzado.");
-
         $searchTerm = $request->input('search');
-        $filtroEspecialidad = $request->input('especialidad_filtro'); // Para el filtro
+        $filtroEspecialidad = $request->input('especialidad'); // Para el nuevo filtro
 
         $query = Profesor::query();
 
+        // Aplicar filtro de búsqueda por nombre, DNI, email, etc.
         if ($searchTerm) {
             $lowerSearchTerm = strtolower($searchTerm);
             $query->where(function ($q) use ($lowerSearchTerm) {
@@ -27,41 +26,60 @@ class ProfesorController extends Controller
                   ->orWhere(DB::raw('LOWER(apellido1)'), 'LIKE', "%{$lowerSearchTerm}%")
                   ->orWhere(DB::raw('LOWER(apellido2)'), 'LIKE', "%{$lowerSearchTerm}%")
                   ->orWhere(DB::raw('LOWER(dni)'), 'LIKE', "%{$lowerSearchTerm}%")
-                  ->orWhere(DB::raw('LOWER(email)'), 'LIKE', "%{$lowerSearchTerm}%")
-                  ->orWhere(DB::raw('LOWER(especialidad)'), 'LIKE', "%{$lowerSearchTerm}%"); // Añadir búsqueda por especialidad
+                  ->orWhere(DB::raw('LOWER(email)'), 'LIKE', "%{$lowerSearchTerm}%");
+                // Podrías añadir búsqueda por especialidad aquí también si quieres que el campo de texto busque en especialidades
+                // ->orWhere(DB::raw('LOWER(especialidad)'), 'LIKE', "%{$lowerSearchTerm}%");
             });
         }
 
+        // NUEVO: Aplicar filtro por Especialidad
         if ($filtroEspecialidad) {
             $query->where('especialidad', $filtroEspecialidad);
         }
 
-        $profesores = $query->withCount('cursos') // Cargar el conteo de cursos para el KPI
+        $profesores = $query->withCount('cursos') // NUEVO: Contar cursos para mostrar en la tabla
                             ->orderBy('apellido1', 'asc')
                             ->orderBy('nombre', 'asc')
-                            ->paginate(10) // O 7 si prefieres menos por página
-                            ->appends($request->query()); // Mantener todos los parámetros
-
-        // KPIs (Simplificados)
+                            ->paginate(7) // Ajusta a 7 para que quepa como en la imagen
+                            ->appends($request->query()); // Mantener todos los parámetros de la URL en la paginación
         $totalProfesores = Profesor::count();
-        // $profesoresConMasCursos = Profesor::withCount('cursos')->orderBy('cursos_count', 'desc')->take(1)->first(); // Ejemplo para KPI si quieres
-        $mediaCursosPorProfesor = ($totalProfesores > 0) ? round(Curso::count() / $totalProfesores, 1) : 0;
+        
 
-        // Opciones para el filtro de especialidad
+        // NUEVO: Obtener opciones para el filtro de especialidad
         $opcionesEspecialidad = Profesor::select('especialidad')
                                     ->whereNotNull('especialidad')
                                     ->where('especialidad', '!=', '')
                                     ->distinct()
                                     ->orderBy('especialidad')
                                     ->pluck('especialidad');
+        $activosEsteMes = $totalProfesores;
+        $totalEspecialidades = $opcionesEspecialidad->count();
+        
+
+        // KPIs (Ejemplos basados en la imagen)
+        
+        // Media Cursos/Profesor: Necesitaríamos el total de cursos asignados
+        // Esto es un cálculo más complejo, por ahora un placeholder o un cálculo simple.
+        // $totalCursosAsignados = Curso::whereNotNull('profesor_id')->count();
+        // $mediaCursosPorProfesor = ($totalProfesores > 0) ? round($totalCursosAsignados / $totalProfesores, 1) : 0;
+        // Por simplicidad, usaremos un placeholder hasta tener una mejor lógica para "cursos asignados a ESTOS profesores"
+        // Cálculo más preciso para media de cursos
+        $profesoresConCursos = Profesor::withCount('cursos')->get();
+        $totalCursosAsignados = $profesoresConCursos->sum('cursos_count');
+        $mediaCursosPorProfesor = ($totalProfesores > 0) ? round($totalCursosAsignados / $totalProfesores, 1) : 0;
+
+        
+        
 
         return view('admin.profesores.index', compact(
             'profesores',
             'searchTerm',
-            'totalProfesores',
-            'mediaCursosPorProfesor',
-            'opcionesEspecialidad',
-            'filtroEspecialidad'
+            'opcionesEspecialidad',   // Pasar opciones de filtro
+            'filtroEspecialidad',     // Pasar filtro seleccionado
+            'totalProfesores',        // KPI
+            'mediaCursosPorProfesor', // KPI
+            'totalEspecialidades',    // KPI
+            'activosEsteMes'          // KPI
         ));
     }
 

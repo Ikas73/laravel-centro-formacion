@@ -117,9 +117,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                            <i class="bi bi-chevron-down text-gray-400"></i>
-                        </div>
+                        
                     </div>
                     
                     <!-- Filtro de estado mejorado -->
@@ -134,9 +132,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                            <i class="bi bi-chevron-down text-gray-400"></i>
-                        </div>
+                        
                     </div>
                     
                     <!-- Botones de acción -->

@@ -107,7 +107,7 @@
                     
                     <!-- Filtro de especialidad mejorado -->
                     <div class="relative">
-                        <select name="especialidad_filtro" 
+                        <select name="especialidad" 
                                 id="especialidad_filtro" 
                                 class="block w-full sm:w-60 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all duration-200 appearance-none cursor-pointer">
                             <option value="">📚 Todas las Especialidades</option>
@@ -117,9 +117,6 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                            <i class="bi bi-chevron-down text-gray-400"></i>
-                        </div>
                     </div>
                     
                     <!-- Botones de acción -->
