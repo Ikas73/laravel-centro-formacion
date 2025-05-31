@@ -191,7 +191,7 @@ public function update(Request $request, Alumno $alumno) // Inyectar Request y e
         'nivel_formativo' => 'required|string|max:100',
         'estado' => 'required|string|in:Activo,Inactivo,Pendiente,Baja',
         // ... añade todas las demás reglas de validación ...
-        /* Por ejemplo:
+        
         'num_seguridad_social' => 'nullable|string|max:20|unique:alumnos,num_seguridad_social,' . $alumno->id,
         'sexo' => 'nullable|string|in:Hombre,Mujer,Otro',
         'direccion' => 'nullable|string',
@@ -201,6 +201,7 @@ public function update(Request $request, Alumno $alumno) // Inyectar Request y e
         'telefono' => 'nullable|string|max:20',
         'nacionalidad' => 'nullable|string|max:50',
         'situacion_laboral' => 'nullable|string|max:100',
+        /* Por ejemplo:
         */
     ]);
 
