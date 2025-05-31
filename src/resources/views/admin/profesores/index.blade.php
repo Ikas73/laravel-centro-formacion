@@ -258,12 +258,11 @@
                             </td>
                             <td class="px-6 py-5 whitespace-nowrap text-center">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <a href="{{ route('admin.profesores.show', $profesor->id) }}" 
-                                       class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group/btn"
-                                       title="Ver detalles">
-                                        <i class="bi bi-eye-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
-                                    </a>
-                                    <a href="{{ route('admin.profesores.edit', $profesor->id) }}" 
+                                <a href="{{ route('admin.profesores.show', ['profesore' => $profesor]) }}" class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group/btn"
+                                    title="Ver detalles">
+                                    <i class="bi bi-eye-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
+                                </a>
+                                    <a href="{{ route('admin.profesores.edit', ['profesore' => $profesor]) }}" 
                                        class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 group/btn"
                                        title="Editar información">
                                         <i class="bi bi-pencil-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
@@ -333,34 +332,34 @@
 
     <!-- Modal de confirmación de eliminación -->
     <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
-            <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Eliminar Profesor</h3>
-                <p class="text-sm text-gray-500 mb-4">
-                    ¿Estás seguro de que quieres eliminar a <strong id="profesorName"></strong>? 
-                    Esta acción no se puede deshacer y podría afectar a cursos asignados.
-                </p>
-                <div class="flex justify-center space-x-3">
-                    <button type="button" 
-                            onclick="closeDeleteModal()" 
-                            class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200">
-                        Cancelar
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Eliminar Profesor</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                ¿Estás seguro de que quieres eliminar a <strong id="profesorName"></strong>?
+                Esta acción no se puede deshacer.
+            </p>
+            <div class="flex justify-center space-x-3">
+                <button type="button"
+                        onclick="closeDeleteModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200">
+                    Cancelar
+                </button>
+                <form id="deleteForm" method="POST"> {{-- La action se establece con JS --}}
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        Eliminar
                     </button>
-                    <form id="deleteForm" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" 
-                                class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200">
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
 @endsection
 
@@ -431,7 +430,7 @@
     // Función para confirmar eliminación
     function confirmDelete(profesorId, profesorName) {
         document.getElementById('profesorName').textContent = profesorName;
-        document.getElementById('deleteForm').action = '{{ route("admin.profesores.destroy", ":id") }}'.replace(':id', profesorId);
+        document.getElementById('deleteForm').action = '{{ route("admin.profesores.destroy", ["profesore" => ":id"]) }}'.replace(':id', profesorId);
         document.getElementById('deleteModal').classList.remove('hidden');
     }
     

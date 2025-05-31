@@ -5,7 +5,7 @@
                 particlesJS('particles-js', {
                     particles: {
                         number: {
-                            value: 80,
+                            value: 150,
                             density: {
                                 enable: true,
                                 value_area: 800
@@ -32,7 +32,7 @@
                             }
                         },
                         size: {
-                            value: 3,
+                            value: 2,
                             random: true,
                             anim: {
                                 enable: false,
@@ -43,14 +43,14 @@
                         },
                         line_linked: {
                             enable: true,
-                            distance: 150,
+                            distance: 130,
                             color: "#00e1ff",
                             opacity: 0.4,
                             width: 1
                         },
                         move: {
                             enable: true,
-                            speed: 1,
+                            speed: 0.5,
                             direction: "none",
                             random: false,
                             straight: false,
@@ -78,7 +78,7 @@
                         },
                         modes: {
                             grab: {
-                                distance: 140,
+                                distance: 200,
                                 line_linked: {
                                     opacity: 1
                                 }

@@ -10,6 +10,9 @@ class Profesor extends Model
 {
     use HasFactory;
 
+    public const TITULACIONES_VALIDAS = ['Licenciatura', 'Grado', 'Máster', 'Doctorado', 'Ingeniería Técnica', 'Otra'];
+    public const ESPECIALIDADES_VALIDAS = ['Desarrollo Web', 'Bases de Datos', 'Redes', 'Marketing Digital', 'Finanzas', 'Otra'];
+
     /**
      * La tabla asociada con el modelo.
      *
