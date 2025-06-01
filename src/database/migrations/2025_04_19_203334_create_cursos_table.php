@@ -12,6 +12,8 @@ return new class extends Migration
     public function up()
 {
     Schema::create('cursos', function (Blueprint $table) {
+        $table->unsignedBigInteger('profesor_id');
+        $table->foreign('profesor_id')->references('id')->on('profesores')->onDelete('SET NULL'); // O onDelete('RESTRICT') si no quieres que se borre
         $table->id();
         $table->string('nombre', 255);
         $table->string('codigo', 20)->nullable();

@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Curso extends Model
 {
-    use HasFactory; // <-- AÑADIR ESTA LÍNEA
+    use HasFactory; 
 
     // Aquí pueden ir tus propiedades $fillable, $hidden, relaciones, etc.
-    // protected $fillable = [...];
+    protected $table = 'cursos'; // Nombre de la tabla en la base de datos
 
     /**
      * Los atributos que son asignables masivamente.
@@ -33,6 +33,17 @@ class Curso extends Model
         'centros',
         'profesor_id', // Incluir la clave foránea si se asigna masivamente
         'plazas_maximas',
+    ];
+
+     /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     * Esto es útil para que las fechas se traten como objetos Carbon.
+     */
+    protected $casts = [
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
+        'plazas_maximas' => 'integer',
+        'horas_totales' => 'integer',
     ];
 
     /**
