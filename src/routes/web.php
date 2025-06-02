@@ -1,18 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; // Necesario para la simulación de login
-use App\Models\User;                 // Necesario para la simulación de login
-
-/*
-|--------------------------------------------------------------------------
-| Controladores
-|--------------------------------------------------------------------------
-|
-| Importa todos los controladores que usarás en tus rutas.
-| Separa los controladores de Admin para mayor claridad.
-|
-*/
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 // --- Controladores Estándar (ej: Breeze / Perfil) ---
 use App\Http\Controllers\ProfileController;
@@ -23,30 +13,45 @@ use App\Http\Controllers\Admin\CursoController;
 use App\Http\Controllers\Admin\AlumnoController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\EventoController;
-// Añade aquí otros controladores de Admin a medida que los crees
-use App\Http\Controllers\Admin\PreinscritoSepeController;
-// use App\Http\Controllers\Admin\ReporteController;
-// use App\Http\Controllers\Admin\FinanzaController;
-// use App\Http\Controllers\Admin\ConfiguracionController;
-
+use App\Http\Controllers\Admin\PreinscritoSepeController; // Asegúrate que el nombre es exacto
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Aquí es donde puedes registrar rutas web para tu aplicación. Estas
-| rutas son cargadas por RouteServiceProvider dentro de un grupo que
-| contiene el middleware "web". ¡Crea algo genial!
-|
 */
 
+// --- Ruta de Bienvenida Pública ---
+Route::get('/', function () {
+    // Si un usuario autenticado va a la raíz, redirigirlo al admin dashboard (o a su dashboard de usuario si tuvieras uno)
+    if (Auth::check()) {
+        return redirect()->route('admin.dashboard'); // Asumiendo que todos los logueados van al admin
+    }
+    return view('welcome');
+})->name('welcome');
 
+
+// --- Rutas de Autenticación (Login, Registro, Logout, etc.) ---
+// Esta línea carga las rutas definidas en routes/auth.php (generado por Breeze)
+require __DIR__.'/auth.php';
+
+
+// --- Rutas que Requieren Autenticación ---
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // --- Rutas de Perfil de Usuario ---
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+    });
 
     // --- Grupo para Rutas Específicas de Administración ---
-    Route::prefix('admin') // URL base será /admin/...
-          ->name('admin.')   // Nombre de ruta base será admin... (ej: admin.dashboard)
-          // ->middleware(['can:access-admin']) // Opcional: Añade aquí middleware de autorización específico para admin si tienes roles/permisos
+    Route::prefix('admin')
+          ->name('admin.')
+          // Si quieres un middleware de autorización específico para admin (basado en roles/permisos),
+          // lo añadirías aquí además del 'auth' y 'verified' del grupo padre.
+          // Ejemplo: ->middleware(['can:access-admin-panel'])
           ->group(function () {
 
             // Dashboard de Administración
@@ -57,81 +62,36 @@ use App\Http\Controllers\Admin\PreinscritoSepeController;
             Route::resource('alumnos', AlumnoController::class);
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
-            Route::resource('preinscritos', PreinscritoSepeController::class); 
+            Route::resource('preinscritos', PreinscritoSepeController::class); // Asegúrate que este controlador existe
 
-            // --- AÑADIR LA RUTA PARA CONVERTIR PREINSCRITO ---
+            // Ruta para convertir preinscrito
             Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])
-            ->name('preinscritos.convertir');
+                  ->name('preinscritos.convertir');
 
-            // Rutas para otras secciones (apuntando a controladores o closures temporales)
-            Route::get('/reportes', function () { return 'Admin Reportes (Pendiente)'; })->name('reportes.index'); // O usa ReporteController::class, 'index'
-            Route::get('/finanzas', function () { return 'Admin Finanzas (Pendiente)'; })->name('finanzas.index'); // O usa FinanzaController::class, 'index'
-            Route::get('/configuracion', function () { return 'Admin Configuración (Pendiente)'; })->name('configuracion.index'); // O usa ConfiguracionController::class, 'index'
-
-            // Puedes añadir más rutas específicas de admin aquí...
-
+            // Placeholders para otras secciones de admin
+            Route::get('/reportes', function () { return 'Admin Reportes (Pendiente)'; })->name('reportes.index');
+            Route::get('/finanzas', function () { return 'Admin Finanzas (Pendiente)'; })->name('finanzas.index');
+            Route::get('/configuracion', function () { return 'Admin Configuración (Pendiente)'; })->name('configuracion.index');
           }); // --- Fin del grupo admin ---
 
-
-          // --- Rutas Públicas (si las tienes, fuera del middleware 'auth') ---
-            Route::get('/', function () {
-                // Si un usuario autenticado va a la raíz, quizás redirigirlo al admin dashboard
-                if (Auth::check()) {
-                    return redirect()->route('admin.dashboard');
-                }
-                return view('welcome');
-            })->name('welcome');
-
-
-
-
-// --- Rutas de Autenticación (Login, Registro, Logout, etc.) ---
-// ¡IMPORTANTE! Esta línea carga las rutas definidas en routes/auth.php
-// que generalmente son creadas por Laravel Breeze, Jetstream o UI.
-// Estas rutas incluyen la ruta nombrada 'logout' que necesitas.
-require __DIR__.'/auth.php';
+}); // --- Fin del grupo principal 'auth', 'verified' ---
 
 
 // --- Ruta de Simulación de Login (SOLO PARA DESARROLLO LOCAL) ---
-// Permite saltar el login durante el desarrollo para acceder rápidamente al panel.
-// Asegúrate de que NO esté activa en producción.
-// En routes/web.php
-    Route::get('/login-dev', function () {
-        if (!app()->environment('local')) {
-            return redirect()->route('login');
-        }
+Route::get('/login-dev', function () {
+    if (!app()->environment('local')) {
+        return redirect()->route('login'); // En producción, siempre al login real
+    }
 
-        $user = User::where('email', 'admin@admin.com')->first(); // Busca el usuario
-
-        if ($user) {
-            Auth::login($user); // Loguea si existe
-            request()->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
-        } else {
-            // Informar que el usuario no se encontró (debería haber sido creado por el seeder)
-            return "Error: Usuario admin@admin.com no encontrado. ¿Se ejecutó 'php artisan migrate:fresh --seed'?";
-        }
-
-    })->name('login.dev');
-
-
-    // --- Rutas de Perfil de Usuario (Estándar de Breeze, protegidas por 'auth') ---
-// Es mejor que estas también estén dentro de un grupo con middleware 'auth'
-// Si no las moviste dentro del grupo principal 'auth', puedes hacerlo así:
-Route::middleware(['auth', 'verified'])->group(function() {
-
-    // --- Rutas de Inicio (Dashboard) ---
-    // Ruta principal de bienvenida
-    Route::get('/', function () {
-        return view('welcome');
-        })->name('welcome'); // Es buena práctica nombrar todas las rutas
-
-
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
-    });
-
-
-}); // --- Fin del grupo auth ---
+    $user = User::firstOrCreate(
+        ['email' => 'admin@admin.com'], // Usuario admin de prueba
+        [
+            'name' => 'Admin Dev',
+            'password' => bcrypt('password'), // Contraseña de prueba
+            'email_verified_at' => now()
+        ]
+    );
+    Auth::login($user);
+    request()->session()->regenerate();
+    return redirect()->intended(route('admin.dashboard'));
+})->name('login.dev');
