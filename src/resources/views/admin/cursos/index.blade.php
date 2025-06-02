@@ -4,204 +4,525 @@
 @section('page-title', 'Gestión de Cursos')
 
 @section('content')
-    {{-- Mensajes Flash --}}
+    {{-- Mensajes Flash Mejorados --}}
     @if (session('success'))
-        <div class="mb-6 px-4 py-3 rounded-lg relative bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-400 text-green-800 shadow-sm animate-fadeIn" role="alert">
-            <div class="flex items-center"><i class="bi bi-check-circle-fill text-green-500 mr-3"></i><div><strong class="font-semibold">¡Éxito!</strong><p class="text-sm mt-1">{{ session('success') }}</p></div></div>
+        <div class="mb-8 px-6 py-4 rounded-2xl relative bg-gradient-to-r from-emerald-50 via-green-50 to-emerald-50 border border-emerald-200 text-emerald-800 shadow-lg shadow-emerald-100/50 animate-slideInDown" role="alert">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 mt-0.5">
+                    <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-sm">
+                        <i class="bi bi-check-lg text-white text-sm font-bold"></i>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <div class="text-sm font-semibold text-emerald-900">Operación exitosa</div>
+                    <div class="mt-1 text-sm text-emerald-700">{{ session('success') }}</div>
+                </div>
+                <button type="button" onclick="this.parentElement.parentElement.remove()" 
+                        class="flex-shrink-0 ml-4 p-1 rounded-full hover:bg-emerald-200 transition-colors">
+                    <i class="bi bi-x text-emerald-600 text-lg"></i>
+                </button>
+            </div>
         </div>
     @endif
+    
     @if (session('error'))
-        <div class="mb-6 px-4 py-3 rounded-lg relative bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-400 text-red-800 shadow-sm animate-fadeIn" role="alert">
-            <div class="flex items-center"><i class="bi bi-exclamation-triangle-fill text-red-500 mr-3"></i><div><strong class="font-semibold">¡Atención!</strong><p class="text-sm mt-1">{{ session('error') }}</p></div></div>
+        <div class="mb-8 px-6 py-4 rounded-2xl relative bg-gradient-to-r from-red-50 via-rose-50 to-red-50 border border-red-200 text-red-800 shadow-lg shadow-red-100/50 animate-slideInDown" role="alert">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 mt-0.5">
+                    <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-sm">
+                        <i class="bi bi-exclamation-lg text-white text-sm font-bold"></i>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <div class="text-sm font-semibold text-red-900">Atención requerida</div>
+                    <div class="mt-1 text-sm text-red-700">{{ session('error') }}</div>
+                </div>
+                <button type="button" onclick="this.parentElement.parentElement.remove()" 
+                        class="flex-shrink-0 ml-4 p-1 rounded-full hover:bg-red-200 transition-colors">
+                    <i class="bi bi-x text-red-600 text-lg"></i>
+                </button>
+            </div>
         </div>
     @endif
 
-    <!-- KPIs / Tarjetas de Resumen para Cursos -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {{-- Tarjeta Total Cursos Activos (Ejemplo) --}}
-        <div class="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Cursos Activos</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $totalCursosActivos ?? $cursos->total() }}</p> {{-- Usar variable específica o total paginado --}}
+    {{-- KPIs Mejorados con Diseño Premium --}}
+    {{-- KPIs Compactos con Diseño Premium --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+    {{-- Cursos Activos --}}
+    <div class="group relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4 rounded-2xl shadow-lg shadow-blue-100/25 border border-blue-100/50 hover:shadow-xl hover:shadow-blue-200/30 transition-all duration-300 hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-blue-50/30 to-blue-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-all duration-300 group-hover:scale-105">
+                    <i class="bi bi-journals text-lg text-white"></i>
                 </div>
-                <div class="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                    <i class="bi bi-journals text-2xl text-blue-600"></i>
-                </div>
-            </div>
-        </div>
-        {{-- Tarjeta Media Alumnos/Curso (Placeholder) --}}
-        <div class="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Media Alumnos/Curso</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $mediaAlumnosPorCurso ?? 'N/A' }}</p>
-                </div>
-                <div class="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
-                    <i class="bi bi-people-fill text-2xl text-green-600"></i>
+                <div class="text-right">
+                    <div class="text-xs font-medium text-blue-600 uppercase tracking-wide">Cursos</div>
+                    <div class="text-xs text-blue-500 font-medium">Activos</div>
                 </div>
             </div>
-        </div>
-        {{-- Tarjeta Modalidades Únicas --}}
-        <div class="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Modalidades</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $opcionesModalidad->count() }}</p>
+            <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+                    {{ $totalCursosActivos ?? $cursos->total() }}
                 </div>
-                <div class="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                    <i class="bi bi-intersect text-2xl text-purple-600"></i>
-                </div>
-            </div>
-        </div>
-        {{-- Tarjeta Profesores con Cursos --}}
-        <div class="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all group">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Profesores Asignados</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $opcionesProfesores->count() }}</p>
-                </div>
-                <div class="p-3 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
-                    <i class="bi bi-person-video3 text-2xl text-orange-600"></i>
-                </div>
+                <div class="text-xs text-gray-600">cursos disponibles</div>
             </div>
         </div>
     </div>
 
-    <!-- Filtros y Herramientas -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-        <form method="GET" action="{{ route('admin.cursos.index') }}" id="filterFormCursos">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
-                    {{-- Buscador --}}
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none"><i class="bi bi-search text-gray-400 group-focus-within:text-indigo-500"></i></div>
-                        <input type="text" name="search" id="searchCursos"
-                               class="block w-full sm:w-72 pl-11 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all text-sm"
-                               placeholder="Buscar por nombre o código..." value="{{ $searchTerm ?? '' }}" autocomplete="off">
-                        @if($searchTerm)
-                            <button type="button" onclick="document.getElementById('searchCursos').value=''; document.getElementById('filterFormCursos').submit();" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"><i class="bi bi-x-lg"></i></button>
-                        @endif
-                    </div>
-                    
-                    {{-- Filtro Modalidad --}}
-                    <div class="relative">
-                        <select name="modalidad" id="modalidad_filtro" onchange="this.form.submit()"
-                                class="block w-full sm:w-auto rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all appearance-none cursor-pointer">
-                            <option value="">Todas las Modalidades</option>
-                            @foreach ($opcionesModalidad as $modalidad)
-                                <option value="{{ $modalidad }}" {{ ($filtroModalidad == $modalidad) ? 'selected' : '' }}>{{ $modalidad }}</option>
-                            @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"><i class="bi bi-chevron-down text-gray-400"></i></div>
-                    </div>
+    {{-- Media Alumnos --}}
+    <div class="group relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-4 rounded-2xl shadow-lg shadow-emerald-100/25 border border-emerald-100/50 hover:shadow-xl hover:shadow-emerald-200/30 transition-all duration-300 hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-emerald-50/30 to-emerald-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2.5 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-md shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-all duration-300 group-hover:scale-105">
+                    <i class="bi bi-people-fill text-lg text-white"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs font-medium text-emerald-600 uppercase tracking-wide">Media</div>
+                    <div class="text-xs text-emerald-500 font-medium">Alumnos/Curso</div>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                    {{ $mediaAlumnosPorCurso ?? 'N/A' }}
+                </div>
+                <div class="text-xs text-gray-600">estudiantes promedio</div>
+            </div>
+        </div>
+    </div>
 
-                    {{-- Filtro Profesor --}}
-                    <div class="relative">
-                        <select name="profesor_id" id="profesor_filtro" onchange="this.form.submit()"
-                                class="block w-full sm:w-auto rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all appearance-none cursor-pointer">
-                            <option value="">Todos los Profesores</option>
-                            @foreach ($opcionesProfesores as $profesor)
-                                <option value="{{ $profesor->id }}" {{ ($filtroProfesor == $profesor->id) ? 'selected' : '' }}>{{ $profesor->nombre }} {{ $profesor->apellido1 }}</option>
-                            @endforeach
-                        </select>
-                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"><i class="bi bi-chevron-down text-gray-400"></i></div>
-                    </div>
+    {{-- Modalidades --}}
+    <div class="group relative overflow-hidden bg-gradient-to-br from-purple-50 via-white to-purple-50 p-4 rounded-2xl shadow-lg shadow-purple-100/25 border border-purple-100/50 hover:shadow-xl hover:shadow-purple-200/30 transition-all duration-300 hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-purple-50/30 to-purple-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2.5 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
+                    <i class="bi bi-intersect text-lg text-white"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs font-medium text-purple-600 uppercase tracking-wide">Modalidades</div>
+                    <div class="text-xs text-purple-500 font-medium">Disponibles</div>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 group-hover:text-purple-700 transition-colors">
+                    {{ $opcionesModalidad->count() }}
+                </div>
+                <div class="text-xs text-gray-600">tipos de enseñanza</div>
+            </div>
+        </div>
+    </div>
 
-                    @if($searchTerm || $filtroModalidad || $filtroProfesor)
-                        <a href="{{ route('admin.cursos.index') }}" class="inline-flex items-center justify-center px-4 py-3 text-sm font-medium rounded-lg text-gray-500 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500transition-all" title="Limpiar filtros"><i class="bi bi-arrow-clockwise"></i></a>
+    {{-- Profesores --}}
+    <div class="group relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-amber-50 p-4 rounded-2xl shadow-lg shadow-amber-100/25 border border-amber-100/50 hover:shadow-xl hover:shadow-amber-200/30 transition-all duration-300 hover:-translate-y-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-amber-50/30 to-amber-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+                <div class="p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-md shadow-amber-500/25 group-hover:shadow-amber-500/40 transition-all duration-300 group-hover:scale-105">
+                    <i class="bi bi-person-video3 text-lg text-white"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs font-medium text-amber-600 uppercase tracking-wide">Profesores</div>
+                    <div class="text-xs text-amber-500 font-medium">Asignados</div>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 group-hover:text-amber-700 transition-colors">
+                    {{ $opcionesProfesores->count() }}
+                </div>
+                <div class="text-xs text-gray-600">docentes activos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    {{-- Panel de Filtros Compacto --}}
+<div class="bg-gradient-to-r from-white via-gray-50/50 to-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-200/50 p-5 mb-8 backdrop-blur-sm">
+    <form method="GET" action="{{ route('admin.cursos.index') }}" id="filterFormCursos">
+        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
+            {{-- Controles de Filtrado --}}
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 w-full xl:w-auto">
+                {{-- Buscador Compacto --}}
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+                        <i class="bi bi-search text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200"></i>
+                    </div>
+                    <input type="text" name="search" id="searchCursos"
+                           class="block w-full lg:w-72 pl-10 pr-10 py-3 text-sm border-2 border-gray-200 rounded-xl bg-gray-50/50 placeholder-gray-400 focus:outline-none focus:ring-3 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all duration-300 shadow-inner hover:border-gray-300"
+                           placeholder="Buscar cursos por nombre o código..." 
+                           value="{{ $searchTerm ?? '' }}" 
+                           autocomplete="off">
+                    @if($searchTerm)
+                        <button type="button" 
+                                onclick="document.getElementById('searchCursos').value=''; document.getElementById('filterFormCursos').submit();" 
+                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-red-500 transition-colors duration-200 z-10">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
                     @endif
                 </div>
                 
-                <div class="flex-shrink-0 w-full sm:w-auto">
-                    <a href="{{ route('admin.cursos.create') }}" 
-                       class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent shadow-sm text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-105">
-                        <i class="bi bi-plus-lg mr-2"></i> Nuevo Curso
-                    </a>
+                {{-- Selectores Compactos --}}
+                <div class="flex flex-col sm:flex-row gap-3">
+                    {{-- Filtro Modalidad --}}
+                    <div class="relative group">
+                        <select name="modalidad" id="modalidad_filtro" onchange="this.form.submit()"
+                                class="block w-full sm:w-48 rounded-xl border-2 border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:outline-none focus:ring-3 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all duration-300 appearance-none cursor-pointer hover:border-gray-300 shadow-inner">
+                            <option value="">🎯 Todas las Modalidades</option>
+                            @foreach ($opcionesModalidad as $modalidad)
+                                <option value="{{ $modalidad }}" {{ ($filtroModalidad == $modalidad) ? 'selected' : '' }}>
+                                    {{ $modalidad == 'Online' ? '💻' : ($modalidad == 'Presencial' ? '🏫' : '🔄') }} {{ $modalidad }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="bi bi-chevron-down text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                        </div>
+                    </div>
+
+                    {{-- Filtro Profesor --}}
+                    <div class="relative group">
+                        <select name="profesor_id" id="profesor_filtro" onchange="this.form.submit()"
+                                class="block w-full sm:w-52 rounded-xl border-2 border-gray-200 bg-gray-50/50 px-4 py-3 text-sm focus:outline-none focus:ring-3 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-all duration-300 appearance-none cursor-pointer hover:border-gray-300 shadow-inner">
+                            <option value="">👨‍🏫 Todos los Profesores</option>
+                            @foreach ($opcionesProfesores as $profesor)
+                                <option value="{{ $profesor->id }}" {{ ($filtroProfesor == $profesor->id) ? 'selected' : '' }}>
+                                    {{ $profesor->nombre }} {{ $profesor->apellido1 }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="bi bi-chevron-down text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                        </div>
+                    </div>
+
+                    {{-- Botón Limpiar Filtros --}}
+                    @if($searchTerm || $filtroModalidad || $filtroProfesor)
+                        <button type="button" 
+                                onclick="window.location.href='{{ route('admin.cursos.index') }}'"
+                                class="inline-flex items-center justify-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 bg-gray-100 border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300 focus:outline-none focus:ring-3 focus:ring-gray-500/20 transition-all duration-300 shadow-inner hover:shadow-lg"
+                                title="Limpiar todos los filtros">
+                            <i class="bi bi-arrow-clockwise mr-2"></i>
+                            Limpiar
+                        </button>
+                    @endif
                 </div>
             </div>
-            @if($cursos->total() > 0)
-                <div class="mt-4 pt-4 border-t border-gray-100"><p class="text-sm text-gray-600"><i class="bi bi-info-circle mr-1"></i>Mostrando {{ $cursos->firstItem() }}-{{ $cursos->lastItem() }} de {{ $cursos->total() }} cursos @if($searchTerm || $filtroModalidad || $filtroProfesor) <span class="ml-2 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">Filtros activos</span>@endif</p></div>
-            @endif
-        </form>
-    </div>
+            
+            {{-- Botón Nuevo Curso Compacto --}}
+            <div class="flex-shrink-0 w-full sm:w-auto">
+                <a href="{{ route('admin.cursos.create') }}" 
+                   class="group w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border-2 border-transparent shadow-lg text-sm font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-700 hover:via-indigo-800 hover:to-purple-800 focus:outline-none focus:ring-3 focus:ring-indigo-500/30 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/25">
+                    <i class="bi bi-plus-lg mr-2 group-hover:scale-110 transition-transform duration-200"></i> 
+                    Nuevo Curso
+                </a>
+            </div>
+        </div>
+        
+        {{-- Información de Resultados Compacta --}}
+        @if($cursos->total() > 0)
+            <div class="mt-5 pt-4 border-t border-gray-200/50">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <p class="text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200/50">
+                        <i class="bi bi-info-circle mr-1 text-blue-500"></i>
+                        Mostrando <span class="font-semibold text-gray-900">{{ $cursos->firstItem() }}-{{ $cursos->lastItem() }}</span> 
+                        de <span class="font-semibold text-gray-900">{{ $cursos->total() }}</span> cursos
+                    </p>
+                    @if($searchTerm || $filtroModalidad || $filtroProfesor) 
+                        <span class="px-3 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 rounded-lg text-xs font-semibold border border-indigo-200/50 shadow-sm">
+                            <i class="bi bi-funnel mr-1"></i>Filtros activos
+                        </span>
+                    @endif
+                </div>
+            </div>
+        @endif
+    </form>
+</div>
 
-    <!-- Tabla de Cursos -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+
+    {{-- Tabla Premium Responsive --}}
+<div class="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/50 overflow-hidden backdrop-blur-sm">
+    {{-- Wrapper con scroll horizontal suave --}}
+    <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-gray-100">
+        <div class="min-w-full inline-block align-middle">
+            <table class="min-w-full divide-y divide-gray-100">
+                <thead class="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Curso</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Código</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Modalidad</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Profesor</th>
-                        <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Alumnos Insc.</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Fechas</th>
-                        <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Plazas</th>
-                        <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Acciones</th>
+                        {{-- Columna Curso - Siempre visible y sticky --}}
+                        <th scope="col" class="sticky left-0 z-20 bg-gray-100 px-4 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[280px]">
+                            <div class="flex items-center space-x-2">
+                                <i class="bi bi-book text-gray-500"></i>
+                                <span>Curso</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Código - Oculto en móvil (sm y mayor) --}}
+                        <th scope="col" class="hidden sm:table-cell px-4 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[120px]">
+                            <div class="flex items-center space-x-2">
+                                <i class="bi bi-hash text-gray-500"></i>
+                                <span>Código</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Modalidad - Oculto en tablet pequeña (md y mayor) --}}
+                        <th scope="col" class="hidden md:table-cell px-4 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[130px]">
+                            <div class="flex items-center space-x-2">
+                                <i class="bi bi-intersect text-gray-500"></i>
+                                <span>Modalidad</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Profesor - Oculto en tablet (lg y mayor) --}}
+                        <th scope="col" class="hidden lg:table-cell px-4 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[180px]">
+                            <div class="flex items-center space-x-2">
+                                <i class="bi bi-person-video3 text-gray-500"></i>
+                                <span>Profesor</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Inscritos - Oculto en móvil (sm y mayor) --}}
+                        <th scope="col" class="hidden sm:table-cell px-4 py-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[100px]">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="bi bi-people text-gray-500"></i>
+                                <span>Inscritos</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Fechas - Oculto en desktop pequeño (xl y mayor) --}}
+                        <th scope="col" class="hidden xl:table-cell px-4 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[140px]">
+                            <div class="flex items-center space-x-2">
+                                <i class="bi bi-calendar-range text-gray-500"></i>
+                                <span>Fechas</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Plazas - Oculto en tablet (lg y mayor) --}}
+                        <th scope="col" class="hidden lg:table-cell px-4 py-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[100px]">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="bi bi-diagram-3 text-gray-500"></i>
+                                <span>Plazas</span>
+                            </div>
+                        </th>
+                        
+                        {{-- Acciones - Siempre visible y sticky --}}
+                        <th scope="col" class="sticky right-0 z-20 bg-gray-100 px-4 py-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b-2 border-gray-200/50 min-w-[140px]">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="bi bi-gear text-gray-500"></i>
+                                <span>Acciones</span>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                    @forelse ($cursos as $curso)
-                        <tr class="hover:bg-gray-50 transition-colors group">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900 group-hover:text-indigo-600">{{ $curso->nombre }}</div>
-                                <div class="text-xs text-gray-500">{{ Str::limit($curso->descripcion, 50) }}</div>
+                
+                <tbody class="bg-white divide-y divide-gray-50">
+                    @forelse ($cursos as $index => $curso)
+                        <tr class="hover:bg-gradient-to-r hover:from-blue-50/30 hover:via-transparent hover:to-blue-50/30 transition-all duration-300 group {{ $index % 2 == 0 ? 'bg-gray-50/20' : 'bg-white' }}">
+                            
+                            {{-- Información del Curso - Sticky y siempre visible --}}
+                            <td class="sticky left-0 z-10 bg-white group-hover:bg-blue-50/30 px-4 py-6 whitespace-nowrap border-r border-gray-100">
+                                <div class="space-y-3">
+                                    {{-- Título del curso --}}
+                                    <div class="text-sm font-bold text-gray-900 group-hover:text-indigo-700 transition-colors duration-200">
+                                        {{ $curso->nombre }}
+                                    </div>
+                                    
+                                    {{-- Descripción --}}
+                                    <div class="text-xs text-gray-600 max-w-[220px] truncate">
+                                        {{ Str::limit($curso->descripcion, 45) }}
+                                    </div>
+                                    
+                                    {{-- Información adicional para móvil - Solo visible en pantallas pequeñas --}}
+                                    <div class="sm:hidden space-y-2 pt-2 border-t border-gray-100">
+                                        {{-- Código en móvil --}}
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-gray-500 font-semibold">Código:</span>
+                                            <code class="text-xs font-mono bg-gray-100 px-2 py-1 rounded">{{ $curso->codigo }}</code>
+                                        </div>
+                                        
+                                        {{-- Modalidad en móvil --}}
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-gray-500 font-semibold">Modalidad:</span>
+                                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full
+                                                {{ $curso->modalidad == 'Online' ? 'bg-sky-100 text-sky-800' : 
+                                                   ($curso->modalidad == 'Presencial' ? 'bg-emerald-100 text-emerald-800' : 
+                                                    'bg-purple-100 text-purple-800') }}">
+                                                @if($curso->modalidad == 'Online')
+                                                    <i class="bi bi-laptop mr-1"></i>
+                                                @elseif($curso->modalidad == 'Presencial')
+                                                    <i class="bi bi-building mr-1"></i>
+                                                @else
+                                                    <i class="bi bi-arrow-repeat mr-1"></i>
+                                                @endif
+                                                {{ $curso->modalidad }}
+                                            </span>
+                                        </div>
+                                        
+                                        {{-- Inscritos en móvil --}}
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-xs text-gray-500 font-semibold">Inscritos:</span>
+                                            <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-500 text-white rounded-full text-xs font-bold">
+                                                {{ $curso->alumnos_count }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono">{{ $curso->codigo }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {{ $curso->modalidad == 'Online' ? 'bg-sky-100 text-sky-800' : ($curso->modalidad == 'Presencial' ? 'bg-lime-100 text-lime-800' : 'bg-fuchsia-100 text-fuchsia-800') }}">
+                            
+                            {{-- Código - Visible desde sm --}}
+                            <td class="hidden sm:table-cell px-4 py-6 whitespace-nowrap">
+                                <div class="inline-flex items-center px-3 py-2 rounded-xl bg-gray-100 border border-gray-200/50">
+                                    <code class="text-sm font-mono font-semibold text-gray-800">{{ $curso->codigo }}</code>
+                                </div>
+                            </td>
+                            
+                            {{-- Modalidad - Visible desde md --}}
+                            <td class="hidden md:table-cell px-4 py-6 whitespace-nowrap">
+                                <span class="inline-flex items-center px-4 py-2 text-sm font-bold rounded-xl shadow-sm
+                                    {{ $curso->modalidad == 'Online' ? 'bg-gradient-to-r from-sky-100 to-blue-100 text-sky-800 border border-sky-200' : 
+                                       ($curso->modalidad == 'Presencial' ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border border-emerald-200' : 
+                                        'bg-gradient-to-r from-purple-100 to-fuchsia-100 text-purple-800 border border-purple-200') }}">
+                                    @if($curso->modalidad == 'Online')
+                                        <i class="bi bi-laptop mr-2"></i>
+                                    @elseif($curso->modalidad == 'Presencial')
+                                        <i class="bi bi-building mr-2"></i>
+                                    @else
+                                        <i class="bi bi-arrow-repeat mr-2"></i>
+                                    @endif
                                     {{ $curso->modalidad }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {{ $curso->profesor->nombre ?? 'N/A' }} {{ $curso->profesor->apellido1 ?? '' }}
+                            
+                            {{-- Profesor - Visible desde lg --}}
+                            <td class="hidden lg:table-cell px-4 py-6 whitespace-nowrap">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                                        <span class="text-white text-sm font-bold">
+                                            {{ substr($curso->profesor->nombre ?? 'N', 0, 1) }}{{ substr($curso->profesor->apellido1 ?? 'A', 0, 1) }}
+                                        </span>
+                                    </div>
+                                    <div class="max-w-[120px]">
+                                        <div class="text-sm font-semibold text-gray-900 truncate">
+                                            {{ $curso->profesor->nombre ?? 'Sin asignar' }} {{ $curso->profesor->apellido1 ?? '' }}
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                               <span class="inline-flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {{ $curso->alumnos_count }} {{-- Viene de withCount('alumnos') --}}
-                                </span>
+                            
+                            {{-- Alumnos Inscritos - Visible desde sm --}}
+                            <td class="hidden sm:table-cell px-4 py-6 whitespace-nowrap text-center">
+                                <div class="inline-flex items-center justify-center">
+                                    <div class="relative">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-all duration-300">
+                                            <span class="text-white text-lg font-bold">{{ $curso->alumnos_count }}</span>
+                                        </div>
+                                        @if($curso->alumnos_count > 0)
+                                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+                                        @endif
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $curso->fecha_inicio ? $curso->fecha_inicio->format('d/m/Y') : 'N/A' }} -
-                                {{ $curso->fecha_fin ? $curso->fecha_fin->format('d/m/Y') : 'N/A' }}
+                            
+                            {{-- Fechas - Visible desde xl --}}
+                            <td class="hidden xl:table-cell px-4 py-6 whitespace-nowrap">
+                                <div class="space-y-1">
+                                    <div class="flex items-center text-sm text-gray-700">
+                                        <i class="bi bi-calendar-event mr-2 text-green-600"></i>
+                                        {{ $curso->fecha_inicio ? $curso->fecha_inicio->format('d/m/Y') : 'No definida' }}
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-700">
+                                        <i class="bi bi-calendar-x mr-2 text-red-600"></i>
+                                        {{ $curso->fecha_fin ? $curso->fecha_fin->format('d/m/Y') : 'No definida' }}
+                                    </div>
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">{{ $curso->plazas_maximas }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                            
+                            {{-- Plazas - Visible desde lg --}}
+                            <td class="hidden lg:table-cell px-4 py-6 whitespace-nowrap text-center">
+                                <div class="inline-flex items-center px-3 py-2 rounded-xl bg-orange-100 border border-orange-200/50">
+                                    <span class="text-lg font-bold text-orange-800">{{ $curso->plazas_maximas }}</span>
+                                    <span class="text-sm text-orange-600 ml-1">plazas</span>
+                                </div>
+                            </td>
+                            
+                            {{-- Acciones - Sticky y siempre visible --}}
+                            <td class="sticky right-0 z-10 bg-white group-hover:bg-blue-50/30 px-4 py-6 whitespace-nowrap text-center border-l border-gray-100">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <a href="{{ route('admin.cursos.show', $curso->id) }}" class="text-gray-400 hover:text-blue-600" title="Ver"><i class="bi bi-eye-fill"></i></a>
-                                    <a href="{{ route('admin.cursos.edit', $curso->id) }}" class="text-gray-400 hover:text-indigo-600" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                                    <form action="{{ route('admin.cursos.destroy', $curso->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Seguro que quieres eliminar este curso?');">
+                                    {{-- Ver --}}
+                                    <a href="{{ route('admin.cursos.show', $curso->id) }}"
+                                       class="group/action p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/25"
+                                       title="Ver detalles del curso">
+                                        <i class="bi bi-eye-fill text-sm group-hover/action:scale-110 transition-transform"></i>
+                                    </a>
+                                    
+                                    {{-- Editar --}}
+                                    <a href="{{ route('admin.cursos.edit', $curso->id) }}" 
+                                       class="group/action p-2 rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-indigo-500/25"
+                                       title="Editar curso">
+                                        <i class="bi bi-pencil-fill text-sm group-hover/action:scale-110 transition-transform"></i>
+                                    </a>
+                                    
+                                    {{-- Eliminar --}}
+                                    <form action="{{ route('admin.cursos.destroy', $curso->id) }}" method="POST" class="inline">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="text-gray-400 hover:text-red-600" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
+                                        <button type="submit" 
+                                                onclick="return confirm('⚠️ ¿Estás seguro de que deseas eliminar este curso?\n\nEsta acción no se puede deshacer.')"
+                                                class="group/action p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/25"
+                                                title="Eliminar curso">
+                                            <i class="bi bi-trash-fill text-sm group-hover/action:scale-110 transition-transform"></i>
+                                        </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                             <td colspan="8" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center space-y-4">
-                                    <div class="p-4 bg-gray-100 rounded-full"><i class="bi bi-journals text-4xl text-gray-400"></i></div>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No hay cursos</h3>
-                                    <p class="text-sm text-gray-500 mb-4">
-                                        @if($searchTerm || $filtroModalidad || $filtroProfesor)
-                                            No se encontraron cursos que coincidan con los criterios.
+                            <td colspan="8" class="px-8 py-16 text-center">
+                                <div class="flex flex-col items-center justify-center space-y-6 max-w-md mx-auto">
+                                    {{-- Ilustración --}}
+                                    <div class="relative">
+                                        <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center shadow-xl">
+                                            <i class="bi bi-journals text-4xl text-gray-400"></i>
+                                        </div>
+                                        <div class="absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                            <i class="bi bi-exclamation text-white text-sm font-bold"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Mensaje principal --}}
+                                    <div class="text-center space-y-3">
+                                        <h3 class="text-2xl font-bold text-gray-900">
+                                            @if($searchTerm || $filtroModalidad || $filtroProfesor)
+                                                Sin resultados
+                                            @else
+                                                No hay cursos
+                                            @endif
+                                        </h3>
+                                        <p class="text-lg text-gray-600 leading-relaxed">
+                                            @if($searchTerm || $filtroModalidad || $filtroProfesor)
+                                                No se encontraron cursos que coincidan con los criterios de búsqueda especificados.
+                                            @else
+                                                Aún no has agregado ningún curso al sistema. ¡Es hora de comenzar!
+                                            @endif
+                                        </p>
+                                    </div>
+                                    
+                                    {{-- Botones de acción --}}
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        @if(!$searchTerm && !$filtroModalidad && !$filtroProfesor)
+                                            <a href="{{ route('admin.cursos.create') }}" 
+                                               class="inline-flex items-center px-8 py-4 border-2 border-transparent text-lg font-bold rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl hover:shadow-indigo-500/25">
+                                                <i class="bi bi-plus-lg mr-3"></i>
+                                                Agregar primer curso
+                                            </a>
                                         @else
-                                            Aún no has agregado ningún curso al sistema.
+                                            <a href="{{ route('admin.cursos.index') }}" 
+                                               class="inline-flex items-center px-8 py-4 border-2 border-gray-300 text-lg font-semibold rounded-2xl text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-300 shadow-lg hover:shadow-xl">
+                                                <i class="bi bi-arrow-clockwise mr-3"></i>
+                                                Limpiar filtros
+                                            </a>
                                         @endif
-                                    </p>
-                                    @if(!$searchTerm && !$filtroModalidad && !$filtroProfesor)
-                                        <a href="{{ route('admin.cursos.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700">
-                                            <i class="bi bi-plus-lg mr-2"></i>Agregar primer curso
-                                        </a>
-                                    @else
-                                        <a href="{{ route('admin.cursos.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                                            <i class="bi bi-arrow-clockwise mr-2"></i>Limpiar filtros
-                                        </a>
-                                    @endif
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -210,23 +531,143 @@
             </table>
         </div>
     </div>
+</div>
 
-    {{-- Paginación --}}
+
+    {{-- Paginación Premium --}}
     @if ($cursos->hasPages())
-        <div class="mt-8 px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-200">
-           <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-600">Página {{ $cursos->currentPage() }} de {{ $cursos->lastPage() }}</div>
-                {{ $cursos->appends(request()->query())->links('vendor.pagination.tailwind') }} {{-- Usando el paginador de Tailwind de Breeze --}}
+        <div class="mt-12 bg-gradient-to-r from-white via-gray-50/50 to-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/50 p-8 backdrop-blur-sm">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center px-4 py-2 bg-indigo-50 rounded-xl border border-indigo-200/50">
+                        <i class="bi bi-file-earmark-text text-indigo-600 mr-2"></i>
+                        <span class="text-sm font-medium text-indigo-800">
+                            Página {{ $cursos->currentPage() }} de {{ $cursos->lastPage() }}
+                        </span>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        ({{ $cursos->total() }} cursos en total)
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    {{ $cursos->appends(request()->query())->links('vendor.pagination.tailwind') }}
+                </div>
             </div>
         </div>
     @endif
 
 @endsection
 
+@push('styles')
+<style>
+    /* Animaciones personalizadas */
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translate3d(0, -100%, 0); }
+        to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    
+    .animate-slideInDown {
+        animation: slideInDown 0.6s ease-out;
+    }
+    
+    /* Suavizado para transiciones */
+    * {
+        scroll-behavior: smooth;
+    }
+    
+    /* Estilos personalizados para selectores */
+    select option {
+        padding: 12px;
+        background-color: white;
+        color: #374151;
+    }
+    
+    select option:checked {
+        background-color: #e0e7ff;
+        color: #3730a3;
+    }
+    
+    /* Efectos de hover para las filas de tabla */
+    tbody tr:hover {
+        transform: translateX(1px);
+    }
+    
+    /* Estilos para scrollbar */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        border-radius: 10px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    }
+</style>
+@endpush
+
 @push('scripts')
 <script>
-    // Auto-submit de filtros si decides usarlo para los <select> de cursos
-    // document.getElementById('modalidad_filtro').addEventListener('change', function() { document.getElementById('filterFormCursos').submit(); });
-    // document.getElementById('profesor_filtro').addEventListener('change', function() { document.getElementById('filterFormCursos').submit(); });
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-dismiss para mensajes flash después de 5 segundos
+    const flashMessages = document.querySelectorAll('[role="alert"]');
+    flashMessages.forEach(message => {
+        setTimeout(() => {
+            if (message.parentElement) {
+                message.style.transform = 'translateX(100%)';
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }
+        }, 5000);
+    });
+    
+    // Mejorar la experiencia de búsqueda
+    const searchInput = document.getElementById('searchCursos');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            // Auto-submit después de 1 segundo de inactividad
+            searchTimeout = setTimeout(() => {
+                document.getElementById('filterFormCursos').submit();
+            }, 1000);
+        });
+        
+        // Limpiar con Escape
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                document.getElementById('filterFormCursos').submit();
+            }
+        });
+    }
+    
+    // Tooltips para botones de acción
+    const actionButtons = document.querySelectorAll('[title]');
+    actionButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            // Aquí podrías agregar tooltips personalizados si lo deseas
+        });
+    });
+    
+    // Efecto de carga suave para la página
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s ease-in-out';
+        document.body.style.opacity = '1';
+    }, 100);
+});
+
+// Función para mostrar confirmaciones más amigables
+function confirmarEliminacion(nombre) {
+    return confirm(`⚠️ ¡Atención!\n\n¿Estás seguro de que deseas eliminar el curso "${nombre}"?\n\nEsta acción no se puede deshacer y se perderán todos los datos asociados.`);
+}
 </script>
 @endpush

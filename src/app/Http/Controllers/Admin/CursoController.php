@@ -38,7 +38,7 @@ class CursoController extends Controller
         $query->where('profesor_id', $filtroProfesor);
     }
 
-    $cursos = $query->orderBy('nombre', 'asc')->paginate(10)->appends($request->query());
+    $cursos = $query->orderBy('nombre', 'asc')->paginate(7)->appends($request->query());
 
     $opcionesModalidad = Curso::select('modalidad')->whereNotNull('modalidad')->distinct()->orderBy('modalidad')->pluck('modalidad');
     $opcionesProfesores = Profesor::orderBy('apellido1')->orderBy('nombre')->get(['id', 'nombre', 'apellido1']); // Para el select
@@ -104,7 +104,69 @@ public function create()
         }
 
     // public function show(Curso $curso) { /* ... */ }
+    /**
+     * Muestra el recurso Curso especificado.
+     */
+    public function show(Curso $curso) // Route Model Binding
+    {
+        // Cargar las relaciones necesarias para mostrar en la vista de detalles
+        $curso->load(['profesor', 'alumnos']);
+        // 'profesor': para mostrar quién imparte el curso.
+        // 'alumnos': para listar los alumnos inscritos (usando la relación belongsToMany).
+
+        return view('admin.cursos.show', compact('curso'));
+    }
+
     // public function edit(Curso $curso) { /* ... */ }
+
+    /**
+     * Muestra el formulario para editar el Curso especificado.
+     */
+    public function edit(Curso $curso) // Route Model Binding para $curso
+    {
+        // Obtener todos los profesores para el dropdown
+        $profesores = Profesor::orderBy('apellido1')->orderBy('nombre')->get(['id', 'nombre', 'apellido1']);
+
+        // Opcional: Si Modalidad y Nivel son selects con opciones fijas
+        // $opcionesModalidad = ['Online', 'Presencial', 'Semipresencial (Blended)'];
+        // $opcionesNivel = ['Básico', 'Intermedio', 'Avanzado'];
+
+        return view('admin.cursos.edit', compact(
+            'curso',
+            'profesores'
+            // 'opcionesModalidad',
+            // 'opcionesNivel'
+        ));
+    }
+
+
     // public function update(Request $request, Curso $curso) { /* ... */ }
+    public function update(Request $request, Curso $curso) // Route Model Binding
+        {
+            // 1. Validación de Datos (ajusta reglas 'unique' si es necesario)
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'codigo' => 'nullable|string|max:20|unique:cursos,codigo,' . $curso->id, // Ignora el código del curso actual
+                'descripcion' => 'nullable|string',
+                'modalidad' => 'required|string|in:Online,Presencial,Semipresencial (Blended)',
+                'nivel' => 'nullable|string|max:50',
+                'requisitos' => 'nullable|string',
+                'fecha_inicio' => 'nullable|date', // Podrías añadir 'after_or_equal:today' si no se pueden editar a fechas pasadas
+                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+                'horas_totales' => 'nullable|integer|min:1',
+                'horario' => 'nullable|string|max:100',
+                'centros' => 'nullable|string|max:255',
+                'profesor_id' => 'required|exists:profesores,id',
+                'plazas_maximas' => 'required|integer|min:1|max:500',
+            ]);
+
+            // 2. Actualización del Curso
+            $curso->update($validatedData);
+
+            // 3. Redirección con Mensaje de Éxito
+            return redirect()->route('admin.cursos.show', $curso->id) // Redirige a la vista de detalles
+                             ->with('success', '¡Curso actualizado correctamente!');
+        }
+
     // public function destroy(Curso $curso) { /* ... */ }
 }
