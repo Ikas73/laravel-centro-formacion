@@ -38,7 +38,7 @@ class CursoController extends Controller
         $query->where('profesor_id', $filtroProfesor);
     }
 
-    $cursos = $query->orderBy('nombre', 'asc')->paginate(7)->appends($request->query());
+    $cursos = $query->orderBy('nombre', 'asc')->paginate(8)->appends($request->query());
 
     $opcionesModalidad = Curso::select('modalidad')->whereNotNull('modalidad')->distinct()->orderBy('modalidad')->pluck('modalidad');
     $opcionesProfesores = Profesor::orderBy('apellido1')->orderBy('nombre')->get(['id', 'nombre', 'apellido1']); // Para el select
