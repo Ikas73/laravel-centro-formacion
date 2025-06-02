@@ -168,5 +168,40 @@ public function create()
                              ->with('success', '¡Curso actualizado correctamente!');
         }
 
-    // public function destroy(Curso $curso) { /* ... */ }
+    
+        // public function destroy(Curso $curso) { /* ... */ }
+
+        /**
+         * Elimina el recurso Curso especificado del almacenamiento.
+         */
+        public function destroy(Curso $curso) // Route Model Binding
+        {
+            try {
+                // Verificar si el curso tiene alumnos inscritos
+                // Usamos la relación 'alumnos' que definimos en el modelo Curso
+                // o la relación 'inscripciones' si prefieres contar directamente en la tabla pivote.
+                if ($curso->alumnos()->count() > 0) { // O $curso->inscripciones()->count() > 0
+                    return redirect()->route('admin.cursos.index')
+                                    ->with('error', "No se puede eliminar el curso '{$curso->nombre}' porque tiene alumnos inscritos. Desinscribe primero a los alumnos o considera archivar el curso.");
+                }
+
+                // Si el curso no tiene alumnos, se puede proceder a eliminar
+                $nombreCurso = $curso->nombre;
+                $curso->delete();
+
+                return redirect()->route('admin.cursos.index')
+                                ->with('success', "Curso '{$nombreCurso}' eliminado correctamente.");
+
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Manejar otros errores de base de datos
+                Log::error("Error al eliminar curso (QueryException) ID {$curso->id}: " . $e->getMessage());
+                return redirect()->route('admin.cursos.index')
+                                ->with('error', 'No se pudo eliminar el curso debido a un error en la base de datos o restricciones de integridad. Es posible que aún tenga datos asociados.');
+            } catch (\Exception $e) {
+                Log::error("Error inesperado al eliminar curso ID {$curso->id}: " . $e->getMessage());
+                return redirect()->route('admin.cursos.index')
+                                ->with('error', 'Ocurrió un error inesperado al intentar eliminar el curso.');
+            }
+        }
+
 }

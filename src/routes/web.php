@@ -24,7 +24,7 @@ use App\Http\Controllers\Admin\AlumnoController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\EventoController;
 // Añade aquí otros controladores de Admin a medida que los crees
-// use App\Http\Controllers\Admin\PreinscritoController;
+use App\Http\Controllers\Admin\PreinscritoSepeController;
 // use App\Http\Controllers\Admin\ReporteController;
 // use App\Http\Controllers\Admin\FinanzaController;
 // use App\Http\Controllers\Admin\ConfiguracionController;
@@ -43,26 +43,6 @@ use App\Http\Controllers\Admin\EventoController;
 
 
 
-
-// --- Rutas Protegidas (Requieren Autenticación) ---
-// Todas las rutas dentro de este grupo requerirán que el usuario haya iniciado sesión.
-// El middleware 'verified' es opcional, solo si usas la verificación de email de Laravel.
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    // --- Rutas de Inicio (Dashboard) ---
-    // Ruta principal de bienvenida
-    Route::get('/', function () {
-        return view('welcome');
-        })->name('welcome'); // Es buena práctica nombrar todas las rutas
-
-    // --- Rutas de Perfil de Usuario (Estándar, fuera del prefijo /admin) ---
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
-    });
-
-
     // --- Grupo para Rutas Específicas de Administración ---
     Route::prefix('admin') // URL base será /admin/...
           ->name('admin.')   // Nombre de ruta base será admin... (ej: admin.dashboard)
@@ -77,7 +57,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('alumnos', AlumnoController::class);
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
-            // Route::resource('preinscritos', PreinscritoController::class); // Descomenta cuando implementes
+            Route::resource('preinscritos', PreinscritoSepeController::class); 
+
+            // --- AÑADIR LA RUTA PARA CONVERTIR PREINSCRITO ---
+            Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])
+            ->name('preinscritos.convertir');
 
             // Rutas para otras secciones (apuntando a controladores o closures temporales)
             Route::get('/reportes', function () { return 'Admin Reportes (Pendiente)'; })->name('reportes.index'); // O usa ReporteController::class, 'index'
@@ -88,7 +72,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
           }); // --- Fin del grupo admin ---
 
-}); // --- Fin del grupo auth ---
+
+          // --- Rutas Públicas (si las tienes, fuera del middleware 'auth') ---
+            Route::get('/', function () {
+                // Si un usuario autenticado va a la raíz, quizás redirigirlo al admin dashboard
+                if (Auth::check()) {
+                    return redirect()->route('admin.dashboard');
+                }
+                return view('welcome');
+            })->name('welcome');
+
+
 
 
 // --- Rutas de Autenticación (Login, Registro, Logout, etc.) ---
@@ -119,3 +113,25 @@ require __DIR__.'/auth.php';
         }
 
     })->name('login.dev');
+
+
+    // --- Rutas de Perfil de Usuario (Estándar de Breeze, protegidas por 'auth') ---
+// Es mejor que estas también estén dentro de un grupo con middleware 'auth'
+// Si no las moviste dentro del grupo principal 'auth', puedes hacerlo así:
+Route::middleware(['auth', 'verified'])->group(function() {
+
+    // --- Rutas de Inicio (Dashboard) ---
+    // Ruta principal de bienvenida
+    Route::get('/', function () {
+        return view('welcome');
+        })->name('welcome'); // Es buena práctica nombrar todas las rutas
+
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+    });
+
+
+}); // --- Fin del grupo auth ---

@@ -367,7 +367,7 @@
                     <div class="space-y-1.5">
                         {{-- Título del curso --}}
                         <div class="text-sm font-bold text-gray-900 group-hover:text-indigo-700 transition-colors duration-200 line-clamp-2 max-w-[220px] leading-tight">
-                            {{ Str::limit($curso->nombre, 35) }}
+                            {{ Str::limit($curso->nombre, 60) }}
                         </div>
                         
                         {{-- Descripción --}}
