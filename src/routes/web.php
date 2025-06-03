@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // --- Grupo para Rutas Específicas de Administración ---
     Route::prefix('admin')
           ->name('admin.')
+          ->middleware(['auth', 'verified'])
           // Si quieres un middleware de autorización específico para admin (basado en roles/permisos),
           // lo añadirías aquí además del 'auth' y 'verified' del grupo padre.
           // Ejemplo: ->middleware(['can:access-admin-panel'])

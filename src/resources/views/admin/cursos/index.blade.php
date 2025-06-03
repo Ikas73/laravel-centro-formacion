@@ -182,7 +182,7 @@
 
 
     {{-- Panel de Filtros Compacto --}}
-<div class="bg-gradient-to-r from-white via-gray-50/50 to-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-200/50 p-5 mb-8 backdrop-blur-sm">
+<div class="bg-gradient-to-r from-white via-gray-50/50 to-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-200/50 p-4 mb-8 backdrop-blur-sm">
     <form method="GET" action="{{ route('admin.cursos.index') }}" id="filterFormCursos">
         <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
             {{-- Controles de Filtrado --}}
@@ -285,7 +285,7 @@
 
 
     {{-- Tabla Premium Responsive --}}
-<div class="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/50 overflow-hidden backdrop-blur-sm">
+<div class="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/100 overflow-hidden backdrop-blur-sm">
     {{-- Wrapper con scroll horizontal suave --}}
     <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-gray-100">
         <div class="min-w-full inline-block align-middle">
@@ -293,7 +293,7 @@
     <thead class="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50">
         <tr>
             {{-- Columna Curso - Con borde ligero --}}
-            <th scope="col" class="sticky left-0 z-20 bg-gray-100 px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/50 border-r border-gray-200/30 min-w-[280px]">
+            <th scope="col" class="sticky left-0 z-20 bg-gray-15000 px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/50 border-r border-gray-200/30 min-w-[280px]">
                 <div class="flex items-center space-x-2">
                     <i class="bi bi-book text-gray-500"></i>
                     <span>Curso</span>
@@ -301,7 +301,7 @@
             </th>
             
             {{-- Código - Con borde ligero --}}
-            <th scope="col" class="hidden sm:table-cell px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/50 border-r border-gray-200/30 min-w-[120px]">
+            <th scope="col" class="hidden sm:table-cell px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/50 border-r border-gray-200/30 min-w-[120px]">
                 <div class="flex items-center space-x-2">
                     <i class="bi bi-hash text-gray-500"></i>
                     <span>Código</span>
@@ -349,7 +349,7 @@
             </th>
             
             {{-- Acciones - Sin borde derecho --}}
-            <th scope="col" class="sticky right-0 z-20 bg-gray-100 px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/50 min-w-[140px]">
+            <th scope="col" class="sticky right-0 z-20 bg-gray-150 px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200/50 min-w-[140px]">
                 <div class="flex items-center justify-center space-x-2">
                     <i class="bi bi-gear text-gray-500"></i>
                     <span>Acciones</span>
@@ -540,7 +540,7 @@
 
     {{-- Paginación Premium --}}
     @if ($cursos->hasPages())
-        <div class="mt-12 bg-gradient-to-r from-white via-gray-50/50 to-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/50 p-8 backdrop-blur-sm">
+        <div class="mt-4 bg-gradient-to-r from-white via-gray-50/50 to-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-200/50 p-4 backdrop-blur-sm">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center px-4 py-2 bg-indigo-50 rounded-xl border border-indigo-200/50">

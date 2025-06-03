@@ -1,4 +1,3 @@
-{{-- Usar el layout app, que carga app.css (ahora solo con Tailwind) --}}
 <x-app-layout>
     {{-- Fondo con gradiente mejorado y más inmersivo --}}
     <div class="bg-gradient-to-br from-blue-50 via-gray-100 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 min-h-screen flex items-center justify-center py-14 px-4 sm:px-6 lg:px-8 transition-all duration-300">
