@@ -58,8 +58,8 @@
                     </li>
                     <li class="nav-item">
                         {{-- Necesitarás crear la ruta admin.preinscritos.index --}}
-                        <a class="nav-link {{ request()->routeIs('admin.preinscritos.*') ? 'active' : '' }}" href="#">
-                            <i class="bi bi-person-check-fill"></i>Pre-enrollments
+                        <a class="nav-link {{ request()->routeIs('admin.preinscritos.*') ? 'active' : '' }}" href="{{ route('admin.preinscritos.index') }}">
+                            <i class="bi bi-person-check-fill"></i>Preinscritos
                         </a>
                     </li>
                     <li class="nav-item">

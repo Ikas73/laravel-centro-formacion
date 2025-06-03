@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Models\PreinscritoSepe;
+use App\Models\PreinscritoSepe; // Asegúrate que el namespace es App\Models\PreinscritoSepe
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;   // Para la búsqueda con DB::raw()
+use Illuminate\Support\Facades\Log;  // Para loguear errores
+use Carbon\Carbon; // Descomenta si vuelves a usarlo para KPIs de fecha
 
 class PreinscritoSepeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    
-
-public function index(Request $request)
+    public function index(Request $request)
 {
     $searchTerm = $request->input('search');
-    // $filtroEstadoPre = $request->input('estado_pre'); // Futuro filtro
+    $filtroEstadoPre = $request->input('estado_pre'); // Para el futuro filtro de estado
 
     $query = PreinscritoSepe::query();
 
@@ -30,91 +31,122 @@ public function index(Request $request)
         });
     }
 
-    // if ($filtroEstadoPre) {
-    //     $query->where('estado', $filtroEstadoPre);
-    // }
+    if ($filtroEstadoPre) {
+        $query->where('estado', $filtroEstadoPre);
+    }
 
-    // Ordenar por fecha de importación o creación descendente para ver los más nuevos primero
     $preinscritos = $query->orderBy('fecha_importacion', 'desc')
                            ->orderBy('created_at', 'desc')
-                           ->paginate(10) // O el número que prefieras
+                           ->paginate(10)
                            ->appends($request->query());
 
-    // $opcionesEstadoPre = ['Pendiente', 'Contactado', 'Convertido', 'Rechazado']; // Ejemplo para futuro filtro
+    // KPIs (asegúrate de que tu modelo PreinscritoSepe tiene la columna 'estado')
+    $totalPreinscritos = PreinscritoSepe::count(); // Reemplaza $preinscritos->total() en la vista si usas este
+    $preinscritosPendientes = PreinscritoSepe::where('estado', 'Pendiente')->count();
+    // $importadosHoy = PreinscritoSepe::whereDate('fecha_importacion', \Carbon\Carbon::today())->count(); // Asumiendo Carbon importado
+    $importadosHoy = PreinscritoSepe::whereRaw('DATE(COALESCE(fecha_importacion, created_at)) = ?', [Carbon::today()->toDateString()])->count();
+    $preinscritosConvertidos = PreinscritoSepe::where('estado', 'Convertido')->count();
+
+    // Opciones para el filtro de estado
+    $opcionesEstadoPre = PreinscritoSepe::select('estado')
+                            ->whereNotNull('estado')
+                            ->where('estado', '!=', '')
+                            ->distinct()
+                            ->orderBy('estado')
+                            ->pluck('estado');
+    // O puedes usar un array fijo si los estados no cambian:
+    // $opcionesEstadoPre = collect(['Pendiente', 'Contactado', 'Convertido', 'Rechazado']);
+
 
     return view('admin.preinscritos.index', compact(
         'preinscritos',
-        'searchTerm'
-        // 'opcionesEstadoPre',
-        // 'filtroEstadoPre'
+        'searchTerm',
+        'opcionesEstadoPre',
+        'filtroEstadoPre',
+        'totalPreinscritos',
+        'preinscritosPendientes',
+        'importadosHoy',
+        'preinscritosConvertidos'
     ));
 }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear un nuevo Preinscrito.
      */
     public function create()
     {
-        //
+        Log::info("PreinscritoSepeController@create: Accedido.");
+        // Lógica futura: // return view('admin.preinscritos.create');
+        return "Formulario para crear preinscrito (Pendiente de implementar la vista)";
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo Preinscrito creado.
      */
     public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        'nombre' => 'required|string|max:100',
-        'apellido1' => 'required|string|max:100',
-        'apellido2' => 'nullable|string|max:100',
-        'dni' => 'required|string|max:15|unique:preinscritos_sepe,dni', // Único en esta tabla
-        'email' => 'nullable|email|max:100|unique:preinscritos_sepe,email', // Puede ser opcional pero único
-        'telefono' => 'nullable|string|max:20',
-        // ... otros campos como fecha_nacimiento, direccion, localidad, provincia, cp,
-        // nacionalidad, situacion_laboral, nivel_formativo, fecha_importacion, estado (si lo tienes)
-    ]);
-    // Si fecha_importacion no viene del form, la puedes añadir aquí:
-    // $validatedData['fecha_importacion'] = now();
-
-    PreinscritoSepe::create($validatedData);
-    return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito añadido correctamente.');
-}
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(PreinscritoSepe $preinscrito)
-{
-    return view('admin.preinscritos.show', compact('preinscrito'));
-}
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(PreinscritoSepe $preinscritoSepe)
     {
-        //
+        Log::info("PreinscritoSepeController@store: Accedido.");
+        // Lógica futura:
+        // $validatedData = $request->validate([...]);
+        // PreinscritoSepe::create($validatedData);
+        // return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito añadido.');
+        return redirect()->route('admin.preinscritos.index')->with('info', 'Funcionalidad de guardar preinscrito pendiente.');
     }
 
     /**
-     * Update the specified resource in storage.
+     * Muestra el Preinscrito especificado.
      */
-    public function update(Request $request, PreinscritoSepe $preinscritoSepe)
+    public function show(PreinscritoSepe $preinscrito) // Route Model Binding
     {
-        //
+        Log::info("PreinscritoSepeController@show: Accedido para preinscrito ID " . $preinscrito->id);
+        // Lógica futura: // return view('admin.preinscritos.show', compact('preinscrito'));
+        return "Detalles del preinscrito ID: {$preinscrito->id} (Pendiente de implementar la vista)";
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Muestra el formulario para editar el Preinscrito especificado.
      */
-    public function destroy(PreinscritoSepe $preinscrito)
-{
-    // Opción 1: Eliminación simple
-    $preinscrito->delete();
-    return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito eliminado correctamente.');
+    public function edit(PreinscritoSepe $preinscrito) // Route Model Binding
+    {
+        Log::info("PreinscritoSepeController@edit: Accedido para preinscrito ID " . $preinscrito->id);
+        // Lógica futura: // return view('admin.preinscritos.edit', compact('preinscrito'));
+        return "Formulario para editar preinscrito ID: {$preinscrito->id} (Pendiente de implementar la vista)";
+    }
 
-    // Opción 2: Cambiar estado (si tienes un campo 'estado')
-    // $preinscrito->update(['estado' => 'Rechazado']);
-    // return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito marcado como rechazado.');
-}
+    /**
+     * Actualiza el Preinscrito especificado en el almacenamiento.
+     */
+    public function update(Request $request, PreinscritoSepe $preinscrito) // Route Model Binding
+    {
+        Log::info("PreinscritoSepeController@update: Accedido para preinscrito ID " . $preinscrito->id);
+        // Lógica futura:
+        // $validatedData = $request->validate([...]);
+        // $preinscrito->update($validatedData);
+        // return redirect()->route('admin.preinscritos.show', $preinscrito->id)->with('success', 'Preinscrito actualizado.');
+        return redirect()->route('admin.preinscritos.index')->with('info', 'Funcionalidad de actualizar preinscrito pendiente.');
+    }
+
+    /**
+     * Elimina el Preinscrito especificado del almacenamiento.
+     */
+    public function destroy(PreinscritoSepe $preinscrito) // Route Model Binding
+    {
+        Log::info("PreinscritoSepeController@destroy: Accedido para preinscrito ID " . $preinscrito->id);
+        // Lógica futura:
+        // $preinscrito->delete();
+        // return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito eliminado.');
+        return redirect()->route('admin.preinscritos.index')->with('info', 'Funcionalidad de eliminar preinscrito pendiente.');
+    }
+
+    /**
+     * Convierte un Preinscrito a Alumno.
+     */
+    public function convertirAAlumno(PreinscritoSepe $preinscrito) // Route Model Binding
+    {
+        Log::info("PreinscritoSepeController@convertirAAlumno: Accedido para preinscrito ID " . $preinscrito->id);
+        // Lógica futura:
+        // ... (verificar duplicados en Alumno, crear Alumno, actualizar estado de Preinscrito) ...
+        // return redirect()->route('admin.alumnos.show', $nuevoAlumno->id)->with('success', 'Preinscrito convertido a Alumno.');
+        return redirect()->route('admin.preinscritos.index')->with('info', 'Funcionalidad de convertir a alumno pendiente.');
+    }
 }

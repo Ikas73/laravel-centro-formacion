@@ -12,8 +12,6 @@ return new class extends Migration
     public function up()
 {
     Schema::create('cursos', function (Blueprint $table) {
-        $table->unsignedBigInteger('profesor_id');
-        $table->foreign('profesor_id')->references('id')->on('profesores')->onDelete('SET NULL'); // O onDelete('RESTRICT') si no quieres que se borre
         $table->id();
         $table->string('nombre', 255);
         $table->string('codigo', 20)->nullable();
@@ -25,9 +23,15 @@ return new class extends Migration
         $table->date('fecha_fin')->nullable();
         $table->integer('horas_totales')->nullable();
         $table->string('horario', 100)->nullable();
-        $table->string('centros', 255)->nullable();
-        $table->foreignId('profesor_id')->constrained('profesores');
+        $table->string('centros', 255)->nullable();        
         $table->integer('plazas_maximas')->default(20);
+
+        // --- ÚNICA Y CORRECTA DEFINICIÓN PARA PROFESOR_ID ---
+        $table->foreignId('profesor_id')
+              ->nullable() // O quita nullable si es obligatorio
+              ->constrained('profesores') // Especifica la tabla a la que hace referencia
+              ->nullOnDelete(); // O tu política preferida en eliminación
+
         $table->timestamps();
     });
 }

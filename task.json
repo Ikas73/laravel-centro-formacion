@@ -5,7 +5,7 @@
 {
 "label": "Ajustar permisos del proyecto",
 "type": "shell",
-"command": "sudo chown -R user1234:user1234 /home/user1234/proyectos/laravel-centro-formacion",
+"command": "sudo chown -R user1234:user1234 /home/user1234/proyectos/proyecto-laravel",
 "problemMatcher": []
 }
 ]

@@ -12,7 +12,10 @@ class PreinscritoSepe extends Model
     /**
      * La tabla asociada con el modelo.
      * Laravel intentará usar 'preinscrito_sepes' si no se especifica.
-     * Confirma el nombre real de tu tabla.
+     * Confirma el nombre real de tu tabla.    
+     * La tabla asociada con el modelo.
+     *
+     * @var string
      */
     protected $table = 'preinscritos_sepe';
 
@@ -35,7 +38,7 @@ class PreinscritoSepe extends Model
         'situacion_laboral',
         'nivel_formativo',
         'fecha_importacion', // Si la gestionas programáticamente
-        // 'estado', // Añade si tienes una columna 'estado' para preinscritos
+        'estado', // Añade si tienes una columna 'estado' para preinscritos
     ];
 
     /**
