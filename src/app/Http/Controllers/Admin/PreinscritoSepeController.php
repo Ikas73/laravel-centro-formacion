@@ -37,7 +37,7 @@ class PreinscritoSepeController extends Controller
 
     $preinscritos = $query->orderBy('fecha_importacion', 'desc')
                            ->orderBy('created_at', 'desc')
-                           ->paginate(10)
+                           ->paginate(7)
                            ->appends($request->query());
 
     // KPIs (asegúrate de que tu modelo PreinscritoSepe tiene la columna 'estado')
@@ -75,22 +75,73 @@ class PreinscritoSepeController extends Controller
      */
     public function create()
     {
-        Log::info("PreinscritoSepeController@create: Accedido.");
-        // Lógica futura: // return view('admin.preinscritos.create');
-        return "Formulario para crear preinscrito (Pendiente de implementar la vista)";
+        // Si tuvieras <selects> con opciones fijas (ej: para 'estado' o 'nivel_formativo' predefinidos),
+        // los pasarías aquí.
+        // $opcionesNivel = ['ESO', 'Bachillerato', ...];
+        // return view('admin.preinscritos.create', compact('opcionesNivel'));
+
+        Log::info("Accediendo a PreinscritoSepeController@create"); // Log para verificar
+        return view('admin.preinscritos.create');
     }
 
-    /**
-     * Almacena un nuevo Preinscrito creado.
+        /**
+     * Almacena un nuevo PreinscritoSepe creado en el almacenamiento.
      */
     public function store(Request $request)
     {
-        Log::info("PreinscritoSepeController@store: Accedido.");
-        // Lógica futura:
-        // $validatedData = $request->validate([...]);
-        // PreinscritoSepe::create($validatedData);
-        // return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito añadido.');
-        return redirect()->route('admin.preinscritos.index')->with('info', 'Funcionalidad de guardar preinscrito pendiente.');
+        Log::info("Datos recibidos para crear Preinscrito:", $request->all());
+
+        // Opciones válidas para los campos select (para la regla 'in')
+        $opcionesValidasSexo = ['Hombre', 'Mujer', 'Otro'];
+        $opcionesValidasNivelFormativo = ['Sin estudios', 'ESO', 'Bachillerato', 'Grado Medio', 'Grado Superior', 'Grado Universitario', 'Máster', 'Doctorado'];
+        $opcionesValidasSituacionLaboral = ['Empleado a tiempo completo', 'Empleado a tiempo parcial', 'Desempleado', 'Estudiante', 'Jubilado', 'Autónomo'];
+        $opcionesValidasEstadoPreinscrito = ['Pendiente', 'Contactado', 'Interesado', 'Convertido', 'Rechazado'];
+
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:100',
+            'apellido1' => 'required|string|max:100',
+            'apellido2' => 'nullable|string|max:100',
+            'dni' => 'required|string|max:15|regex:/^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z])$/i|unique:preinscritos_sepe,dni',
+            'email' => 'nullable|email|max:100|unique:preinscritos_sepe,email,NULL,id,deleted_at,NULL',
+            'sexo' => 'nullable|string|in:' . implode(',', $opcionesValidasSexo),
+            'fecha_nacimiento' => 'nullable|date|before_or_equal:today',
+            'nacionalidad' => 'nullable|string|max:50',
+            'num_seguridad_social' => 'nullable|string|max:20|unique:preinscritos_sepe,num_seguridad_social,NULL,id,deleted_at,NULL',
+
+            'direccion' => 'nullable|string',
+            'telefono' => 'nullable|string|max:20',
+            'cp' => 'nullable|string|max:10',
+            'localidad' => 'nullable|string|max:100',
+            'provincia' => 'nullable|string|max:100',
+
+            'nivel_formativo' => 'nullable|string|in:' . implode(',', $opcionesValidasNivelFormativo),
+            'situacion_laboral' => 'nullable|string|in:' . implode(',', $opcionesValidasSituacionLaboral),
+            'estado' => 'required|string|in:' . implode(',', $opcionesValidasEstadoPreinscrito),
+            'fecha_importacion' => 'nullable|date_format:Y-m-d\TH:i', // Para datetime-local
+        ]);
+
+        // Si fecha_importacion no se envía o es nula, establecerla a now()
+        // El input datetime-local la envía, así que esta lógica puede ser opcional si el campo está siempre presente.
+        if (empty($validatedData['fecha_importacion'])) {
+            $validatedData['fecha_importacion'] = Carbon::now();
+        } else {
+            // Convertir el formato de datetime-local a formato de base de datos si es necesario
+            $validatedData['fecha_importacion'] = Carbon::parse($validatedData['fecha_importacion'])->format('Y-m-d H:i:s');
+        }
+
+
+        Log::info("Datos validados para crear PreinscritoSepe:", $validatedData);
+
+        try {
+            PreinscritoSepe::create($validatedData);
+            Log::info("Preinscrito creado exitosamente.");
+            return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito añadido correctamente.');
+        } catch (\Exception $e) {
+            Log::error("Error al crear PreinscritoSepe: " . $e->getMessage(), ['exception' => $e]);
+            return redirect()->back()
+                             ->withInput() // Devuelve los datos antiguos al formulario
+                             ->with('error', 'Hubo un error al guardar el preinscrito: ' . $e->getMessage());
+        }
     }
 
     /**

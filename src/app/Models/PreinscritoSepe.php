@@ -9,44 +9,32 @@ class PreinscritoSepe extends Model
 {
     use HasFactory;
 
-    /**
-     * La tabla asociada con el modelo.
-     * Laravel intentará usar 'preinscrito_sepes' si no se especifica.
-     * Confirma el nombre real de tu tabla.    
-     * La tabla asociada con el modelo.
-     *
-     * @var string
-     */
     protected $table = 'preinscritos_sepe';
 
-    /**
-     * Los atributos que son asignables masivamente.
-     */
     protected $fillable = [
         'nombre',
         'apellido1',
         'apellido2',
         'dni',
-        'fecha_nacimiento',
-        'telefono',
         'email',
-        'direccion',    // Asumiendo que este campo se llama 'direccion' en la BD
+        'sexo',                 // Añadido
+        'fecha_nacimiento',
+        'nacionalidad',
+        'num_seguridad_social', // Añadido
+        'direccion',
+        'telefono',
+        'cp',
         'localidad',
         'provincia',
-        'cp',           // Asumiendo que este campo se llama 'cp' en la BD
-        'nacionalidad',
-        'situacion_laboral',
         'nivel_formativo',
-        'fecha_importacion', // Si la gestionas programáticamente
-        'estado', // Añade si tienes una columna 'estado' para preinscritos
+        'situacion_laboral',
+        'estado',               // Añadido
+        'fecha_importacion',    // Añadido
     ];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     */
     protected $casts = [
         'fecha_nacimiento' => 'date',
-        'fecha_importacion' => 'datetime', // O 'date' si solo es la fecha
+        'fecha_importacion' => 'datetime',
     ];
 
     // Aquí podrías añadir relaciones si los preinscritos se asocian a algo más (ej: un curso deseado)
