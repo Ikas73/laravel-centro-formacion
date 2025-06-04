@@ -7,10 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AlumnoCurso extends Model
 {
-    use HasFactory; // <-- AÑADIR ESTA LÍNEA
+    use HasFactory; 
     protected $table = 'alumno_curso';
-    // Aquí pueden ir tus propiedades $fillable, $hidden, relaciones, etc.
-    // protected $fillable = [...];
 
     /**
      * Los atributos que son asignables masivamente.

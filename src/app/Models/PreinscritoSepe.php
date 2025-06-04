@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PreinscritoSepe extends Model
 {
     use HasFactory;
-
+    
     protected $table = 'preinscritos_sepe';
 
     protected $fillable = [
