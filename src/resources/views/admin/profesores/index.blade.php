@@ -332,34 +332,34 @@
 
     <!-- Modal de confirmación de eliminación -->
     <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
-        <div class="mt-3 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Eliminar Profesor</h3>
-            <p class="text-sm text-gray-500 mb-4">
-                ¿Estás seguro de que quieres eliminar a <strong id="profesorName"></strong>?
-                Esta acción no se puede deshacer.
-            </p>
-            <div class="flex justify-center space-x-3">
-                <button type="button"
-                        onclick="closeDeleteModal()"
-                        class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200">
-                    Cancelar
-                </button>
-                <form id="deleteForm" method="POST"> {{-- La action se establece con JS --}}
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200">
-                        Eliminar
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Eliminar Profesor</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    ¿Estás seguro de que quieres eliminar a <strong id="profesorName"></strong>?
+                    Esta acción no se puede deshacer.
+                </p>
+                <div class="flex justify-center space-x-3">
+                    <button type="button"
+                            onclick="closeDeleteModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200">
+                        Cancelar
                     </button>
-                </form>
+                    <form id="deleteForm" method="POST"> {{-- La action se establece con JS --}}
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200">
+                            Eliminar
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 

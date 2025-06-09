@@ -138,14 +138,14 @@
                         <div class="space-y-1">
                             <label for="situacion_laboral" class="block text-sm font-medium text-gray-700">Situación Laboral</label>
                             <select name="situacion_laboral" id="situacion_laboral_pre" class="form-select @error('situacion_laboral') form-input-error @enderror">
-    <option value="" disabled {{ old('situacion_laboral') ? '' : 'selected' }}>Seleccionar...</option>
-    <option value="Empleado a tiempo completo" {{ old('situacion_laboral') == 'Empleado a tiempo completo' ? 'selected' : '' }}>Empleado a tiempo completo</option>
-    <option value="Empleado a tiempo parcial" {{ old('situacion_laboral') == 'Empleado a tiempo parcial' ? 'selected' : '' }}>Empleado a tiempo parcial</option>
-    <option value="Desempleado" {{ old('situacion_laboral') == 'Desempleado' ? 'selected' : '' }}>Desempleado</option>
-    <option value="Estudiante" {{ old('situacion_laboral') == 'Estudiante' ? 'selected' : '' }}>Estudiante</option>
-    <option value="Jubilado" {{ old('situacion_laboral') == 'Jubilado' ? 'selected' : '' }}>Jubilado</option>
-    <option value="Autónomo" {{ old('situacion_laboral') == 'Autónomo' ? 'selected' : '' }}>Autónomo</option>
-</select>
+                                <option value="" disabled {{ old('situacion_laboral') ? '' : 'selected' }}>Seleccionar...</option>
+                                <option value="Empleado a tiempo completo" {{ old('situacion_laboral') == 'Empleado a tiempo completo' ? 'selected' : '' }}>Empleado a tiempo completo</option>
+                                <option value="Empleado a tiempo parcial" {{ old('situacion_laboral') == 'Empleado a tiempo parcial' ? 'selected' : '' }}>Empleado a tiempo parcial</option>
+                                <option value="Desempleado" {{ old('situacion_laboral') == 'Desempleado' ? 'selected' : '' }}>Desempleado</option>
+                                <option value="Estudiante" {{ old('situacion_laboral') == 'Estudiante' ? 'selected' : '' }}>Estudiante</option>
+                                <option value="Jubilado" {{ old('situacion_laboral') == 'Jubilado' ? 'selected' : '' }}>Jubilado</option>
+                                <option value="Autónomo" {{ old('situacion_laboral') == 'Autónomo' ? 'selected' : '' }}>Autónomo</option>
+                            </select>
 
                              @error('situacion_laboral') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>

@@ -12,48 +12,57 @@
     
     
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Students</p>
-                <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $totalAlumnos ?? '0' }}</p>
-            </div>
-            <div class="bg-blue-100 rounded-full p-3">
-                <i class="bi bi-people-fill text-blue-600 text-2xl"></i>
-            </div>
-            
-        </div>
+    <!-- Tarjetas resumen (KPIs) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
 
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Active Courses</p>
-                <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $totalCursosActivos ?? '0' }}</p>
-            </div>
-            <div class="bg-green-100 rounded-full p-3">
-                <i class="bi bi-journal-bookmark-fill text-green-600 text-2xl"></i>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Available Teachers</p>
-                <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $totalProfesores ?? '0' }}</p>
-            </div>
-            <div class="bg-indigo-100 rounded-full p-3">
-                 <i class="bi bi-person-video3 text-indigo-600 text-2xl"></i>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
-             <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Pre-enrollments</p>
-                <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $totalPreinscritosPendientes ?? '0' }}</p>
-            </div>
-            <div class="bg-orange-100 rounded-full p-3">
-                <i class="bi bi-person-lines-fill text-orange-500 text-2xl"></i>
-            </div>
-        </div>
+{{-- Tarjeta 1: Total Students (se mantiene igual) --}}
+<div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+    <div>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Students</p>
+        {{-- Usar la variable correcta del controlador --}}
+        <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $totalStudents ?? '0' }}</p>
     </div>
+    <div class="bg-blue-100 rounded-full p-3">
+        <i class="bi bi-people-fill text-blue-600 text-2xl"></i>
+    </div>
+</div>
+
+{{-- Tarjeta 2: Total Courses (NUEVA) --}}
+<div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+    <div>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Courses</p>
+        <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $totalCourses ?? '0' }}</p>
+    </div>
+    <div class="bg-green-100 rounded-full p-3">
+        <i class="bi bi-journal-bookmark-fill text-green-600 text-2xl"></i>
+    </div>
+</div>
+
+{{-- Tarjeta 3: Available Teachers (se mantiene igual) --}}
+<div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+    <div>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Available Teachers</p>
+        {{-- Usar la variable correcta del controlador --}}
+        <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $availableTeachers ?? '0' }}</p>
+    </div>
+    <div class="bg-indigo-100 rounded-full p-3">
+         <i class="bi bi-person-video3 text-indigo-600 text-2xl"></i>
+    </div>
+</div>
+
+{{-- Tarjeta 4: Inactive Courses (NUEVA) --}}
+<div class="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+     <div>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Inactive Courses</p>
+        <p class="text-3xl font-semibold text-gray-800 mt-1">{{ $inactiveCourses ?? '0' }}</p>
+    </div>
+    <div class="bg-orange-100 rounded-full p-3">
+        {{-- Icono de ejemplo: un archivo archivado o un ojo tachado --}}
+        <i class="bi bi-archive-fill text-orange-500 text-2xl"></i>
+    </div>
+</div>
+
+</div> <!-- Fin Grid Tarjetas -->
 
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
@@ -156,9 +165,7 @@
                 $enrollmentDataPHP = $enrollmentData ?? [85, 72, 90, 88, 95, 82];
                 $studentsPerCourseLabelsPHP = $studentsPerCourseLabels ?? ['Mathematics', 'Computer Science', 'Physics', 'Chemistry', 'English', 'History', 'Spanish', 'Biology', 'Art'];
                 $studentsPerCourseDataPHP = $studentsPerCourseData ?? [145, 180, 125, 138, 160, 102, 120, 148, 98];
-                $preenrollmentPendingPHP = $preenrollmentPending ?? 70;
-                $preenrollmentApprovedPHP = $preenrollmentApproved ?? 20;
-                $preenrollmentRejectedPHP = $preenrollmentRejected ?? 10;
+                
             @endphp
 
             const ctxEnrollment = document.getElementById('enrollmentChart');
@@ -170,27 +177,77 @@
                  new Chart(ctxEnrollment, enrollmentConfig);
             } else { console.warn("Canvas 'enrollmentChart' no encontrado."); }
 
+            // PONER ESTE CÓDIGO EN SU LUGAR
             const ctxPreenrollmentStatus = document.getElementById('preenrollmentStatusChart');
             if (ctxPreenrollmentStatus) {
                 const preenrollmentConfig = {
                     type: 'doughnut',
                     data: {
                         labels: ['Pending', 'Approved', 'Rejected'],
-                        datasets: [{ data: [@json($preenrollmentPendingPHP), @json($preenrollmentApprovedPHP), @json($preenrollmentRejectedPHP)], backgroundColor: ['rgb(251, 191, 36)', 'rgb(16, 185, 129)', 'rgb(239, 68, 68)'], hoverOffset: 4 }]
+                        datasets: [{
+                            data: [
+                                {{ $preEnrollmentStatusData['pending'] ?? 0 }},
+                                {{ $preEnrollmentStatusData['approved'] ?? 0 }},
+                                {{ $preEnrollmentStatusData['rejected'] ?? 0 }}
+                            ],
+                            backgroundColor: [
+                                'rgb(251, 191, 36)', // Amarillo para Pending
+                                'rgb(16, 185, 129)', // Verde para Approved
+                                'rgb(239, 68, 68)'  // Rojo para Rejected
+                            ],
+                            hoverOffset: 4
+                        }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false // La leyenda ya está en el HTML
+                            }
+                        }
+                    }
                 };
                 new Chart(ctxPreenrollmentStatus, preenrollmentConfig);
-            } else { console.warn("Canvas 'preenrollmentStatusChart' no encontrado."); }
+            } else {
+                console.warn("Elemento canvas 'preenrollmentStatusChart' no encontrado.");
+            }
 
             const ctxStudentsPerCourse = document.getElementById('studentsPerCourseChart');
-            if (ctxStudentsPerCourse) {
-                const studentsConfig = {
-                    type: 'bar', data: { labels: @json($studentsPerCourseLabelsPHP), datasets: [{ label: 'Students', data: @json($studentsPerCourseDataPHP), backgroundColor: 'rgb(20, 184, 166)', borderColor: 'rgb(13, 148, 136)', borderWidth: 1 }] },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
-                };
-                new Chart(ctxStudentsPerCourse, studentsConfig);
-            } else { console.warn("Canvas 'studentsPerCourseChart' no encontrado."); }
+    if (ctxStudentsPerCourse) {
+        const studentsConfig = {
+            type: 'bar',
+            data: {
+                // Usa los datos reales del controlador
+                labels: @json($studentsPerCourseLabels ?? []),
+                datasets: [{
+                    label: 'Número de Estudiantes',
+                    // Usa los datos reales del controlador
+                    data: @json($studentsPerCourseData ?? []),
+                    backgroundColor: 'rgb(20, 184, 166)', // Color Teal-500 de Tailwind
+                    borderColor: 'rgb(13, 148, 136)',     // Color Teal-600 de Tailwind
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Ocultamos la leyenda si solo hay una serie de datos
+                    }
+                }
+            }
+        };
+        new Chart(ctxStudentsPerCourse, studentsConfig);
+    } else {
+        console.warn("Elemento canvas 'studentsPerCourseChart' no encontrado.");
+    }
 
              const listaEventosElem = document.getElementById('lista-eventos');
              if (listaEventosElem && !listaEventosElem.innerHTML.trim()) {
