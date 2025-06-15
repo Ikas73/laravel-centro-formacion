@@ -302,7 +302,7 @@
                                         <i class="bi bi-pencil-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
                                     </a>
                                     <button type="button" 
-                                            onclick="confirmDelete('{{ $alumno->id }}', '{{ $alumno->nombre }} {{ $alumno->apellido1 }}')"
+                                            onclick="confirmDelete('{{ route('admin.alumnos.destroy', $alumno->id) }}', '{{ addslashes($alumno->nombre . ' ' . $alumno->apellido1) }}')"
                                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group/btn"
                                             title="Eliminar alumno">
                                         <i class="bi bi-trash-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
@@ -364,37 +364,8 @@
         </div>
     @endif
 
-    <!-- Modal de confirmación de eliminación -->
-    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
-            <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Eliminar Alumno</h3>
-                <p class="text-sm text-gray-500 mb-4">
-                    ¿Estás seguro de que quieres eliminar a <strong id="alumnoName"></strong>? 
-                    Esta acción no se puede deshacer y eliminará todo el historial académico asociado.
-                </p>
-                <div class="flex justify-center space-x-3">
-                    <button type="button" 
-                            onclick="closeDeleteModal()" 
-                            class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-400 transition-colors duration-200">
-                        Cancelar
-                    </button>
-                    <form id="deleteForm" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" 
-                                class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200">
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<!-- Modal de confirmación de eliminación -->
+<x-delete-modal title="Eliminar Alumno" />
 @endsection
 
 @push('styles')
@@ -466,30 +437,30 @@
     }
     
     // Función para confirmar eliminación
-    function confirmDelete(alumnoId, alumnoName) {
+    /* function confirmDelete(alumnoId, alumnoName) {
         document.getElementById('alumnoName').textContent = alumnoName;
         document.getElementById('deleteForm').action = '{{ route("admin.alumnos.destroy", ":id") }}'.replace(':id', alumnoId);
         document.getElementById('deleteModal').classList.remove('hidden');
-    }
+    } */
     
     // Función para cerrar modal de eliminación
-    function closeDeleteModal() {
+    /* function closeDeleteModal() {
         document.getElementById('deleteModal').classList.add('hidden');
-    }
+    } */
     
     // Cerrar modal con ESC
-    document.addEventListener('keydown', function(event) {
+    /* document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeDeleteModal();
         }
-    });
+    }); */
     
     // Cerrar modal clickeando fuera
-    document.getElementById('deleteModal').addEventListener('click', function(event) {
+    /* document.getElementById('deleteModal').addEventListener('click', function(event) {
         if (event.target === this) {
             closeDeleteModal();
         }
-    });
+    }); */
     
     // Auto-submit en cambio de filtros
     document.getElementById('grado').addEventListener('change', function() {

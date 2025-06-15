@@ -87,77 +87,52 @@ class PreinscritoSepeController extends Controller
     public function store(Request $request)
     {
         Log::info("Datos recibidos para crear Preinscrito:", $request->all());
-
+    
         $opcionesValidasSexo = ['Hombre', 'Mujer', 'Otro'];
         $opcionesValidasNivelFormativo = ['Sin estudios', 'ESO', 'Bachillerato', 'Grado Medio', 'Grado Superior', 'Grado Universitario', 'Máster', 'Doctorado'];
         $opcionesValidasSituacionLaboral = ['Empleado a tiempo completo', 'Empleado a tiempo parcial', 'Desempleado', 'Estudiante', 'Jubilado', 'Autónomo'];
         $opcionesValidasEstadoPreinscrito = ['Pendiente', 'Contactado', 'Interesado', 'Convertido', 'Rechazado'];
-
-        // Definición de las comprobaciones para la regla NotExistsInTables
-        $checksDni = [
-            ['table' => 'alumnos', 'column' => 'dni', 'label' => 'alumno'],
-            ['table' => 'profesores', 'column' => 'dni', 'label' => 'profesor']
-        ];
-        $checksEmail = [
-            ['table' => 'alumnos', 'column' => 'email', 'label' => 'alumno'],
-            ['table' => 'profesores', 'column' => 'email', 'label' => 'profesor']
-        ];
-        $checksNuss = [ // Asumiendo que 'num_seguridad_social' es el nombre de la columna en todas las tablas
-            ['table' => 'alumnos', 'column' => 'num_seguridad_social', 'label' => 'alumno'],
-            ['table' => 'profesores', 'column' => 'num_seguridad_social', 'label' => 'profesor']
-        ];
-
+    
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:100',
             'apellido1' => 'required|string|max:100',
             'apellido2' => 'nullable|string|max:100',
             'dni' => [
-                'required',
-                'string',
-                'max:15',
+                'required', 'string', 'max:15',
                 'regex:/^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z])$/i',
-                Rule::unique('preinscritos_sepe', 'dni'),
-                // new NotExistsInTables($checksDni) // <-- COMENTADO TEMPORALMENTE
+                'unique:preinscritos_sepe,dni', // Regla 'unique' simple para 'store'
             ],
             'email' => 'nullable|email|max:100|unique:preinscritos_sepe,email',
-            // new NotExistsInTables($checksEmail) // <-- COMENTADO TEMPORALMENTE
-            'sexo' => 'nullable|string|in:' . implode(',', $opcionesValidasSexo),
+            'sexo' => ['nullable', 'string', Rule::in($opcionesValidasSexo)],
             'fecha_nacimiento' => 'nullable|date|before_or_equal:today',
             'nacionalidad' => 'nullable|string|max:50',
             'num_seguridad_social' => 'nullable|string|max:20|unique:preinscritos_sepe,num_seguridad_social',
-            // new NotExistsInTables($checksNuss) // <-- COMENTADO TEMPORALMENTE
-
             'direccion' => 'nullable|string',
             'telefono' => 'nullable|string|max:20',
             'cp' => 'nullable|string|max:10',
             'localidad' => 'nullable|string|max:100',
             'provincia' => 'nullable|string|max:100',
-
-            'nivel_formativo' => 'nullable|string|in:' . implode(',', $opcionesValidasNivelFormativo),
-            'situacion_laboral' => 'nullable|string|in:' . implode(',', $opcionesValidasSituacionLaboral),
-            'estado' => 'required|string|in:' . implode(',', $opcionesValidasEstadoPreinscrito),
+            'nivel_formativo' => ['nullable', 'string', Rule::in($opcionesValidasNivelFormativo)],
+            'situacion_laboral' => ['nullable', 'string', Rule::in($opcionesValidasSituacionLaboral)],
+            'estado' => ['required', 'string', Rule::in($opcionesValidasEstadoPreinscrito)],
             'fecha_importacion' => 'nullable|date_format:Y-m-d\TH:i',
         ]);
-
+    
         if (empty($validatedData['fecha_importacion'])) {
-            $validatedData['fecha_importacion'] = Carbon::now();
+            $validatedData['fecha_importacion'] = now();
         } else {
             $validatedData['fecha_importacion'] = Carbon::parse($validatedData['fecha_importacion'])->format('Y-m-d H:i:s');
         }
-
-        Log::info("Datos validados para crear PreinscritoSepe:", $validatedData);
-
+    
         try {
             PreinscritoSepe::create($validatedData);
-            Log::info("Preinscrito creado exitosamente.");
             return redirect()->route('admin.preinscritos.index')->with('success', 'Preinscrito añadido correctamente.');
         } catch (\Exception $e) {
             Log::error("Error al crear PreinscritoSepe: " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Hubo un error al guardar el preinscrito: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Hubo un error al guardar el preinscrito.');
         }
     }
+    
 
     /**
      * Muestra el recurso PreinscritoSepe especificado.
@@ -196,7 +171,7 @@ class PreinscritoSepeController extends Controller
     /**
      * Actualiza el Preinscrito especificado en el almacenamiento.
      */
-    public function update(Request $request, PreinscritoSepe $preinscrito) // Route Model Binding
+        public function update(Request $request, PreinscritoSepe $preinscrito)
     {
         Log::info("Recibiendo datos para PreinscritoSepe@update para ID " . $preinscrito->id, $request->all());
 
@@ -205,49 +180,24 @@ class PreinscritoSepeController extends Controller
         $opcionesValidasSituacionLaboral = ['Empleado a tiempo completo', 'Empleado a tiempo parcial', 'Desempleado', 'Estudiante', 'Jubilado', 'Autónomo'];
         $opcionesValidasEstadoPreinscrito = ['Pendiente', 'Contactado', 'Interesado', 'Convertido', 'Rechazado'];
 
-        // Definición de las comprobaciones para la regla NotExistsInTables
-        $checksDni = [
-            ['table' => 'alumnos', 'column' => 'dni', 'label' => 'alumno'],
-            ['table' => 'profesores', 'column' => 'dni', 'label' => 'profesor']
-        ];
-        $checksEmail = [
-            ['table' => 'alumnos', 'column' => 'email', 'label' => 'alumno'],
-            ['table' => 'profesores', 'column' => 'email', 'label' => 'profesor']
-        ];
-        $checksNuss = [
-            ['table' => 'alumnos', 'column' => 'num_seguridad_social', 'label' => 'alumno'],
-            ['table' => 'profesores', 'column' => 'num_seguridad_social', 'label' => 'profesor']
-        ];
-
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:100',
             'apellido1' => 'required|string|max:100',
             'apellido2' => 'nullable|string|max:100',
             'dni' => [
-                'required',
-                'string',
-                'max:15',
-                'regex:/^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z])$/i',
-                Rule::unique('preinscritos_sepe', 'dni')->ignore($preinscrito->id),
-                // new NotExistsInTables($checksDni) // <-- COMENTADO TEMPORALMENTE
-                
+                'required', 'string', 'max:15', 'regex:/^([0-9]{8}[A-Z]|[XYZ][0-9]{7}[A-Z])$/i',
+                Rule::unique('preinscritos_sepe', 'dni')->ignore($preinscrito->id), // Correcto para update
             ],
             'email' => [
-                'nullable',
-                'email',
-                'max:100',
-                Rule::unique('preinscritos_sepe', 'email')->ignore($preinscrito->id),
-                // new NotExistsInTables($checksEmail) // <-- COMENTADO TEMPORALMENTE
+                'nullable', 'email', 'max:100',
+                Rule::unique('preinscritos_sepe', 'email')->ignore($preinscrito->id), // Correcto para update
             ],
             'sexo' => ['nullable', 'string', Rule::in($opcionesValidasSexo)],
             'fecha_nacimiento' => 'nullable|date|before_or_equal:today',
             'nacionalidad' => 'nullable|string|max:50',
-            'num_seguridad_social' => [ // Si este campo existe para preinscritos
-                'nullable',
-                'string',
-                'max:20',
-                Rule::unique('preinscritos_sepe', 'num_seguridad_social')->ignore($preinscrito->id),
-                // new NotExistsInTables($checksNuss) // <-- COMENTADO TEMPORALMENTE
+            'num_seguridad_social' => [
+                'nullable', 'string', 'max:20',
+                Rule::unique('preinscritos_sepe', 'num_seguridad_social')->ignore($preinscrito->id), // Correcto para update
             ],
             'direccion' => 'nullable|string',
             'telefono' => 'nullable|string|max:20',
@@ -260,48 +210,23 @@ class PreinscritoSepeController extends Controller
             'fecha_importacion' => 'nullable|date_format:Y-m-d\TH:i',
         ]);
 
-        /// --- Manejo Especial para fecha_importacion en el Update ---
-        // Solo actualiza fecha_importacion si el usuario envió un valor para ella.
-        // Si el usuario borra el campo en el formulario, $request->input('fecha_importacion') será una cadena vacía ""
-        // `filled()` verifica que no sea una cadena vacía.
         if ($request->filled('fecha_importacion')) {
-            // Validar el formato específico de la fecha de importación solo si se proporcionó
-            $request->validate([
-                'fecha_importacion' => 'required|date_format:Y-m-d\TH:i', // 'required' aquí porque ya sabemos que 'filled' es true
-            ]);
             $validatedData['fecha_importacion'] = Carbon::parse($request->input('fecha_importacion'))->format('Y-m-d H:i:s');
         } else {
-            // Si no se envió un valor (o se envió vacío intencionalmente),
-            // y NO queremos que se actualice a NULL, entonces NO lo incluimos en $validatedData
-            // para la actualización. Eloquent no tocará el campo si no está en el array de update.
-            // No es necesario hacer unset($validatedData['fecha_importacion']) aquí si nunca
-            // se añadió a $validatedData desde el $request->validate() principal (si la quitaste de ahí).
-            // Si la validaste como nullable, y el usuario la borró, entrará como null.
-            // Para EVITAR que se ponga a null si se borra en el form:
             if ($request->has('fecha_importacion') && !$request->filled('fecha_importacion')) {
-                // El campo fue enviado pero vacío; no queremos actualizarlo.
-                // Si 'fecha_importacion' estaba en la validación principal como nullable,
-                // $validatedData['fecha_importacion'] será null. La quitamos para que no se actualice.
                 unset($validatedData['fecha_importacion']);
             }
         }
-        // --- Fin Manejo Especial para fecha_importacion ---
-
-        Log::info("Datos validados para actualizar PreinscritoSepe ID " . $preinscrito->id, $validatedData);
 
         try {
             $preinscrito->update($validatedData);
-            Log::info("Preinscrito ID " . $preinscrito->id . " actualizado exitosamente.");
-            return redirect()->route('admin.preinscritos.show', $preinscrito->id) // Redirige a la vista de detalles
-                             ->with('success', 'Preinscrito actualizado correctamente.');
+            return redirect()->route('admin.preinscritos.show', $preinscrito->id)
+                            ->with('success', 'Preinscrito actualizado correctamente.');
         } catch (\Exception $e) {
             Log::error("Error al actualizar PreinscritoSepe ID " . $preinscrito->id . ": " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->back()
-                             ->withInput()
-                             ->with('error', 'Hubo un error al actualizar el preinscrito: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Hubo un error al actualizar el preinscrito.');
         }
     }
-
 
     /**
      * Elimina el Preinscrito especificado del almacenamiento.
@@ -368,28 +293,6 @@ class PreinscritoSepeController extends Controller
             // Añade cualquier otro campo que el modelo Alumno requiera y que no esté en Preinscrito,
             // o que deba tener un valor por defecto al convertirse.
         ];
-
-        // Filtrar valores nulos si prefieres no pasarlos a Alumno::create si eran opcionales en preinscrito
-        // $datosNuevoAlumno = array_filter($datosNuevoAlumno, function($value) {
-        //     return !is_null($value);
-        // });
-
-
-        // 3. Validar los datos ANTES de crear el Alumno (opcional pero buena práctica)
-        // Esto es por si los datos del preinscrito no cumplen alguna regla más estricta de Alumno.
-        // Las reglas unique aquí se aplicarían a la tabla 'alumnos'.
-        // $validator = \Illuminate\Support\Facades\Validator::make($datosNuevoAlumno, [
-        //     'dni' => 'required|unique:alumnos,dni',
-        //     'email' => 'nullable|email|unique:alumnos,email',
-        //      // ... otras reglas para Alumno ...
-        // ]);
-        // if ($validator->fails()) {
-        //     Log::error("Validación fallida al intentar convertir Preinscrito ID: {$preinscrito->id} a Alumno.", $validator->errors()->toArray());
-        //     return redirect()->route('admin.preinscritos.show', $preinscrito->id)
-        //                      ->with('error', 'Los datos del preinscrito no son válidos para crear un alumno. Revisa la información.')
-        //                      ->withErrors($validator);
-        // }
-
 
         try {
             // 4. Crear el nuevo Alumno

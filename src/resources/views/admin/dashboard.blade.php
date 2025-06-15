@@ -110,43 +110,61 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                {{-- En admin/dashboard.blade.php, dentro de la tabla --}}
+<tbody class="bg-white divide-y divide-gray-200">
+    @forelse ($recentPreEnrollments as $preinscrito)
+    <tr>
+        {{-- STUDENT NAME --}}
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 h-8 w-8">
                     @php
-                        $demoPreenrollments = $recentPreenrollments ?? [
-                            ['name' => 'Maria Garcia', 'course' => 'Advanced Mathematics', 'date' => 'Apr 30, 2025', 'status' => 'Pending'],
-                            ['name' => 'Alex Johnson', 'course' => 'Computer Science', 'date' => 'Apr 29, 2025', 'status' => 'Approved'],
-                            ['name' => 'James Wilson', 'course' => 'Physics', 'date' => 'Apr 28, 2025', 'status' => 'Rejected'],
-                            ['name' => 'Emma Davis', 'course' => 'English Literature', 'date' => 'Apr 27, 2025', 'status' => 'Pending'],
-                            ['name' => 'Carlos Mendez', 'course' => 'Chemistry', 'date' => 'Apr 26, 2025', 'status' => 'Approved'],
-                        ];
+                        $inicialNombre = (!empty($preinscrito->nombre)) ? $preinscrito->nombre[0] : '';
+                        $inicialApellido = (!empty($preinscrito->apellido1)) ? $preinscrito->apellido1[0] : '';
                     @endphp
-                    @forelse ($demoPreenrollments as $preinscrito)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $preinscrito['name'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $preinscrito['course'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $preinscrito['date'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($preinscrito['status'] === 'Pending')
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-                            @elseif($preinscrito['status'] === 'Approved')
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
-                            @elseif($preinscrito['status'] === 'Rejected')
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <a href="#" class="text-gray-400 hover:text-blue-600 me-2" title="Ver"><i class="bi bi-eye-fill"></i></a>
-                            <a href="#" class="text-gray-400 hover:text-indigo-600" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                            No recent pre-enrollment applications found.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
+                    <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode($inicialNombre.$inicialApellido) }}&color=7F9CF5&background=EBF4FF" alt="">
+                </div>
+                <div class="ml-3">
+                    {{ $preinscrito->nombre }} {{ $preinscrito->apellido1 }}
+                </div>
+            </div>
+        </td>
+        {{-- COURSE --}}
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{-- Un preinscrito no está ligado a un curso todavía, mostramos su nivel --}}
+            {{ $preinscrito->nivel_formativo ?? 'N/A' }}
+        </td>
+        {{-- DATE --}}
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ $preinscrito->created_at->format('M d, Y') }}
+        </td>
+        {{-- STATUS --}}
+        <td class="px-6 py-4 whitespace-nowrap">
+            @php
+                $estadoPre = $preinscrito->estado ?? 'Pendiente';
+                $badgeColorPre = 'bg-yellow-100 text-yellow-800'; // Default a Pendiente
+                if ($estadoPre === 'Convertido') $badgeColorPre = 'bg-green-100 text-green-800';
+                elseif ($estadoPre === 'Rechazado' || $estadoPre === 'Baja') $badgeColorPre = 'bg-red-100 text-red-800';
+                elseif ($estadoPre === 'Contactado' || $estadoPre === 'Interesado') $badgeColorPre = 'bg-blue-100 text-blue-800';
+            @endphp
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $badgeColorPre }}">
+                {{ $estadoPre }}
+            </span>
+        </td>
+        {{-- ACTIONS --}}
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+            <a href="{{ route('admin.preinscritos.show', $preinscrito->id) }}" class="hover:text-indigo-600" title="Ver"><i class="bi bi-eye-fill"></i></a>
+            <a href="{{ route('admin.preinscritos.edit', $preinscrito->id) }}" class="ml-2 hover:text-indigo-600" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+        </td>
+    </tr>
+    @empty
+    <tr>
+        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+            No hay aplicaciones de preinscripción recientes.
+        </td>
+    </tr>
+    @endforelse
+</tbody>
             </table>
         </div>
     </div>
@@ -156,28 +174,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            @php
-                $asistenciaLabelsPHP = $asistenciaLabels ?? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
-                $asistenciaPresentePHP = $asistenciaPresente ?? [85, 90, 88, 92, 80];
-                $asistenciaAusentePHP = $asistenciaAusente ?? [15, 10, 12, 8, 20];
-                $generoDataPHP = [$totalAlumnosChicos ?? 55, $totalAlumnosChicas ?? 45];
-                $enrollmentLabelsPHP = $enrollmentLabels ?? ['November', 'December', 'January', 'February', 'March', 'April'];
-                $enrollmentDataPHP = $enrollmentData ?? [85, 72, 90, 88, 95, 82];
-                $studentsPerCourseLabelsPHP = $studentsPerCourseLabels ?? ['Mathematics', 'Computer Science', 'Physics', 'Chemistry', 'English', 'History', 'Spanish', 'Biology', 'Art'];
-                $studentsPerCourseDataPHP = $studentsPerCourseData ?? [145, 180, 125, 138, 160, 102, 120, 148, 98];
-                
-            @endphp
+            {{--
+                El bloque @php aquí puede ser útil para definir valores por defecto
+                para TODAS las variables, pero vamos a confiar en que el controlador
+                siempre las pasa. Si alguna vez el controlador no pasara una,
+                recibirías un error de "Undefined variable", lo cual es bueno
+                para detectar problemas.
+            --}}
 
+            // --- Gráfico Enrollment Trends (Líneas) ---
             const ctxEnrollment = document.getElementById('enrollmentChart');
             if (ctxEnrollment) {
                  const enrollmentConfig = {
-                     type: 'line', data: { labels: @json($enrollmentLabelsPHP), datasets: [{ label: 'Enrollments', data: @json($enrollmentDataPHP), borderColor: 'rgb(59, 130, 246)', tension: 0.1, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }] },
-                     options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } }, plugins: { legend: { display: false } } }
+                     type: 'line',
+                     data: {
+                         // Usar directamente las variables del controlador
+                         labels: @json($enrollmentLabels ?? []),
+                         datasets: [{
+                             label: 'Nuevos Alumnos',
+                             // Usar directamente las variables del controlador
+                             data: @json($enrollmentData ?? []),
+                             borderColor: 'rgb(59, 130, 246)',
+                             tension: 0.3, // Un poco más suave
+                             fill: true,
+                             backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                         }]
+                     },
+                     options: {
+                         responsive: true,
+                         maintainAspectRatio: false,
+                         scales: { y: { beginAtZero: false } },
+                         plugins: { legend: { display: false } }
+                     }
                  };
                  new Chart(ctxEnrollment, enrollmentConfig);
-            } else { console.warn("Canvas 'enrollmentChart' no encontrado."); }
+            } else {
+                console.warn("Canvas 'enrollmentChart' no encontrado.");
+            }
 
-            // PONER ESTE CÓDIGO EN SU LUGAR
+            // --- Gráfico Pre-enrollment Status (Doughnut) ---
             const ctxPreenrollmentStatus = document.getElementById('preenrollmentStatusChart');
             if (ctxPreenrollmentStatus) {
                 const preenrollmentConfig = {
@@ -190,73 +225,35 @@
                                 {{ $preEnrollmentStatusData['approved'] ?? 0 }},
                                 {{ $preEnrollmentStatusData['rejected'] ?? 0 }}
                             ],
-                            backgroundColor: [
-                                'rgb(251, 191, 36)', // Amarillo para Pending
-                                'rgb(16, 185, 129)', // Verde para Approved
-                                'rgb(239, 68, 68)'  // Rojo para Rejected
-                            ],
+                            backgroundColor: ['rgb(251, 191, 36)', 'rgb(16, 185, 129)', 'rgb(239, 68, 68)'],
                             hoverOffset: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false // La leyenda ya está en el HTML
-                            }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
                 };
                 new Chart(ctxPreenrollmentStatus, preenrollmentConfig);
-            } else {
-                console.warn("Elemento canvas 'preenrollmentStatusChart' no encontrado.");
             }
 
+            // --- Gráfico Students per Course (Barras) ---
             const ctxStudentsPerCourse = document.getElementById('studentsPerCourseChart');
-    if (ctxStudentsPerCourse) {
-        const studentsConfig = {
-            type: 'bar',
-            data: {
-                // Usa los datos reales del controlador
-                labels: @json($studentsPerCourseLabels ?? []),
-                datasets: [{
-                    label: 'Número de Estudiantes',
-                    // Usa los datos reales del controlador
-                    data: @json($studentsPerCourseData ?? []),
-                    backgroundColor: 'rgb(20, 184, 166)', // Color Teal-500 de Tailwind
-                    borderColor: 'rgb(13, 148, 136)',     // Color Teal-600 de Tailwind
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false // Ocultamos la leyenda si solo hay una serie de datos
-                    }
-                }
+            if (ctxStudentsPerCourse) {
+                const studentsConfig = {
+                    type: 'bar',
+                    data: {
+                        labels: @json($studentsPerCourseLabels ?? []),
+                        datasets: [{
+                            label: 'Número de Estudiantes',
+                            data: @json($studentsPerCourseData ?? []),
+                            backgroundColor: 'rgb(20, 184, 166)',
+                            borderColor: 'rgb(13, 148, 136)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                };
+                new Chart(ctxStudentsPerCourse, studentsConfig);
             }
-        };
-        new Chart(ctxStudentsPerCourse, studentsConfig);
-    } else {
-        console.warn("Elemento canvas 'studentsPerCourseChart' no encontrado.");
-    }
 
-             const listaEventosElem = document.getElementById('lista-eventos');
-             if (listaEventosElem && !listaEventosElem.innerHTML.trim()) {
-                  listaEventosElem.innerHTML = '<p class="text-gray-500 text-sm">No hay eventos próximos.</p>';
-             }
-             const listaAnunciosElem = document.getElementById('lista-anuncios');
-             if (listaAnunciosElem && !listaAnunciosElem.innerHTML.trim()) {
-                 listaAnunciosElem.innerHTML = '<p class="text-gray-500 text-sm">No hay anuncios recientes.</p>';
-             }
         });
     </script>
 @endpush

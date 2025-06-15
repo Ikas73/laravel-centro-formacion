@@ -98,9 +98,9 @@
                             @error('nacionalidad') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1">
-                            <label for="numero_seguridad_social" class="block text-sm font-medium text-gray-700">Número Seguridad Social <span class="text-red-500">*</span></label>
-                            <input type="text" name="numero_seguridad_social" id="numero_seguridad_social" value="{{ old('numero_seguridad_social') }}" required class="w-full px-4 py-2 border {{ $errors->has('numero_seguridad_social') ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' }} rounded-lg transition-colors" placeholder="12/34567890/12">
-                            @error('numero_seguridad_social') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                            <label for="num_seguridad_social" class="block text-sm font-medium text-gray-700">Número Seguridad Social <span class="text-red-500">*</span></label>
+                            <input type="text" name="num_seguridad_social" id="num_seguridad_social" value="{{ old('num_seguridad_social') }}" required class="w-full px-4 py-2 border {{ $errors->has('num_seguridad_social') ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' }} rounded-lg transition-colors" placeholder="12/34567890/12">
+                            @error('num_seguridad_social') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>
@@ -120,9 +120,9 @@
                 <div class="p-6 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label for="direccion_completa" class="block text-sm font-medium text-gray-700">Dirección Completa <span class="text-red-500">*</span></label>
-                            <textarea name="direccion_completa" id="direccion_completa" rows="3" required class="w-full px-4 py-2 border {{ $errors->has('direccion_completa') ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' }} rounded-lg transition-colors resize-none" placeholder="Calle, número, piso, puerta...">{{ old('direccion_completa') }}</textarea>
-                            @error('direccion_completa') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                            <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección Completa <span class="text-red-500">*</span></label>
+                            <textarea name="direccion" id="direccion" rows="3" required class="w-full px-4 py-2 border {{ $errors->has('direccion') ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' }} rounded-lg transition-colors resize-none" placeholder="Calle, número, piso, puerta...">{{ old('direccion') }}</textarea>
+                            @error('direccion') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1">
                             <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono <span class="text-red-500">*</span></label>
@@ -132,9 +132,9 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="space-y-1">
-                            <label for="codigo_postal" class="block text-sm font-medium text-gray-700">Código Postal <span class="text-red-500">*</span></label>
-                            <input type="text" name="codigo_postal" id="codigo_postal" value="{{ old('codigo_postal') }}" required class="w-full px-4 py-2 border {{ $errors->has('codigo_postal') ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' }} rounded-lg transition-colors" placeholder="28001">
-                            @error('codigo_postal') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+                            <label for="cp" class="block text-sm font-medium text-gray-700">Código Postal <span class="text-red-500">*</span></label>
+                            <input type="text" name="cp" id="cp" value="{{ old('cp') }}" required class="w-full px-4 py-2 border {{ $errors->has('cp') ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500' }} rounded-lg transition-colors" placeholder="28001">
+                            @error('cp') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                         </div>
                         <div class="space-y-1">
                             <label for="localidad" class="block text-sm font-medium text-gray-700">Localidad <span class="text-red-500">*</span></label>

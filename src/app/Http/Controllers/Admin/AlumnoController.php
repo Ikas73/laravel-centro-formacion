@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Alumno;
 use App\Models\Profesor;
+use App\Models\Curso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AlumnoController extends Controller
 {
@@ -85,162 +87,249 @@ class AlumnoController extends Controller
         ));
     }
 
-/**
- * Muestra el formulario para editar el recurso especificado.
- */
-public function edit(Alumno $alumno) // Route Model Binding inyecta el Alumno
-{
-    // Al igual que en create(), podríamos pasar opciones para <selects> si fuera necesario
-    // $opcionesEstado = ['Activo', 'Inactivo', 'Pendiente', 'Baja'];
-    // return view('admin.alumnos.edit', compact('alumno', 'opcionesEstado'));
+    /**
+     * Muestra el formulario para editar el recurso especificado.
+     */
+    public function edit(Alumno $alumno) // Route Model Binding inyecta el Alumno
+    {
+        // Al igual que en create(), podríamos pasar opciones para <selects> si fuera necesario
+        // $opcionesEstado = ['Activo', 'Inactivo', 'Pendiente', 'Baja'];
+        // return view('admin.alumnos.edit', compact('alumno', 'opcionesEstado'));
 
-    return view('admin.alumnos.edit', compact('alumno'));
-}    
+        return view('admin.alumnos.edit', compact('alumno'));
+    }    
 
-/**
- * Muestra el formulario para crear un nuevo recurso.
- */
-public function create()
-{
-    // Por ahora, solo necesitamos mostrar la vista.
-    // Más adelante, si el formulario necesita 'options' para <select> (ej: lista de estados),
-    // se pasarían aquí.
-    // Por ejemplo, si el estado se elige de una lista fija:
-    // $opcionesEstado = ['Activo', 'Inactivo', 'Pendiente', 'Baja'];
-    // return view('admin.alumnos.create', compact('opcionesEstado'));
+    /**
+     * Muestra el formulario para crear un nuevo recurso.
+     */
+    public function create()
+    {
+        // Por ahora, solo necesitamos mostrar la vista.
+        // Más adelante, si el formulario necesita 'options' para <select> (ej: lista de estados),
+        // se pasarían aquí.
+        // Por ejemplo, si el estado se elige de una lista fija:
+        // $opcionesEstado = ['Activo', 'Inactivo', 'Pendiente', 'Baja'];
+        // return view('admin.alumnos.create', compact('opcionesEstado'));
 
-    return view('admin.alumnos.create');
-}
-
-
-
-/**
- * Muestra el recurso especificado.
- * Gracias al Route Model Binding, Laravel automáticamente busca y
- * nos inyecta el objeto Alumno correspondiente al ID en la URL.
- */
-public function show(Alumno $alumno) // Laravel inyecta el objeto Alumno
-{
-    // Aquí podrías cargar relaciones si las vas a mostrar en la vista de detalle
-    // Ejemplo: $alumno->load('cursosInscritos'); // Si tienes una relación así
-    // (Asumiendo que $alumno ya tiene la relación 'cursos' definida)
-    $alumno->load('cursos'); // Para la relación ManyToMany
-
-    return view('admin.alumnos.show', compact('alumno'));
-}
-
-
-/**
- * Almacena un nuevo recurso creado en el almacenamiento.
- */
-public function store(Request $request)
-{
-    // ------ 1. Validación de Datos ------
-    // Asegúrate de que los nombres aquí ('nombre', 'apellido1', etc.)
-    // coinciden EXACTAMENTE con los atributos 'name' de tus campos de formulario
-    // en create.blade.php.
-    $validatedData = $request->validate([
-        'nombre' => 'required|string|max:100',
-        'apellido1' => 'required|string|max:100',
-        'apellido2' => 'nullable|string|max:100',
-        'dni' => 'required|string|max:15|unique:alumnos,dni',
-        'email' => 'required|email|max:100|unique:alumnos,email',
-        'sexo' => 'required|string|in:Hombre,Mujer,Otro', // Validación para el select
-        'fecha_nacimiento' => 'required|date|before_or_equal:today',
-        'nacionalidad' => 'required|string|max:50',
-        'numero_seguridad_social' => 'required|string|max:20|unique:alumnos,num_seguridad_social', // Asegúrate del nombre del campo
-
-        // Campos de la sección "Información de Contacto"
-        'direccion_completa' => 'required|string', // Nombre del textarea
-        'telefono' => 'required|string|max:20',
-        'codigo_postal' => 'required|string|max:10',
-        'localidad' => 'required|string|max:100',
-        'provincia' => 'required|string|max:100',
-
-        // Campos de la sección "Información Académica y Laboral"
-        'nivel_formativo' => 'required|string|max:100',
-        'situacion_laboral' => 'required|string|max:100',
-        'estado' => 'required|string|in:Activo,Inactivo,Pendiente,Baja',
-    ]);
-
-    // ------ 2. Creación del Alumno ------
-    // Esto asume que todos los campos en $validatedData están en la propiedad $fillable
-    // de tu modelo App\Models\Alumno.
-    Alumno::create($validatedData);
-
-    // ------ 3. Redirección con Mensaje de Éxito ------
-    return redirect()->route('admin.alumnos.index')
-                     ->with('success', '¡Alumno añadido correctamente!');
-}
-
-/**
- * Actualiza el recurso especificado en el almacenamiento.
- */
-public function update(Request $request, Alumno $alumno) // Inyectar Request y el Alumno a actualizar
-{
-    // ------ 1. Validación de Datos ------
-    // Similar a store(), pero ajusta las reglas 'unique' para ignorar el registro actual
-    $validatedData = $request->validate([
-        'nombre' => 'required|string|max:100',
-        'apellido1' => 'required|string|max:100',
-        'apellido2' => 'nullable|string|max:100',
-        // Para 'unique', debemos ignorar el DNI/email del alumno actual
-        'dni' => 'required|string|max:15|unique:alumnos,dni,' . $alumno->id,
-        'email' => 'required|email|max:100|unique:alumnos,email,' . $alumno->id,
-        'fecha_nacimiento' => 'required|date|before_or_equal:today',
-        'nivel_formativo' => 'required|string|max:100',
-        'estado' => 'required|string|in:Activo,Inactivo,Pendiente,Baja',
-        // ... añade todas las demás reglas de validación ...
-        
-        'num_seguridad_social' => 'nullable|string|max:20|unique:alumnos,num_seguridad_social,' . $alumno->id,
-        'sexo' => 'nullable|string|in:Hombre,Mujer,Otro',
-        'direccion' => 'nullable|string',
-        'cp' => 'nullable|string|max:10',
-        'localidad' => 'nullable|string|max:100',
-        'provincia' => 'nullable|string|max:100',
-        'telefono' => 'nullable|string|max:20',
-        'nacionalidad' => 'nullable|string|max:50',
-        'situacion_laboral' => 'nullable|string|max:100',
-        /* Por ejemplo:
-        */
-    ]);
-
-    // ------ 2. Actualización del Alumno ------
-    $alumno->update($validatedData);
-
-    // ------ 3. Redirección con Mensaje de Éxito ------
-    return redirect()->route('admin.alumnos.show', $alumno->id) // Redirige a la vista de detalles del alumno
-                     ->with('success', '¡Alumno actualizado correctamente!');
-}
-
-// En Admin/AlumnoController.php
-
-/**
- * Elimina el recurso especificado del almacenamiento.
- */
-public function destroy(Alumno $alumno) // Route Model Binding inyecta el Alumno
-{
-    try {
-        $nombreCompleto = $alumno->nombre . ' ' . $alumno->apellido1; // Guardar nombre para el mensaje
-        $alumno->delete(); // Elimina el alumno de la base de datos
-
-        // Podrías añadir aquí lógica adicional si necesitas eliminar datos relacionados
-        // que no se eliminan en cascada (ej: archivos, etc.), aunque las inscripciones
-        // en alumno_curso deberían tener ON DELETE CASCADE si quieres que se borren también.
-
-        return redirect()->route('admin.alumnos.index')
-                         ->with('success', "Alumno '{$nombreCompleto}' eliminado correctamente.");
-
-    } catch (\Illuminate\Database\QueryException $e) {
-        // Manejar errores de base de datos (ej: si hay restricciones de clave foránea que impiden borrar)
-        // Loguear el error también es una buena práctica: Log::error($e->getMessage());
-        return redirect()->route('admin.alumnos.index')
-                         ->with('error', 'No se pudo eliminar el alumno. Es posible que tenga datos asociados (ej: cursos inscritos) que impiden su eliminación o hubo un error en la base de datos.');
-    } catch (\Exception $e) {
-        // Manejar otros errores inesperados
-        // Log::error($e->getMessage());
-        return redirect()->route('admin.alumnos.index')
-                         ->with('error', 'Ocurrió un error inesperado al intentar eliminar el alumno.');
+        return view('admin.alumnos.create');
     }
-}
+
+
+
+    /**
+     * Muestra el recurso especificado.
+     * Gracias al Route Model Binding, Laravel automáticamente busca y
+     * nos inyecta el objeto Alumno correspondiente al ID en la URL.
+     */
+    public function show(Alumno $alumno) // Laravel inyecta el objeto Alumno
+    {
+        // Aquí podrías cargar relaciones si las vas a mostrar en la vista de detalle
+        // Ejemplo: $alumno->load('cursosInscritos'); // Si tienes una relación así
+        // (Asumiendo que $alumno ya tiene la relación 'cursos' definida)
+        $alumno->load('cursos'); // Para la relación ManyToMany
+
+        return view('admin.alumnos.show', compact('alumno'));
+    }
+
+
+    /**
+     * Almacena un nuevo recurso creado en el almacenamiento.
+     */
+    public function store(Request $request)
+    {
+        // ------ 1. Validación de Datos ------
+        // Asegúrate de que los nombres aquí ('nombre', 'apellido1', etc.)
+        // coinciden EXACTAMENTE con los atributos 'name' de tus campos de formulario
+        // en create.blade.php.
+        //dd($request->all()); // Para depurar y ver qué datos se están enviando
+
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:100',
+            'apellido1' => 'required|string|max:100',
+            'apellido2' => 'nullable|string|max:100',
+            'dni' => 'required|string|max:15|unique:alumnos,dni',
+            'email' => 'required|email|max:100|unique:alumnos,email',
+            'sexo' => 'required|string|in:Hombre,Mujer,Otro', // Validación para el select
+            'fecha_nacimiento' => 'required|date|before_or_equal:today',
+            'nacionalidad' => 'required|string|max:50',
+            'num_seguridad_social' => 'required|string|max:20|unique:alumnos,num_seguridad_social', // Asegúrate del nombre del campo
+
+            // Campos de la sección "Información de Contacto"
+            'direccion' => 'required|string', // Nombre del textarea
+            'telefono' => 'required|string|max:20',
+            'cp' => 'required|string|max:10',
+            'localidad' => 'required|string|max:100',
+            'provincia' => 'required|string|max:100',
+
+            // Campos de la sección "Información Académica y Laboral"
+            'nivel_formativo' => 'required|string|max:100',
+            'situacion_laboral' => 'required|string|max:100',
+            'estado' => 'required|string|in:Activo,Inactivo,Pendiente,Baja',
+        ]);
+
+        // ------ 2. Creación del Alumno ------
+        // Esto asume que todos los campos en $validatedData están en la propiedad $fillable
+        // de tu modelo App\Models\Alumno.
+        Alumno::create($validatedData);
+
+        // ------ 3. Redirección con Mensaje de Éxito ------
+        return redirect()->route('admin.alumnos.index')
+                        ->with('success', '¡Alumno añadido correctamente!');
+    }
+
+    /**
+     * Actualiza el recurso especificado en el almacenamiento.
+     */
+    public function update(Request $request, Alumno $alumno) // Inyectar Request y el Alumno a actualizar
+    {
+        // ------ 1. Validación de Datos ------
+        // Similar a store(), pero ajusta las reglas 'unique' para ignorar el registro actual
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:100',
+            'apellido1' => 'required|string|max:100',
+            'apellido2' => 'nullable|string|max:100',
+            // Para 'unique', debemos ignorar el DNI/email del alumno actual
+            'dni' => 'required|string|max:15|unique:alumnos,dni,' . $alumno->id,
+            'email' => 'required|email|max:100|unique:alumnos,email,' . $alumno->id,
+            'fecha_nacimiento' => 'required|date|before_or_equal:today',
+            'nivel_formativo' => 'required|string|max:100',
+            'estado' => 'required|string|in:Activo,Inactivo,Pendiente,Baja',
+            // ... añade todas las demás reglas de validación ...
+            
+            'num_seguridad_social' => 'nullable|string|max:20|unique:alumnos,num_seguridad_social,' . $alumno->id,
+            'sexo' => 'nullable|string|in:Hombre,Mujer,Otro',
+            'direccion' => 'nullable|string',
+            'cp' => 'nullable|string|max:10',
+            'localidad' => 'nullable|string|max:100',
+            'provincia' => 'nullable|string|max:100',
+            'telefono' => 'nullable|string|max:20',
+            'nacionalidad' => 'nullable|string|max:50',
+            'situacion_laboral' => 'nullable|string|max:100',
+            /* Por ejemplo:
+            */
+        ]);
+
+        // ------ 2. Actualización del Alumno ------
+        $alumno->update($validatedData);
+
+        // ------ 3. Redirección con Mensaje de Éxito ------
+        return redirect()->route('admin.alumnos.show', $alumno->id) // Redirige a la vista de detalles del alumno
+                        ->with('success', '¡Alumno actualizado correctamente!');
+    }
+
+    // En Admin/AlumnoController.php
+
+    /**
+     * Elimina el recurso especificado del almacenamiento.
+     */
+    public function destroy(Alumno $alumno) // Route Model Binding inyecta el Alumno
+    {
+        try {
+            $nombreCompleto = $alumno->nombre . ' ' . $alumno->apellido1; // Guardar nombre para el mensaje
+            $alumno->delete(); // Elimina el alumno de la base de datos
+
+            // Podrías añadir aquí lógica adicional si necesitas eliminar datos relacionados
+            // que no se eliminan en cascada (ej: archivos, etc.), aunque las inscripciones
+            // en alumno_curso deberían tener ON DELETE CASCADE si quieres que se borren también.
+
+            return redirect()->route('admin.alumnos.index')
+                            ->with('success', "Alumno '{$nombreCompleto}' eliminado correctamente.");
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Manejar errores de base de datos (ej: si hay restricciones de clave foránea que impiden borrar)
+            // Loguear el error también es una buena práctica: Log::error($e->getMessage());
+            return redirect()->route('admin.alumnos.index')
+                            ->with('error', 'No se pudo eliminar el alumno. Es posible que tenga datos asociados (ej: cursos inscritos) que impiden su eliminación o hubo un error en la base de datos.');
+        } catch (\Exception $e) {
+            // Manejar otros errores inesperados
+            // Log::error($e->getMessage());
+            return redirect()->route('admin.alumnos.index')
+                            ->with('error', 'Ocurrió un error inesperado al intentar eliminar el alumno.');
+        }
+    }
+
+    
+    /**
+     * Obtiene los cursos en los que un alumno NO está inscrito.
+     * Devuelve una respuesta JSON para ser usada por AJAX.
+     */
+    public function getCursosDisponibles(Alumno $alumno)
+    {
+        // Obtener los IDs de los cursos en los que el alumno YA está inscrito
+        $cursosInscritosIds = $alumno->cursos()->pluck('cursos.id');
+
+        // Obtener los cursos que NO están en la lista de inscritos y que están "activos"
+        $cursosDisponibles = Curso::whereNotIn('id', $cursosInscritosIds)
+                                ->where(function ($query) { // Condición de curso activo
+                                    $query->where('fecha_fin', '>=', now())
+                                            ->orWhereNull('fecha_fin');
+                                })
+                                ->orderBy('nombre')
+                                ->get(['id', 'nombre']); // Solo necesitamos el ID y el nombre
+
+        return response()->json($cursosDisponibles);
+    }
+
+
+    /**
+     * Inscribe (vincula) un alumno a un curso específico.
+     */
+    public function inscribirCurso(Request $request, Alumno $alumno)
+    {
+        $request->validate([
+            'curso_id' => 'required|exists:cursos,id',
+            'estado' => 'nullable|string|in:Inscrito,Pendiente', // Validar el estado si lo envías
+        ]);
+
+        $cursoId = $request->input('curso_id');
+        $estadoInscripcion = $request->input('estado', 'Inscrito'); // Valor por defecto 'Inscrito'
+
+        // Verificar si ya está inscrito (doble verificación)
+        if ($alumno->cursos()->where('curso_id', $cursoId)->exists()) {
+            return redirect()->route('admin.alumnos.show', $alumno->id)
+                            ->with('error', 'El alumno ya está inscrito en este curso.');
+        }
+
+        // Inscribir al alumno usando attach() y pasando los datos de la tabla pivote
+        $alumno->cursos()->attach($cursoId, [
+            'estado' => $estadoInscripcion,
+            'fecha_inscripcion' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.alumnos.show', $alumno->id)
+                        ->with('success', '¡Alumno inscrito en el curso correctamente!');
+    }
+
+    /**
+     * Desvincula (desinscribe) un alumno de un curso específico.
+     *
+     * @param  \App\Models\Alumno  $alumno
+     * @param  \App\Models\Curso  $curso
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function desinscribirCurso(Alumno $alumno, Curso $curso)
+    {
+        Log::info("Intentando desinscribir Alumno ID {$alumno->id} del Curso ID {$curso->id}.");
+
+        try {
+            // Llama a la relación 'cursos' del modelo Alumno y usa el método 'detach'
+            // para eliminar la fila de la tabla pivote que conecta este alumno con este curso.
+            $alumno->cursos()->detach($curso->id);
+
+            // Redirige de vuelta a la página de detalles del alumno con un mensaje de éxito.
+            return redirect()->route('admin.alumnos.show', $alumno->id)
+                            ->with('success', "Alumno '{$alumno->nombre} {$alumno->apellido1}' desinscrito del curso '{$curso->nombre}' correctamente.");
+
+        } catch (\Exception $e) {
+            // Captura cualquier error inesperado durante el proceso.
+            Log::error("Error al desinscribir alumno ID {$alumno->id} del curso ID {$curso->id}: " . $e->getMessage());
+            return redirect()->route('admin.alumnos.show', $alumno->id)
+                            ->with('error', 'Ocurrió un error inesperado al intentar desinscribir al alumno.');
+        }
+    }
+
+    
+
 }

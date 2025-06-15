@@ -282,12 +282,12 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                     
                     <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
-</svg>
-</div>
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                </svg>
+            </div>
                     Información Académica y Laboral
                 </h2>
                 
@@ -315,52 +315,73 @@
                     Historial Académico
                 </h2>
                 
+                
                 @if ($alumno->relationLoaded('cursos') && $alumno->cursos->count() > 0)
                     <div class="space-y-4">
                         @foreach ($alumno->cursos as $cursoInscrito)
                             <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-300">
                                 <div class="flex flex-col md:flex-row md:items-center justify-between">
+
+                                    {{-- Parte Izquierda: Nombre del Curso y Datos Pivote --}}
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-gray-900 mb-3">
                                             <a href="{{ route('admin.cursos.show', $cursoInscrito->id) }}"
-                                               class="text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+                                            class="text-blue-600 hover:text-blue-800 hover:underline transition-colors">
                                                 {{ $cursoInscrito->nombre }}
                                             </a>
                                         </h4>
                                         <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                                            {{-- ... (tus spans para Estado y Nota se mantienen igual) ... --}}
                                             <span class="flex items-center bg-gray-50 px-3 py-1 rounded-lg">
-                                                <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
+                                                <i class="bi bi-check-circle-fill text-gray-500 mr-1.5"></i>
                                                 Estado: <span class="font-medium text-gray-900 ml-1">{{ $cursoInscrito->pivot->estado ?? 'N/A' }}</span>
                                             </span>
                                             <span class="flex items-center bg-gray-50 px-3 py-1 rounded-lg">
-                                                <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                               </svg>
-                                               Nota: <span class="font-medium text-gray-900 ml-1">{{ $cursoInscrito->pivot->nota ?? 'N/A' }}</span>
-                                           </span>
-                                       </div>
-                                   </div>
-                                   <div class="mt-4 md:mt-0 md:ml-6">
-                                       @php
-                                           $estadoCurso = $cursoInscrito->pivot->estado ?? 'N/A';
-                                           $badgeClasses = match($estadoCurso) {
-                                               'Completado' => 'bg-green-100 text-green-800 border-green-200',
-                                               'En Progreso' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                               'Abandonado' => 'bg-red-100 text-red-800 border-red-200',
-                                               default => 'bg-gray-100 text-gray-800 border-gray-200'
-                                           };
-                                       @endphp
-                                       <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $badgeClasses }}">
-                                           {{ $estadoCurso }}
-                                       </span>
-                                   </div>
-                               </div>
-                           </div>
-                       @endforeach
-                   </div>
-               @else
+                                                <i class="bi bi-star-fill text-gray-500 mr-1.5"></i>
+                                                Nota: <span class="font-medium text-gray-900 ml-1">{{ $cursoInscrito->pivot->nota ?? 'N/A' }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Parte Derecha: Badge de Estado y NUEVO Botón de Desinscribir --}}
+                                    <div class="mt-4 md:mt-0 md:ml-6 flex items-center space-x-3"> {{-- Contenedor para alinear Badge y Botón --}}
+                                        {{-- Badge de Estado (Tu código original, sin cambios) --}}
+                                        @php
+                                        $estadoCurso = $cursoInscrito->pivot->estado ?? 'N/A';
+                                        $badgeClasses = match($estadoCurso) {
+                                            'Completado' => 'bg-green-100 text-green-800 border-green-200',
+                                            'En Progreso' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                            'Abandonado' => 'bg-red-100 text-red-800 border-red-200',
+                                            default => 'bg-gray-100 text-gray-800 border-gray-200'
+                                        };
+                                        @endphp
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $badgeClasses }}">
+                                        {{ $estadoCurso }}
+                                        </span>
+
+                                        {{-- NUEVO: Formulario para Desinscribir de este curso --}}
+                                        <form action="{{ route('admin.alumnos.cursos.desinscribir', ['alumno' => $alumno->id, 'curso' => $cursoInscrito->id]) }}"
+      method="POST"
+      onsubmit="return confirm('¿Seguro que quieres desinscribir a {{ $alumno->nombre }} del curso \'{{ addslashes($cursoInscrito->nombre) }}\'?');">
+    @csrf
+    @method('DELETE')
+
+    {{-- BOTÓN MODIFICADO CON CLASES TAILWIND --}}
+    <button type="submit"
+            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-red-500 text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 group/btn"
+            title="Desinscribir de este curso">
+        <i class="bi bi-person-x-fill text-lg group-hover/btn:scale-110 transition-transform duration-200"></i>
+    </button>
+
+</form>
+</form>
+
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else    
                    <div class="text-center py-16 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl">
                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,13 +417,14 @@
                        Editar Perfil
                    </a>
                    
-                   <button onclick="handleEnrollStudent()" 
+                   <button onclick="openEnrollModal('{{ $alumno->id }}')" 
                            class="flex items-center justify-center w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg group">
                        <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                        </svg>
                        Inscribir a Curso
                    </button>
+                   
                    
                    <button onclick="printProfile()" 
                            class="flex items-center justify-center w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl border border-gray-300 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-md group">
@@ -529,16 +551,99 @@
        </div>
    </div>
 </div>
+<!-- Modal para Inscribir Alumno a Curso -->
+<div id="enrollModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-xl bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Inscribir Alumno a un Curso</h3>
+                <button onclick="closeEnrollModal()" class="text-gray-400 hover:text-gray-600">×</button>
+            </div>
+
+            <form id="enrollForm" method="POST"> {{-- La action se establecerá con JS --}}
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label for="curso_id" class="block text-sm font-medium text-gray-700">Seleccionar Curso <span class="text-red-500">*</span></label>
+                        <select name="curso_id" id="curso_id_select" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <option value="">Cargando cursos disponibles...</option>
+                            {{-- Las opciones se llenarán con JavaScript --}}
+                        </select>
+                    </div>
+                     {{-- Puedes añadir más campos si son necesarios, ej: estado inicial de la inscripción --}}
+                     <div>
+                        <label for="enroll_status" class="block text-sm font-medium text-gray-700">Estado de la Inscripción</label>
+                        <select name="estado" id="enroll_status" class="mt-1 block w-full ...">
+                            <option value="Inscrito" selected>Inscrito</option>
+                            <option value="Pendiente">Pendiente</option>
+                        </select>
+                     </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeEnrollModal()" class="btn-secondary-tailwind">Cancelar</button>
+                    <button type="submit" class="btn-indigo-tailwind">Inscribir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-   function handleEnrollStudent() {
-       // Puedes implementar un modal o redirección aquí
-       alert('Funcionalidad de inscripción a implementar');
-   }
-   
-   function printProfile() {
+    const enrollModal = document.getElementById('enrollModal');
+    const enrollForm = document.getElementById('enrollForm');
+    const cursoSelect = document.getElementById('curso_id_select');
+
+    function openEnrollModal(alumnoId) {
+        if (!enrollModal || !enrollForm || !cursoSelect) {
+            console.error("Elementos del modal de inscripción no encontrados.");
+            return;
+        }
+
+        // Establecer la acción del formulario
+        const actionUrl = `{{ route('admin.alumnos.cursos.inscribir', ['alumno' => ':id']) }}`.replace(':id', alumnoId);
+        enrollForm.action = actionUrl;
+
+        // Limpiar y mostrar "cargando" en el select
+        cursoSelect.innerHTML = '<option value="">Cargando cursos...</option>';
+        cursoSelect.disabled = true;
+
+        // Mostrar el modal
+        enrollModal.classList.remove('hidden');
+
+        // Obtener los cursos disponibles vía AJAX
+        const cursosDisponiblesUrl = `{{ route('admin.alumnos.cursos.disponibles', ['alumno' => ':id']) }}`.replace(':id', alumnoId);
+        fetch(cursosDisponiblesUrl)
+            .then(response => response.json())
+            .then(data => {
+                cursoSelect.innerHTML = '<option value="" disabled selected>Selecciona un curso</option>'; // Opción por defecto
+                if (data.length > 0) {
+                    data.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = curso.nombre;
+                        cursoSelect.appendChild(option);
+                    });
+                } else {
+                     cursoSelect.innerHTML = '<option value="">No hay cursos disponibles para este alumno</option>';
+                }
+                cursoSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error al cargar los cursos:', error);
+                cursoSelect.innerHTML = '<option value="">Error al cargar cursos</option>';
+            });
+    }
+
+    function closeEnrollModal() {
+        if (enrollModal) {
+            enrollModal.classList.add('hidden');
+        }
+    }
+
+    function printProfile() {
        window.print();
    }
    
@@ -546,5 +651,8 @@
        // Puedes implementar la funcionalidad de exportación PDF aquí
        alert('Funcionalidad de exportación a PDF a implementar');
    }
+    
 </script>
 @endpush
+   
+   

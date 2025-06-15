@@ -16,14 +16,15 @@ class AlumnoFactory extends Factory
         $nombre = ($sexo === 'Hombre') ? fake()->firstNameMale() : fake()->firstNameFemale();
         $situacion = ['Desempleado', 'Empleado a tiempo completo', 'Empleado a tiempo parcial', 'Estudiante', 'Autónomo'];
         $nivel = ['Sin estudios', 'ESO', 'Bachillerato', 'Grado Medio', 'Grado Superior', 'Grado Universitario', 'Máster', 'Doctorado'];
+        // Genera una fecha/hora aleatoria dentro de los últimos 6 meses
+        $fechaCreacion = fake()->dateTimeBetween('-6 months', 'now');
 
         return [
             'nombre' => $nombre,
             'apellido1' => fake()->lastName(),
             'apellido2' => fake()->optional(0.7)->lastName(),
             'dni' => fake()->unique()->numerify('########') . fake()->randomLetter(),
-            //'num_seguridad_social' => fake()->optional(0.8)->unique()->numerify('##/########/##'), // Opcional
-             // --- LÍNEA CORREGIDA ---
+            //'num_seguridad_social' => fake()->optional(0.8)->unique()->numerify('##/########/##'), // Opcional             
             'num_seguridad_social' => fake()->boolean(80) // 80% de probabilidad de que sea true
                 ? fake()->unique()->numerify('##/########/##') // Si es true, genera el número único
                 : null, // Si es false (20%), asigna null
@@ -43,6 +44,8 @@ class AlumnoFactory extends Factory
             'situacion_laboral' => fake()->randomElement($situacion),
             'nivel_formativo' => fake()->randomElement($nivel),
             'estado' => fake()->randomElement(['Activo', 'Inactivo', 'Baja', 'Pendiente']), // Ejemplo de estados
+            'created_at' => $fechaCreacion,
+            'updated_at' => $fechaCreacion, // Usualmente, para datos de prueba, la fecha de actualización es la misma que la de creación
         ];
     }
 }

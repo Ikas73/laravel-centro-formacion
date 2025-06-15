@@ -64,16 +64,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
             Route::resource('preinscritos', PreinscritoSepeController::class); // Asegúrate que este controlador existe
-
+            
             // Ruta para convertir preinscrito
             Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])
                   ->name('preinscritos.convertir');
+            
+            // Ruta para desinscribir un alumno de un curso
+            Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
+            // Ruta GET para obtener los cursos disponibles para un alumno (para el modal AJAX)
+            Route::get('/alumnos/{alumno}/cursos-disponibles', [AlumnoController::class, 'getCursosDisponibles'])->name('alumnos.cursos.disponibles');
+
+            // Ruta POST para procesar la inscripción del alumno en un curso
+            Route::post('/alumnos/{alumno}/inscribir', [AlumnoController::class, 'inscribirCurso'])->name('alumnos.cursos.inscribir');
 
             // Placeholders para otras secciones de admin
             Route::get('/reportes', function () { return 'Admin Reportes (Pendiente)'; })->name('reportes.index');
             Route::get('/finanzas', function () { return 'Admin Finanzas (Pendiente)'; })->name('finanzas.index');
             Route::get('/configuracion', function () { return 'Admin Configuración (Pendiente)'; })->name('configuracion.index');
-          }); // --- Fin del grupo admin ---
+             // Define una ruta DELETE para desvincular un curso de un alumno
+            Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
+                }); // --- Fin del grupo admin ---
 
 }); // --- Fin del grupo principal 'auth', 'verified' ---
 

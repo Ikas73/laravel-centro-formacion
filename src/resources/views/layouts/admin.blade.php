@@ -163,5 +163,43 @@
     </div>
 
     @stack('scripts')
+    
+    {{-- ... otros scripts que puedas tener ... --}}
+    <script>
+        // Función para ABRIR el modal y configurar su contenido
+    function confirmDelete(actionUrl, itemName) {
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteModal = document.getElementById('deleteModal');
+        const modalBody = deleteModal.querySelector('.text-sm.text-gray-500'); // Selector más específico para el cuerpo del mensaje
+
+        if(deleteForm && deleteModal && modalBody) {
+            // Establecer la acción del formulario
+            deleteForm.action = actionUrl;
+            // Construir el cuerpo del mensaje dinámicamente
+            modalBody.innerHTML = `¿Estás seguro de que quieres eliminar a <strong class="font-semibold text-gray-700">${itemName}</strong>? <br> Esta acción no se puede deshacer.`;
+            // Mostrar el modal
+            deleteModal.classList.remove('hidden');
+        } else {
+            console.error('Elementos del modal de eliminación no encontrados.');
+        }
+    }
+
+    // Función para CERRAR el modal
+    function closeDeleteModal() {
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.classList.add('hidden');
+        }
+    }
+
+    // (Opcional) Cerrar modal con la tecla ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && !document.getElementById('deleteModal').classList.contains('hidden')) {
+            closeDeleteModal();
+        }
+    });
+    </script>
 </body>
+
+
 </html>
