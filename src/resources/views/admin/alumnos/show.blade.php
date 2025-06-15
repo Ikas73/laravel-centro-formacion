@@ -344,43 +344,60 @@
                                     </div>
 
                                     {{-- Parte Derecha: Badge de Estado y NUEVO Botón de Desinscribir --}}
-                                    <div class="mt-4 md:mt-0 md:ml-6 flex items-center space-x-3"> {{-- Contenedor para alinear Badge y Botón --}}
-                                        {{-- Badge de Estado (Tu código original, sin cambios) --}}
+                                    <div class="mt-4 md:mt-0 md:ml-6 flex items-center space-x-3">
+                                        {{-- Badge de Estado (sin cambios) --}}
                                         @php
-                                        $estadoCurso = $cursoInscrito->pivot->estado ?? 'N/A';
-                                        $badgeClasses = match($estadoCurso) {
-                                            'Completado' => 'bg-green-100 text-green-800 border-green-200',
-                                            'En Progreso' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                            'Abandonado' => 'bg-red-100 text-red-800 border-red-200',
-                                            default => 'bg-gray-100 text-gray-800 border-gray-200'
-                                        };
+                                            $estadoCurso = $cursoInscrito->pivot->estado ?? 'N/A';
+                                            $badgeClasses = match($estadoCurso) {
+                                                'Completado'  => 'bg-green-100 text-green-800 border-green-200',
+                                                'En Progreso' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                'Abandonado'  => 'bg-red-100 text-red-800 border-red-200',
+                                                default       => 'bg-gray-100 text-gray-800 border-gray-200'
+                                            };
                                         @endphp
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border {{ $badgeClasses }}">
-                                        {{ $estadoCurso }}
+                                            {{ $estadoCurso }}
                                         </span>
 
-                                        {{-- NUEVO: Formulario para Desinscribir de este curso --}}
-                                        <form action="{{ route('admin.alumnos.cursos.desinscribir', ['alumno' => $alumno->id, 'curso' => $cursoInscrito->id]) }}"
-      method="POST"
-      onsubmit="return confirm('¿Seguro que quieres desinscribir a {{ $alumno->nombre }} del curso \'{{ addslashes($cursoInscrito->nombre) }}\'?');">
-    @csrf
-    @method('DELETE')
+                                        {{-- Formulario real (ahora sin confirm nativo) --}}
+                                        <form id="desinscribir-form-{{ $cursoInscrito->id }}"          
+                                            
+                                            action="{{ route('admin.alumnos.cursos.desinscribir', [
+                                                        'alumno' => $alumno->id,
+                                                        'curso'  => $cursoInscrito->id]) }}"
+                                            method="POST"
+                                            class="inline">                                           
+                                            @csrf
+                                            @method('DELETE')
 
-    {{-- BOTÓN MODIFICADO CON CLASES TAILWIND --}}
-    <button type="submit"
-            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-red-500 text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 group/btn"
-            title="Desinscribir de este curso">
-        <i class="bi bi-person-x-fill text-lg group-hover/btn:scale-110 transition-transform duration-200"></i>
-    </button>
-
-</form>
-</form>
-
+                                            {{-- Botón que abre el modal --}}
+                                            <button x-data type="button"                                        
+                                                    @click="$dispatch('open-modal', 'desinscribir-modal-{{ $cursoInscrito->id }}')"
+                                                    class="inline-flex items-center justify-center h-8 w-8 rounded-lg
+                                                        bg-red-500 text-white shadow-sm hover:bg-red-600
+                                                        focus:outline-none focus:ring-2 focus:ring-offset-2
+                                                        focus:ring-red-500 transition-all duration-200 group/btn"
+                                                    title="Desinscribir de este curso">
+                                                <i class="bi bi-person-x-fill text-lg group-hover/btn:scale-110 transition-transform duration-200"></i>
+                                            </button>
+                                        </form>
                                     </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+
+                                    {{-- Modal de confirmación --}}
+                                    <x-desinscribir-modal
+                                            id="desinscribir-modal-{{ $cursoInscrito->id }}"
+                                            :form="'desinscribir-form-' . $cursoInscrito->id">
+                                        <p class="text-sm text-gray-600">
+                                            ¿Seguro que quieres desinscribir a
+                                            <b>{{ $alumno->nombre }}</b> del curso
+                                            <b>{{ $cursoInscrito->nombre }}</b>? Esta acción es irreversible.
+                                        </p>
+                                    </x-desinscribir-modal>
+
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
                 @else    
                    <div class="text-center py-16 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl">
                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -588,6 +605,8 @@
         </div>
     </div>
 </div>
+<!-- Modal de confirmación de desinscripción -->
+<x-desinscribir-modal title="Desinscribir de este curso" />
 @endsection
 
 @push('scripts')

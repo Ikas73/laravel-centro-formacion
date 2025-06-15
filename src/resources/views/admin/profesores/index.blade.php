@@ -267,12 +267,14 @@
                                        title="Editar información">
                                         <i class="bi bi-pencil-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
                                     </a>
-                                    <button type="button" 
-                                            onclick="confirmDelete('{{ $profesor->id }}', '{{ $profesor->nombre }} {{ $profesor->apellido1 }}')"
+                                    <button type="button"
+                                            onclick="confirmDelete('{{ route('admin.profesores.destroy', $profesor->id) }}', '{{ addslashes($profesor->nombre . ' ' . $profesor->apellido1) }}')"
                                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group/btn"
                                             title="Eliminar profesor">
                                         <i class="bi bi-trash-fill group-hover/btn:scale-110 transition-transform duration-200"></i>
                                     </button>
+
+                                    
                                 </div>
                             </td>
                         </tr>
@@ -331,7 +333,7 @@
     @endif
 
     <!-- Modal de confirmación de eliminación -->
-    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <!-- <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
             <div class="mt-3 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
@@ -359,8 +361,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
+<!-- Modal de confirmación de eliminación -->
+<x-delete-modal title="Eliminar profesor" />
 @endsection
 
 @push('styles')
@@ -428,7 +432,7 @@
     }
     
     // Función para confirmar eliminación
-    function confirmDelete(profesorId, profesorName) {
+     /* function confirmDelete(profesorId, profesorName) {
         document.getElementById('profesorName').textContent = profesorName;
         document.getElementById('deleteForm').action = '{{ route("admin.profesores.destroy", ["profesore" => ":id"]) }}'.replace(':id', profesorId);
         document.getElementById('deleteModal').classList.remove('hidden');
@@ -451,7 +455,7 @@
         if (event.target === this) {
             closeDeleteModal();
         }
-    });
+    }); */
     
     // Auto-submit en cambio de filtro
     document.getElementById('especialidad_filtro').addEventListener('change', function() {

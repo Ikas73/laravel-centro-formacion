@@ -507,16 +507,19 @@
             <i class="bi bi-pencil-fill w-4 h-4 group-hover/action:scale-110 transition-transform"></i>
         </a>
         
-        {{-- Eliminar --}}
-        <form action="{{ route('admin.cursos.destroy', $curso->id) }}" method="POST" class="inline">
-            @csrf @method('DELETE')
-            <button type="submit" 
-                    onclick="return confirm('⚠️ ¿Estás seguro de que deseas eliminar este curso?\n\nEsta acción no se puede deshacer.')"
-                    class="group/action p-1 rounded-md bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/25"
+        {{-- Eliminar (con modal) --}}
+            <button type="button"
+                    onclick="confirmDelete(
+                        '{{ route('admin.cursos.destroy', $curso->id) }}',
+                        '{{ addslashes($curso->nombre) }}'
+                    )"
+                    class="group/action p-1 rounded-md bg-red-100 text-red-600 hover:bg-red-600
+                        hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg
+                        hover:shadow-red-500/25"
                     title="Eliminar curso">
                 <i class="bi bi-trash-fill w-4 h-4 group-hover/action:scale-110 transition-transform"></i>
             </button>
-        </form>
+
     </div>
 </td>
 
@@ -560,6 +563,8 @@
         </div>
     @endif
 
+<!-- Modal de confirmación de eliminación -->
+<x-delete-modal title="Eliminar curso" />
 @endsection
 
 @push('styles')
@@ -669,9 +674,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
-// Función para mostrar confirmaciones más amigables
-function confirmarEliminacion(nombre) {
-    return confirm(`⚠️ ¡Atención!\n\n¿Estás seguro de que deseas eliminar el curso "${nombre}"?\n\nEsta acción no se puede deshacer y se perderán todos los datos asociados.`);
-}
+
 </script>
 @endpush

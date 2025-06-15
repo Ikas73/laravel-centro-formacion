@@ -435,33 +435,7 @@
     function clearFilters() {
         window.location.href = '{{ route("admin.alumnos.index") }}';
     }
-    
-    // Función para confirmar eliminación
-    /* function confirmDelete(alumnoId, alumnoName) {
-        document.getElementById('alumnoName').textContent = alumnoName;
-        document.getElementById('deleteForm').action = '{{ route("admin.alumnos.destroy", ":id") }}'.replace(':id', alumnoId);
-        document.getElementById('deleteModal').classList.remove('hidden');
-    } */
-    
-    // Función para cerrar modal de eliminación
-    /* function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
-    } */
-    
-    // Cerrar modal con ESC
-    /* document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeDeleteModal();
-        }
-    }); */
-    
-    // Cerrar modal clickeando fuera
-    /* document.getElementById('deleteModal').addEventListener('click', function(event) {
-        if (event.target === this) {
-            closeDeleteModal();
-        }
-    }); */
-    
+         
     // Auto-submit en cambio de filtros
     document.getElementById('grado').addEventListener('change', function() {
         document.getElementById('filterForm').submit();

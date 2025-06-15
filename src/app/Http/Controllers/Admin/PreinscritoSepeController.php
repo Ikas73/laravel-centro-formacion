@@ -171,7 +171,7 @@ class PreinscritoSepeController extends Controller
     /**
      * Actualiza el Preinscrito especificado en el almacenamiento.
      */
-        public function update(Request $request, PreinscritoSepe $preinscrito)
+    public function update(Request $request, PreinscritoSepe $preinscrito)
     {
         Log::info("Recibiendo datos para PreinscritoSepe@update para ID " . $preinscrito->id, $request->all());
 
@@ -245,81 +245,93 @@ class PreinscritoSepeController extends Controller
         }
     }
 
+   
     /**
-     * Convierte un PreinscritoSepe a un nuevo registro de Alumno.
+     * Convierte un PreinscritoSepe a Alumno.
      */
-    public function convertirAAlumno(PreinscritoSepe $preinscrito) // Route Model Binding
+    public function convertirAAlumno(PreinscritoSepe $preinscrito)
     {
-        Log::info("Intentando convertir Preinscrito ID: {$preinscrito->id} a Alumno.");
+        Log::info("Intentando convertir Preinscrito ID {$preinscrito->id} a Alumno.");
 
-        // 1. Verificar si ya existe un Alumno con el mismo DNI o Email
-        // Esto ayuda a prevenir duplicados accidentales si se intenta convertir dos veces
-        // o si el alumno ya fue registrado manualmente.
+        /* -----------------------------------------------------------------
+         | 1) Cortocircuito si YA está convertido
+         *-----------------------------------------------------------------*/
+        if ($preinscrito->estado === 'Convertido') {
+            return back()->with('error', 'Este preinscrito ya fue convertido.');
+        }
+
+        /* -----------------------------------------------------------------
+         | 2) Comprobar si existe otro alumno con mismo DNI o e-mail
+         *-----------------------------------------------------------------*/
         $alumnoExistente = Alumno::where('dni', $preinscrito->dni)
-                                ->orWhere(function($query) use ($preinscrito) {
-                                    if (!empty($preinscrito->email)) { // Solo buscar por email si el preinscrito tiene uno
-                                        $query->where('email', $preinscrito->email);
-                                    }
-                                })
-                                ->first();
+            ->orWhere(function ($q) use ($preinscrito) {
+                if ($preinscrito->email) {
+                    $q->where('email', $preinscrito->email);
+                }
+            })
+            ->first();
 
         if ($alumnoExistente) {
-            Log::warning("Intento de convertir Preinscrito ID: {$preinscrito->id} fallido. Ya existe un Alumno con DNI/Email similar (ID Alumno: {$alumnoExistente->id}).");
-            return redirect()->route('admin.preinscritos.show', $preinscrito->id)
-                            ->with('error', 'No se pudo convertir. Ya existe un alumno registrado con el mismo DNI o Email.');
+            Log::warning("Conversión abortada: duplicado DNI/Email (Alumno ID {$alumnoExistente->id}).");
+            return back()->with('error',
+                'Ya existe un alumno con el mismo DNI o correo electrónico.');
         }
 
-        // 2. Mapear y Preparar datos para el nuevo Alumno
-        // Asegúrate de que los campos aquí coinciden con las columnas de tu tabla 'alumnos'
-        // y con lo que tienes en $fillable del modelo Alumno.
+        /* -----------------------------------------------------------------
+         | 3) Preparar datos para el nuevo alumno
+         *-----------------------------------------------------------------*/
         $datosNuevoAlumno = [
-            'nombre' => $preinscrito->nombre,
-            'apellido1' => $preinscrito->apellido1,
-            'apellido2' => $preinscrito->apellido2,
-            'dni' => $preinscrito->dni,
-            'email' => $preinscrito->email,
-            'telefono' => $preinscrito->telefono,
-            'fecha_nacimiento' => $preinscrito->fecha_nacimiento,
-            'sexo' => $preinscrito->sexo, // Asumiendo que preinscritos tiene 'sexo'
-            'direccion' => $preinscrito->direccion,
-            'cp' => $preinscrito->cp,
-            'localidad' => $preinscrito->localidad,
-            'provincia' => $preinscrito->provincia,
-            'nacionalidad' => $preinscrito->nacionalidad,
-            'situacion_laboral' => $preinscrito->situacion_laboral,
-            'nivel_formativo' => $preinscrito->nivel_formativo,
-            'num_seguridad_social' => $preinscrito->num_seguridad_social, // Si preinscritos lo tiene y alumnos también
-            'estado' => 'Activo', // Establecer un estado por defecto para el nuevo alumno
-            // Añade cualquier otro campo que el modelo Alumno requiera y que no esté en Preinscrito,
-            // o que deba tener un valor por defecto al convertirse.
+            'nombre'              => $preinscrito->nombre,
+            'apellido1'           => $preinscrito->apellido1,
+            'apellido2'           => $preinscrito->apellido2,
+            'dni'                 => $preinscrito->dni,
+            'email'               => $preinscrito->email,
+            'telefono'            => $preinscrito->telefono,
+            'fecha_nacimiento'    => $preinscrito->fecha_nacimiento,
+            'sexo'                => $preinscrito->sexo,
+            'direccion'           => $preinscrito->direccion,
+            'cp'                  => $preinscrito->cp,
+            'localidad'           => $preinscrito->localidad,
+            'provincia'           => $preinscrito->provincia,
+            'nacionalidad'        => $preinscrito->nacionalidad,
+            'situacion_laboral'   => $preinscrito->situacion_laboral,
+            'nivel_formativo'     => $preinscrito->nivel_formativo,
+            'num_seguridad_social'=> $preinscrito->num_seguridad_social,
+            'estado'              => 'Activo',   // estado inicial en la tabla alumnos
         ];
 
+        /* -----------------------------------------------------------------
+         | 4) Ejecución atómica
+         *-----------------------------------------------------------------*/
+        DB::beginTransaction();
+
         try {
-            // 4. Crear el nuevo Alumno
-            $nuevoAlumno = Alumno::create($datosNuevoAlumno); // Usar los datos validados/mapeados
-            Log::info("Preinscrito ID: {$preinscrito->id} convertido a Alumno ID: {$nuevoAlumno->id} exitosamente.");
+            // 4a. Crear alumno
+            $alumno = Alumno::create($datosNuevoAlumno);
 
-            // 5. Actualizar estado del Preinscrito o Eliminarlo
-            $preinscrito->update(['estado' => 'Convertido']); // Asumiendo que tienes un campo 'estado' en PreinscritoSepe
-            // O podrías eliminarlo:
-            // $preinscrito->delete();
-            Log::info("Estado del Preinscrito ID: {$preinscrito->id} actualizado a 'Convertido'.");
+            // 4b. Marcar preinscrito
+            $preinscrito->update([
+                'estado'     => 'Convertido',
+                'alumno_id'  => $alumno->id,
+            ]);
 
+            DB::commit();
 
-            // 6. Redirigir al perfil del nuevo alumno creado
-            return redirect()->route('admin.alumnos.show', $nuevoAlumno->id)
-                            ->with('success', "Preinscrito '{$preinscrito->nombre} {$preinscrito->apellido1}' convertido a Alumno (ID: {$nuevoAlumno->id}) correctamente.");
+            Log::info("Preinscrito ID {$preinscrito->id} -> Alumno ID {$alumno->id} OK.");
+            return redirect()
+                ->route('admin.alumnos.show', $alumno->id)
+                ->with('success',
+                    "Preinscrito '{$preinscrito->nombre} {$preinscrito->apellido1}' convertido correctamente.");
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Esto podría ocurrir si la validación opcional de arriba falla y no la manejaste antes.
-            Log::error("Error de validación al crear Alumno desde Preinscrito ID {$preinscrito->id}: " . $e->getMessage(), $e->errors());
-            return redirect()->route('admin.preinscritos.show', $preinscrito->id)
-                            ->with('error', 'Error de validación al crear el alumno. Revisa los datos del preinscrito.')
-                            ->withErrors($e->validator);
-        } catch (\Exception $e) {
-            Log::error("Error al convertir Preinscrito ID {$preinscrito->id} a Alumno: " . $e->getMessage(), ['exception' => $e]);
-            return redirect()->route('admin.preinscritos.index')
-                            ->with('error', 'Ocurrió un error inesperado al convertir el preinscrito a alumno.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error("Error al convertir Preinscrito ID {$preinscrito->id}: {$e->getMessage()}",
+                       ['exception' => $e]);
+            return back()->with('error',
+                'Ocurrió un error inesperado al convertir el preinscrito.');
         }
     }
+
+
+    
 }

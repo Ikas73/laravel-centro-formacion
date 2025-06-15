@@ -152,16 +152,36 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <form action="{{ route('admin.preinscritos.convertir', $preinscrito->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Seguro que quieres convertir a este preinscrito en alumno?');">
-                                        @csrf
-                                        <button type="submit" class="text-green-500 hover:text-green-700" title="Convertir a Alumno"><i class="bi bi-person-plus-fill"></i></button>
-                                    </form>
+
+                                    {{-- Mostrar solo si el preinscrito aún NO está convertido --}}
+                                    @if(($preinscrito->estado ?? 'Pendiente') !== 'Convertido')
+                                    {{-- Convertir a Alumno --}}
+<button type="button"
+        onclick="confirmConvert(
+            '{{ route('admin.preinscritos.convertir', $preinscrito->id) }}',
+            '{{ addslashes($preinscrito->nombre) }}'
+        )"
+        class="text-green-500 hover:text-green-700"
+        title="Convertir a Alumno">
+    <i class="bi bi-person-plus-fill"></i>
+</button>
+
+                                    @endif
+
                                     <a href="{{ route('admin.preinscritos.show', $preinscrito->id) }}" class="text-blue-500 hover:text-blue-700" title="Ver Detalles"><i class="bi bi-eye-fill"></i></a>
                                     <a href="{{ route('admin.preinscritos.edit', $preinscrito->id) }}" class="text-indigo-500 hover:text-indigo-700" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-                                    <form action="{{ route('admin.preinscritos.destroy', $preinscrito->id) }}" method="POST" class="inline" onsubmit="return confirm('¿Seguro que quieres eliminar este preinscrito?');">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700" title="Eliminar"><i class="bi bi-trash-fill"></i></button>
-                                    </form>
+                                    {{-- Botón para eliminar Preinscrito con modal --}}
+                                    <button type="button"
+                                            {{-- Pasamos la URL de la ruta destroy y el nombre del preinscrito --}}
+                                            onclick="confirmDelete(
+                                                '{{ route('admin.preinscritos.destroy', $preinscrito->id) }}',
+                                                '{{ addslashes($preinscrito->nombre) }}'
+                                            )"
+                                            class="text-red-500 hover:text-red-700"
+                                            title="Eliminar preinscrito">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+
                                 </div>
                             </td>
                         </tr>
@@ -191,6 +211,9 @@
             {{ $preinscritos->appends(request()->query())->links() }}
         </div>
     @endif
+<!-- Modal de confirmación de eliminación -->
+<x-convert-modal title="Convertir a Alumno"/>
+<x-delete-modal title="Eliminar preinscrito" />
 @endsection
 
 @push('scripts')
@@ -202,5 +225,25 @@
     //         document.getElementById('filterFormPreinscritos').submit();
     //     });
     // }
+    function confirmConvert(url, itemName) {
+    // 1 – indicar al formulario la URL correcta
+    document.getElementById('convertForm').action = url;
+
+    // 2 – actualizar el texto del cuerpo con el nombre
+    const body = document.querySelector('#convertModal .text-sm');
+    if (body) {
+        body.innerHTML =
+            `¿Estás seguro de que quieres convertir <strong>${itemName}</strong> en alumno?<br>` +
+            'Esta acción no se puede deshacer.';
+    }
+
+    // 3 – mostrar modal
+    document.getElementById('convertModal').classList.remove('hidden');
+}
+
+function closeConvertModal() {
+    document.getElementById('convertModal').classList.add('hidden');
+}
+
 </script>
 @endpush
