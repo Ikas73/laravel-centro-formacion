@@ -55,4 +55,16 @@ class Profesor extends Model
         // porque el método está en el modelo 'Profesor'.
         return $this->hasMany(Curso::class);
     }
+
+    /**
+     * Obtiene los horarios asignados a este profesor.
+     *  @return \Illuminate\Database\Eloquent\Relations\HasMany
+     *  @throws \Illuminate\Database\Eloquent\Relations\RelationNotFoundException
+     * 
+     */
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'profesor_id');
+    }
+
 }

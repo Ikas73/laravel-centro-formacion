@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\AlumnoController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\PreinscritoSepeController; // Asegúrate que el nombre es exacto
+use App\Http\Controllers\Admin\ScheduleController;   // ← IMPORTANTE
+
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +66,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
             Route::resource('preinscritos', PreinscritoSepeController::class); // Asegúrate que este controlador existe
+            Route::resource('schedules', ScheduleController::class);
+
             
             // Ruta para convertir preinscrito
             Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])
@@ -106,3 +110,4 @@ Route::get('/login-dev', function () {
     request()->session()->regenerate();
     return redirect()->intended(route('admin.dashboard'));
 })->name('login.dev');
+

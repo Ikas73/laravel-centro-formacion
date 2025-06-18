@@ -75,4 +75,16 @@ class Curso extends Model
                     ->withPivot('fecha_inscripcion', 'nota', 'estado') // Mismas opciones que antes
                     ->withTimestamps(); // Mismas opciones que antes
     }
+
+    /**
+    * Obtiene las franjas horarias asociadas a este curso.
+    * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    * @throws \Illuminate\Database\Eloquent\Relations\RelationNotFoundException
+    * Esta relación es 1-a-1, ya que cada curso tiene una única franja horaria.
+    */
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'curso_id');
+    }
+
 }

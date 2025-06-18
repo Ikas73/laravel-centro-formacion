@@ -63,11 +63,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        {{-- Necesitarás crear la ruta admin.schedule.index --}}
-                        <a class="nav-link {{ request()->routeIs('admin.schedule.*') ? 'active' : '' }}" href="#">
-                            <i class="bi bi-calendar3-week-fill"></i>Schedule
+                        <a class="nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}"
+                        href="{{ route('admin.schedules.index') }}">
+                            <i class="bi bi-calendar3-week-fill"></i> Schedule
                         </a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('admin.reportes.*') ? 'active' : '' }}" href="{{ route('admin.reportes.index') }}">
                             <i class="bi bi-file-earmark-bar-graph-fill"></i>Reports

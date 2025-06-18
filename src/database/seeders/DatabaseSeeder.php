@@ -38,5 +38,26 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->command->info("¡Seeding completado!");
+        
+        // Semillas adicionales para horarios y franjas horarias
+        $this->call([
+            TimeSlotSeeder::class,
+            ScheduleSeeder::class,
+        ]);
+
+        
+        $this->call([
+            TimeSlotSeeder::class,
+            ScheduleSeeder::class,
+    
+            // UserSeeder::class,
+            // ProfesorSeeder::class,
+            // AlumnoSeeder::class,
+            // CursoSeeder::class,
+            // AlumnoCursoSeeder::class, //  ← falla por FK
+            // …
+        ]);
+        
+        
     }
 }
