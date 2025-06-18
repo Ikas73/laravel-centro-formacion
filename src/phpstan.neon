@@ -1,0 +1,42 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+    level: 5 # Recommended starting level for Larastan
+    ignoreErrors:
+        # Example: Ignoring a specific error message in a specific file
+        # - '#PHPDoc tag @var for variable \$user is missing type#'
+    excludePaths:
+        # Example: Excluding a specific directory from analysis
+        # - vendor
+        # - storage
+        # - database/migrations/* # Excluding all migrations for now
+        # - config/*
+        # - routes/*
+        # - resources/*
+        # - public/*
+        # - tests/*
+        # - bootstrap/*
+        # - node_modules/*
+        # - ./* # Exclude files in the root of the src directory
+    scanFiles:
+        - vendor/laravel/framework/src/Illuminate/Foundation/helpers.php # For global helpers like `app()`
+        - vendor/laravel/framework/src/Illuminate/Support/helpers.php # For global helpers like `collect()`
+        # Add other files with global functions if needed
+    databaseMigrationsPath: # Corrected to singular and ensured it's a list
+        - database/migrations
+    # Optional: If you use model factories, specify their path
+    # modelFactoriesPaths: # This should be plural
+    #    - database/factories
+
+# You can add more specific configurations based on your project's needs.
+# For example, to enable stricter analysis for specific directories:
+#    -
+#        path: app/Services
+#        level: 8
+#
+# Refer to the Larastan documentation for more configuration options:
+# https://larastan.com/docs/configuration
+# https://phpstan.org/config-reference
