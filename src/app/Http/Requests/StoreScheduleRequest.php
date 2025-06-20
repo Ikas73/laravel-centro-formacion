@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\NoScheduleOverlap;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreScheduleRequest extends FormRequest
@@ -20,8 +21,8 @@ class StoreScheduleRequest extends FormRequest
 
             // Nuevas reglas para los campos del formulario
             'weekday'      => ['required', 'integer', 'between:0,6'],
-            'start_time'   => ['required', 'date_format:H:i'],
-            // 'after' se asegura de que la hora de fin sea posterior a la de inicio
+            // Aplicamos la regla a uno de los campos de tiempo
+            'start_time'   => ['required', 'date_format:H:i', new NoScheduleOverlap()],
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
             'room'         => ['required', 'string', 'max:50'],
         ];
