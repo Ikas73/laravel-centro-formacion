@@ -15,9 +15,8 @@ class ScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = Schedule::with(['curso', 'profesor', 'timeSlot'])
-                     ->paginate(15);
-        return view('admin.schedules.index', compact('schedules'));
+        
+        return view('admin.schedules.index');
     }
 
     public function create()

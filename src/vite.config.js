@@ -8,7 +8,10 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/login.css',  // Añade tu nuevo CSS
                 'resources/js/app.js',
-                'resources/js/particles-config.js'  // Añade tu nuevo JS
+                'resources/js/particles-config.js',  // Añade tu nuevo JS
+                'resources/js/schedules.js',
+                
+                'node_modules/@fullcalendar/core/main.css', // Le decimos a Vite: "Trata este archivo CSS como un asset principal
             ],
             refresh: true,
         }),
@@ -19,7 +22,10 @@ export default defineConfig({
         port: 5173,      // Puerto estándar de Vite
         hmr: {
             host: 'localhost', // El host que usará el navegador para conectar a HMR
-        }
+        },
+        watch: {
+            usePolling: true, // ¡ESTA ES LA LÍNEA MÁGICA!
+        },
     }
     // --- Fin de la sección ---
 });
