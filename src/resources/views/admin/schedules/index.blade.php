@@ -82,3 +82,19 @@
         {{ $schedules->links() }}
     </div>
 @endsection
+
+
+{{-- Columna 6: Acciones (CORREGIDO) --}}
+                        <td class="px-4 py-2 text-right space-x-2">
+                            <a href="{{ route('admin.schedules.edit', $schedule) }}"
+                               class="text-blue-600 hover:underline">Editar</a>
+                            <form action="{{ route('admin.schedules.destroy', $schedule) }}"
+                                  method="POST" class="inline">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        onclick="return confirm('¿Eliminar este horario?')"
+                                        class="text-red-600 hover:underline">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>

@@ -8,6 +8,8 @@ use App\Models\Profesor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB; // Si planeas usar DB::raw
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\StoreCursoRequest; // <-- IMPORTAR
+use App\Http\Requests\UpdateCursoRequest; // <-- IMPORTAR
 
 class CursoController extends Controller
 {
@@ -75,32 +77,16 @@ public function create()
     ));
 }
     // public function store(Request $request) { /* ... */ }
-    public function store(Request $request)
+    public function store(StoreCursoRequest $request)
         {
-            // 1. Validación de Datos
-            // Ajusta las reglas según tus necesidades (ej: si código es único, etc.)
-            $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
-                'codigo' => 'nullable|string|max:20|unique:cursos,codigo',
-                'descripcion' => 'nullable|string',
-                'modalidad' => 'required|string|in:Online,Presencial,Semipresencial (Blended)', // Si son opciones fijas
-                'nivel' => 'nullable|string|max:50',
-                'requisitos' => 'nullable|string',
-                'fecha_inicio' => 'nullable|date|after_or_equal:today',
-                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio', // Asegura que fin no sea antes que inicio
-                'horas_totales' => 'nullable|integer|min:1',
-                'horario' => 'nullable|string|max:100',
-                'centros' => 'nullable|string|max:255',
-                'profesor_id' => 'required|exists:profesores,id', // Asegura que el profesor_id existe en la tabla profesores
-                'plazas_maximas' => 'required|integer|min:1|max:500', // Ejemplo max
-            ]);
+            // ¡YA NO NECESITAS $request->validate()!
+        // Laravel lo hace automáticamente antes de ejecutar este código.
+        
+        // Simplemente crea el curso usando los datos ya validados.
+        Curso::create($request->validated());
 
-            // 2. Creación del Curso
-            Curso::create($validatedData);
-
-            // 3. Redirección con Mensaje de Éxito
-            return redirect()->route('admin.cursos.index')
-                             ->with('success', '¡Curso añadido correctamente!');
+        return redirect()->route('admin.cursos.index')
+                         ->with('success', 'Curso creado con éxito.');
         }
 
     // public function show(Curso $curso) { /* ... */ }
@@ -140,33 +126,15 @@ public function create()
     }
 
 
-    // public function update(Request $request, Curso $curso) { /* ... */ }
-    public function update(Request $request, Curso $curso) // Route Model Binding
-        {
-            // 1. Validación de Datos (ajusta reglas 'unique' si es necesario)
-            $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
-                'codigo' => 'nullable|string|max:20|unique:cursos,codigo,' . $curso->id, // Ignora el código del curso actual
-                'descripcion' => 'nullable|string',
-                'modalidad' => 'required|string|in:Online,Presencial,Semipresencial (Blended)',
-                'nivel' => 'nullable|string|max:50',
-                'requisitos' => 'nullable|string',
-                'fecha_inicio' => 'nullable|date', // Podrías añadir 'after_or_equal:today' si no se pueden editar a fechas pasadas
-                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-                'horas_totales' => 'nullable|integer|min:1',
-                'horario' => 'nullable|string|max:100',
-                'centros' => 'nullable|string|max:255',
-                'profesor_id' => 'required|exists:profesores,id',
-                'plazas_maximas' => 'required|integer|min:1|max:500',
-            ]);
+    public function update(UpdateCursoRequest $request, Curso $curso) // <-- CAMBIAR AQUÍ
+    {
+        // ¡TAMPOCO NECESITAS $request->validate() AQUÍ!
+        
+        $curso->update($request->validated());
 
-            // 2. Actualización del Curso
-            $curso->update($validatedData);
-
-            // 3. Redirección con Mensaje de Éxito
-            return redirect()->route('admin.cursos.show', $curso->id) // Redirige a la vista de detalles
-                             ->with('success', '¡Curso actualizado correctamente!');
-        }
+        return redirect()->route('admin.cursos.index')
+                         ->with('success', 'Curso actualizado con éxito.');
+    }
 
     
         // public function destroy(Curso $curso) { /* ... */ }

@@ -33,17 +33,20 @@ class Curso extends Model
         'centros',
         'profesor_id', // Incluir la clave foránea si se asigna masivamente
         'plazas_maximas',
+        
     ];
 
      /**
      * Los atributos que deben ser convertidos a tipos nativos.
      * Esto es útil para que las fechas se traten como objetos Carbon.
+     * @var array<string, string>
      */
     protected $casts = [
         'fecha_inicio' => 'date',
         'fecha_fin' => 'date',
         'plazas_maximas' => 'integer',
         'horas_totales' => 'integer',
+        
     ];
 
     /**

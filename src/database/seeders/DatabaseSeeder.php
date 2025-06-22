@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,52 +11,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Limpiar tablas antes (opcional, útil para desarrollo)
-        // DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // Desactivar claves foráneas (MySQL) - PostgreSQL tiene TRUNCATE ... CASCADE
-        // AlumnoCurso::truncate();
-        // Curso::truncate();
-        // Alumno::truncate();
-        // Profesor::truncate();
-        // PreinscritoSepe::truncate();
-        // DB::statement('SET FOREIGN_KEY_CHECKS=1;'); // Reactivar claves foráneas (MySQL)
-
         $this->command->info("Iniciando el proceso de Seeding...");
 
+        // Llamamos a todos los seeders en un único array, en el orden correcto de dependencias.
         $this->call([
-            // 1. Entidades base sin dependencias externas (o solo User si aplica)
+            // 1. Entidades base que no dependen de otras (excepto User).
             UserSeeder::class,
-            ProfesorSeeder::class,       // Debe ir antes de CursoSeeder
-            AlumnoSeeder::class,         // Debe ir antes de AlumnoCursoSeeder
-            PreinscritoSepeSeeder::class,// Independiente en este punto
+            ProfesorSeeder::class,
+            AlumnoSeeder::class,
+            PreinscritoSepeSeeder::class,
 
-            // 2. Entidades que dependen de las anteriores
-            CursoSeeder::class,          // Depende de ProfesorSeeder
+            // 2. Entidades que dependen de las anteriores.
+            CursoSeeder::class,          // Depende de Profesores.
 
-            // 3. Entidades de relación (pivote)
-            AlumnoCursoSeeder::class,    // Depende de AlumnoSeeder y CursoSeeder
-        ]);
+            // 3. Tablas pivote o de relación.
+            AlumnoCursoSeeder::class,    // Depende de Alumnos y Cursos.
 
-        $this->command->info("¡Seeding completado!");
-        
-        // Semillas adicionales para horarios y franjas horarias
-        $this->call([
-            TimeSlotSeeder::class,
+            // 4. Seeder de Horarios.
+            //    Este seeder ya crea los TimeSlots que necesita, por lo que no es
+            //    necesario llamar a TimeSlotSeeder por separado.
             ScheduleSeeder::class,
         ]);
 
-        
-        $this->call([
-            TimeSlotSeeder::class,
-            ScheduleSeeder::class,
-    
-            // UserSeeder::class,
-            // ProfesorSeeder::class,
-            // AlumnoSeeder::class,
-            // CursoSeeder::class,
-            // AlumnoCursoSeeder::class, //  ← falla por FK
-            // …
-        ]);
-        
-        
+        $this->command->info("¡Seeding completado con éxito!");
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Rules\NoScheduleOverlap;
+use App\Rules\SufficientCourseDuration;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreScheduleRequest extends FormRequest
@@ -15,13 +16,10 @@ class StoreScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Estas reglas se mantienen
-            'curso_id'     => ['required', 'exists:cursos,id'],
+            /// Aplicamos la nueva regla al curso_id
+            'curso_id'     => ['required', 'exists:cursos,id', new SufficientCourseDuration()],
             'profesor_id'  => ['required', 'exists:profesores,id'],
-
-            // Nuevas reglas para los campos del formulario
             'weekday'      => ['required', 'integer', 'between:0,6'],
-            // Aplicamos la regla a uno de los campos de tiempo
             'start_time'   => ['required', 'date_format:H:i', new NoScheduleOverlap()],
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
             'room'         => ['required', 'string', 'max:50'],
