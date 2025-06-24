@@ -10,7 +10,14 @@ class Schedule extends Model
     use HasFactory;
 
     protected $table = 'schedules';
-    protected $fillable = ['curso_id', 'profesor_id', 'time_slot_id'];
+    protected $fillable = [
+        'curso_id',
+        'dia_semana',
+        'hora_inicio',
+        'hora_fin',
+        'aula',
+        'profesor_id',
+    ];
 
     /* — Relaciones inversas — */
     public function curso()

@@ -4,96 +4,71 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreScheduleRequest;
-use App\Http\Requests\UpdateScheduleRequest; // Lo usaremos pronto
+use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\Schedule;
 use App\Models\Curso;
 use App\Models\Profesor;
 use App\Models\TimeSlot;
-// Eliminamos 'Request' si no se usa directamente.
+use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
+    /**
+     * Muestra la vista principal del calendario.
+     */
     public function index()
     {
-        
         return view('admin.schedules.index');
     }
 
-    public function create()
+    /**
+     * Obtiene y formatea los eventos para FullCalendar,
+     * alineado con la migración real.
+     */
+    public function fetchEvents()
     {
-        // Ya no pasamos los '$slots'. El usuario los creará dinámicamente.
-        return view('admin.schedules.create', [
-            'cursos'     => Curso::pluck('nombre', 'id'),
-            'profesores' => Profesor::pluck('nombre', 'id'),
-        ]);
+        // 1. Cargamos los horarios y su relación con el curso y el profesor del curso.
+        $schedules = Schedule::with(['curso.profesor'])->get();
+
+        $events = $schedules->map(function ($schedule) {
+            
+            // 2. Comprobación robusta: ignoramos horarios sin curso o si al curso le faltan fechas.
+            if (!$schedule->curso || !$schedule->curso->fecha_inicio || !$schedule->curso->fecha_fin) {
+                return null;
+            }
+
+            // 3. Construimos el evento usando los datos directamente de $schedule y $schedule->curso
+            return [
+                'id'          => $schedule->id,
+                'title'       => $schedule->curso->nombre,
+                'daysOfWeek'  => [$schedule->dia_semana],      // Leído directamente de la tabla 'schedules'
+                'startTime'   => $schedule->hora_inicio,     // Leído directamente de la tabla 'schedules'
+                'endTime'     => $schedule->hora_fin,        // Leído directamente de la tabla 'schedules'
+                'startRecur'  => $schedule->curso->fecha_inicio->format('Y-m-d'),
+                'endRecur'    => $schedule->curso->fecha_fin->addDay()->format('Y-m-d'),
+                'backgroundColor' => $this->stringToColor($schedule->curso->nombre),
+                'borderColor'     => $this->stringToColor($schedule->curso->nombre, -20),
+                'extendedProps' => [
+                    'profesor' => $schedule->curso->profesor ? $schedule->curso->profesor->nombre . ' ' . $schedule->curso->profesor->apellido1 : 'No asignado',
+                    'aula'     => $schedule->aula, // Leído directamente de la tabla 'schedules'
+                ]
+            ];
+        })->filter();
+
+        return response()->json($events);
     }
 
-    public function store(StoreScheduleRequest $request)
+    /**
+     * Helper para generar un color consistente a partir de un string.
+     */
+    private function stringToColor($str, $lightnessAdjustment = 0)
     {
-        // 1. Validar los datos de entrada (ya lo hace StoreScheduleRequest)
-        $validated = $request->validated();
-
-        // 2. Encontrar o crear la franja horaria (TimeSlot)
-        $timeSlot = TimeSlot::firstOrCreate(
-            [
-                'weekday'    => $validated['weekday'],
-                'start_time' => $validated['start_time'],
-                'end_time'   => $validated['end_time'],
-                'room'       => $validated['room'],
-            ]
-        );
-
-        // 3. Crear el Horario (Schedule) usando el ID de la franja horaria
-        Schedule::create([
-            'curso_id'     => $validated['curso_id'],
-            'profesor_id'  => $validated['profesor_id'],
-            'time_slot_id' => $timeSlot->id,
-        ]);
-
-        return to_route('admin.schedules.index')
-               ->with('success', 'Horario creado correctamente.');
-    }
-
-    public function edit(Schedule $schedule)
-    {
-        // Eager-load la relación timeSlot para tener los datos disponibles en la vista
-        $schedule->load('timeSlot');
-
-        return view('admin.schedules.edit', [
-            'schedule'   => $schedule,
-            'cursos'     => Curso::pluck('nombre', 'id'),
-            'profesores' => Profesor::pluck('nombre', 'id'),
-        ]);
-    }
-
-    public function update(UpdateScheduleRequest $request, Schedule $schedule)
-    {
-        $validated = $request->validated();
-
-        // Misma lógica que en 'store': encuentra o crea la franja horaria.
-        $timeSlot = TimeSlot::firstOrCreate(
-            [
-                'weekday'    => $validated['weekday'],
-                'start_time' => $validated['start_time'],
-                'end_time'   => $validated['end_time'],
-                'room'       => $validated['room'],
-            ]
-        );
-
-        // Actualiza el horario existente para que apunte al nuevo (o existente) time_slot_id
-        $schedule->update([
-            'curso_id'     => $validated['curso_id'],
-            'profesor_id'  => $validated['profesor_id'],
-            'time_slot_id' => $timeSlot->id,
-        ]);
-
-        return to_route('admin.schedules.index')
-               ->with('success', 'Horario actualizado correctamente.');
-    }
-
-    public function destroy(Schedule $schedule)
-    {
-        $schedule->delete();
-        return back()->with('success', 'Horario eliminado.');
+        $hash = 0;
+        for ($i = 0; $i < strlen($str); $i++) {
+            $hash = ord($str[$i]) + (($hash << 5) - $hash);
+        }
+        $hue = $hash % 360;
+        $lightness = 50 + $lightnessAdjustment;
+        return "hsl({$hue}, 80%, {$lightness}%)";
     }
 }

@@ -3,8 +3,17 @@
 @section('title', 'Gestión de Horarios')
 @section('page-title', 'Calendario de Horarios')
 
-{{-- La sección de styles debe estar vacía o no existir --}}
 @push('styles')
+    {{-- Estilos para el contenido extra en los eventos --}}
+    <style>
+        .fc-event-profesor, .fc-event-aula {
+            font-size: 0.8em;
+            margin-top: 2px;
+        }
+        .fc-event-profesor i, .fc-event-aula i {
+            margin-right: 4px;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -13,8 +22,7 @@
     </div>
 @endsection
 
-{{-- La sección de scripts solo debe tener la directiva de Vite --}}
 @push('scripts')
-    {{-- ¡Importante! Ahora cargamos ambos assets compilados por Vite --}}
+    {{-- La única línea necesaria. Vite se encargará de inyectar todo el JS y CSS requerido. --}}
     @vite(['resources/js/schedules.js', 'node_modules/@fullcalendar/core/main.css'])
 @endpush

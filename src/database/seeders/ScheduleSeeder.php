@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\TimeSlot;
-use App\Models\Schedule;
 use App\Models\Curso;
 use App\Models\Profesor;
+use App\Models\Schedule;
 
 class ScheduleSeeder extends Seeder
 {
@@ -15,38 +15,43 @@ class ScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Limpiamos las tablas para evitar duplicados en ejecuciones repetidas
+        $this->command->info('----------------------------------------');
+        $this->command->info('Iniciando Seeder: Creando horarios de prueba...');
+        $this->command->info('----------------------------------------');
+
+        // Limpiamos la tabla para evitar duplicados en ejecuciones repetidas
         Schedule::truncate();
-        TimeSlot::truncate();
 
-        // Obtenemos algunos cursos y profesores para asociar.
-        // Asegúrate de tener al menos 2 cursos y 2 profesores en tu BD
-        $curso1 = Curso::first();
-        $curso2 = Curso::skip(1)->first();
-        $profesor1 = Profesor::first();
-        $profesor2 = Profesor::skip(1)->first();
+        // Obtenemos todos los cursos y profesores para no consultar en cada iteración
+        $cursos = Curso::all();
+        $profesores = Profesor::all();
 
-        if (!$curso1 || !$profesor1) {
-            $this->command->info('No hay suficientes cursos o profesores para ejecutar el ScheduleSeeder. Saltando.');
+        if ($cursos->isEmpty() || $profesores->isEmpty()) {
+            $this->command->error('No se pueden crear horarios porque no hay cursos o profesores. Ejecuta los otros seeders primero.');
             return;
         }
 
-        // Creamos algunas franjas horarias y horarios
-        $slotsData = [
-            ['weekday' => 1, 'start_time' => '09:00', 'end_time' => '11:00', 'room' => 'Aula 101'],
-            ['weekday' => 1, 'start_time' => '11:00', 'end_time' => '13:00', 'room' => 'Aula 102'],
-            ['weekday' => 2, 'start_time' => '16:00', 'end_time' => '18:00', 'room' => 'Aula 101'],
-            ['weekday' => 3, 'start_time' => '10:00', 'end_time' => '12:00', 'room' => 'Laboratorio B'],
-            ['weekday' => 4, 'start_time' => '18:00', 'end_time' => '20:00', 'room' => 'Aula 205'],
-        ];
+        $dias = [1, 2, 3, 4, 5]; // Lunes a Viernes
+        $horasInicio = ['09:00:00', '10:00:00', '11:00:00', '12:00:00', '16:00:00', '17:00:00'];
+        $aulas = ['Aula 101', 'Aula 102', 'Laboratorio A', 'Sala de Juntas', 'Aula Virtual 1'];
 
-        foreach ($slotsData as $index => $slot) {
-            $timeSlot = TimeSlot::create($slot);
+        for ($i = 0; $i < 20; $i++) {
+            $cursoAleatorio = $cursos->random();
+            $horaInicioAleatoria = $horasInicio[array_rand($horasInicio)];
+            
             Schedule::create([
-                'curso_id' => ($index % 2 == 0) ? $curso1->id : $curso2->id,
-                'profesor_id' => ($index % 2 == 0) ? $profesor1->id : $profesor2->id,
-                'time_slot_id' => $timeSlot->id,
+                'curso_id' => $cursoAleatorio->id,
+                'profesor_id' => $profesores->random()->id,
+                'dia_semana' => $dias[array_rand($dias)],
+                'hora_inicio' => $horaInicioAleatoria,
+                'hora_fin' => date('H:i:s', strtotime($horaInicioAleatoria . ' +2 hours')), // Duración de 2 horas
+                'aula' => $aulas[array_rand($aulas)],
             ]);
         }
+        
+        $this->command->info('¡20 franjas horarias creadas con éxito!');
+        $this->command->info('----------------------------------------');
+        $this->command->info('Seeder de Horarios finalizado.');
+        $this->command->info('----------------------------------------');
     }
 }

@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
+// die('SI VES ESTE MENSAJE, EL VOLUMEN DE DOCKER FUNCIONA.');
+
+
 define('LARAVEL_START', microtime(true));
 
 // Determine if the application is in maintenance mode...

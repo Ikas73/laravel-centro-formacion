@@ -1,3 +1,4 @@
+//import '@fullcalendar/core/main.css';
 import '../css/admin.css'; // Ajusta la ruta si es diferente
 import '../css/app.css';
 import { initParticles } from './particles-config'; 

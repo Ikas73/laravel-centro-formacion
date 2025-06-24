@@ -13,29 +13,27 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-        
-            // Curso
+            
+            // Relación con el curso
             $table->foreignId('curso_id')
-                  ->constrained('cursos')   // ← tabla real
-                  ->cascadeOnDelete();
-        
-            // Profesor
+                  ->constrained('cursos')
+                  ->onDelete('cascade');
+            
+            // Columnas para los detalles del horario
+            $table->tinyInteger('dia_semana'); // 1=Lunes, 2=Martes...
+            $table->time('hora_inicio');
+            $table->time('hora_fin');
+            $table->string('aula')->nullable();
+            
+            // Relación opcional con un profesor específico para esta franja
             $table->foreignId('profesor_id')
+                  ->nullable()
                   ->constrained('profesores')
-                  ->cascadeOnDelete();
-        
-            // Franja horaria
-            $table->foreignId('time_slot_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
-        
-            // Ninguna franja se puede duplicar
-            $table->unique('time_slot_id');
-        
+                  ->onDelete('set null');
+            
+            // Timestamps (created_at y updated_at)
             $table->timestamps();
         });
-        
-        
     }
 
     /**
