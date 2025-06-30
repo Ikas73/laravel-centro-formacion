@@ -1,23 +1,70 @@
-/.phpunit.cache
+# Dependency directories
 /node_modules
+/vendor
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Laravel specific
+/.phpunit.cache
 /public/build
 /public/hot
 /public/storage
 /storage/*.key
+/storage/app/public
 /storage/pail
-/vendor
-.env
-.env.backup
-.env.production
-.phpactor.json
+/bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+
+# Testing
 .phpunit.result.cache
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
-/auth.json
+Coverage/
+
+# IDE files
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
+.phpactor.json
+
+# Package manager
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+logs/
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Auth
+/auth.json
+
+# Homestead
+Homestead.json
+Homestead.yaml
