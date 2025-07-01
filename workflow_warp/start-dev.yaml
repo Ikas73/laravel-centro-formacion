@@ -1,9 +1,0 @@
-name: Paso 2 - Iniciar Laravel Dev (Docker) - Limpio
-command: bash workflow_warp/start-dev.sh
-description: Llama a un script que inicia el entorno Laravel con Docker (Servidor + Vite)
-tags:
-  - laravel
-  - docker
-  - dev-server
-  - limpio
-  - script

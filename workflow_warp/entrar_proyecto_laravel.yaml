@@ -1,7 +1,0 @@
-name: Paso 1 - Ir al Proyecto Laravel
-command: cd /home/user1234/proyectos/proyecto-laravel
-description: Navega directamente a la carpeta del proyecto Laravel en WSL.
-tags:
-  - wsl
-  - navegacion
-  - laravel

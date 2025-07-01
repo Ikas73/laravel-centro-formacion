@@ -68,3 +68,16 @@ docker-compose.override.yml
 # Homestead
 Homestead.json
 Homestead.yaml
+
+# Warp
+.Warp
+/scripts
+/.warp
+
+# Imagenes
+/public/images/
+
+# docs
+/personal_docs/*.md
+GEMINI.md
+
