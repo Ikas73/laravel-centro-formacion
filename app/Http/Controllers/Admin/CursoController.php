@@ -96,7 +96,7 @@ public function create()
     public function show(Curso $curso) // Route Model Binding
     {
         // Cargar las relaciones necesarias para mostrar en la vista de detalles
-        $curso->load(['profesor', 'alumnos']);
+        $curso->load(['profesor', 'alumnos', 'schedules']);
         // 'profesor': para mostrar quién imparte el curso.
         // 'alumnos': para listar los alumnos inscritos (usando la relación belongsToMany).
 

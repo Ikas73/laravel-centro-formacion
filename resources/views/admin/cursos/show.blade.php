@@ -64,10 +64,47 @@
                 <dt class="font-medium text-gray-500">Horas Totales</dt>
                 <dd class="mt-1 text-gray-900">{{ $curso->horas_totales ?? 'N/A' }}</dd>
             </div>
-            <div class="bg-gray-50 p-3 rounded-lg">
-                <dt class="font-medium text-gray-500">Horario</dt>
-                <dd class="mt-1 text-gray-900">{{ $curso->horario ?? 'No especificado' }}</dd>
-            </div>
+            {{-- La sección de horario ahora es una lista más grande y detallada --}}
+<div class="bg-gray-50 p-4 rounded-lg md:col-span-2 lg:col-span-3">
+    <dt class="font-medium text-gray-500 mb-2">Horarios Programados</dt>
+    <dd class="mt-1 text-gray-900">
+        {{-- Comprobamos si el curso tiene horarios en la tabla `schedules` --}}
+        @if($curso->schedules->isNotEmpty())
+            <ul class="space-y-2">
+                @php
+                    // Array para traducir el número del día a texto
+                    $diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                @endphp
+                {{-- Recorremos cada franja horaria encontrada --}}
+                @foreach($curso->schedules as $horario)
+                    <li class="flex items-center justify-between p-2 bg-white rounded-md border border-gray-200">
+                        <div>
+                            <span class="font-semibold">{{ $diasSemana[$horario->dia_semana] }}</span>
+                            de
+                            <span class="font-mono text-sm bg-gray-100 px-1 rounded">{{ \Carbon\Carbon::parse($horario->hora_inicio)->format('H:i') }}</span>
+                            a
+                            <span class="font-mono text-sm bg-gray-100 px-1 rounded">{{ \Carbon\Carbon::parse($horario->hora_fin)->format('H:i') }}</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <i class="bi bi-geo-alt-fill text-gray-400"></i> {{ $horario->aula }}
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        @else
+            {{-- Mensaje si no se encuentran horarios --}}
+            <p class="text-gray-500 text-sm">No hay franjas horarias definidas para este curso.</p>
+        @endif
+
+        {{-- Enlace para añadir un nuevo horario (funcionalidad futura) --}}
+        <div class="mt-4">
+            <a href="{{-- route('admin.schedules.create', ['curso_id' => $curso->id]) --}}"
+               class="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline">
+                <i class="bi bi-plus-circle-fill"></i> Gestionar horarios de este curso
+            </a>
+        </div>
+    </dd>
+</div>
             <div class="bg-gray-50 p-3 rounded-lg">
                 <dt class="font-medium text-gray-500">Centro(s)</dt>
                 <dd class="mt-1 text-gray-900">{{ $curso->centros ?? 'No especificado' }}</dd>
