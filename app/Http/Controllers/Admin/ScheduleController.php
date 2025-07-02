@@ -26,44 +26,60 @@ class ScheduleController extends Controller
      * alineado con la migración real.
      */
     public function fetchEvents()
-    {
-        $schedules = Schedule::with(['curso.profesor'])->get();
+{
+    // Carga los horarios junto con la información del curso y del profesor
+    $schedules = Schedule::with(['curso', 'profesor'])->get();
 
-        $events = $schedules->map(function ($schedule) {
-            if (!$schedule->curso || !$schedule->curso->fecha_inicio || !$schedule->curso->fecha_fin) {
-                return null;
-            }
+    $events = $schedules->map(function ($schedule) {
+        // --- Comprobación de seguridad ---
+        // Si un horario no tiene curso o el curso no tiene fechas, no lo podemos dibujar.
+        if (!$schedule->curso || !$schedule->curso->fecha_inicio || !$schedule->curso->fecha_fin) {
+            return null; // Omitir este evento
+        }
 
-            // rrule.js espera un entero para 'byday' (0=Lunes, 6=Domingo).
-            // Mapeamos nuestro valor de la BD (0=Domingo, 1=Lunes) al formato de rrule.js.
-            $dbToRruleDay = [0 => 6, 1 => 0, 2 => 1, 3 => 2, 4 => 3, 5 => 4, 6 => 5];
-            $byday = $dbToRruleDay[$schedule->dia_semana] ?? 0; // Por defecto Lunes si hay error.
+        // --- Mapeo del día de la semana ---
+        // Tu BD: 1=Lunes, 2=Martes ... 0=Domingo
+        // RRULE: MO, TU, WE, TH, FR, SA, SU
+        $diasRrule = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+        $diaDeLaSemana = $diasRrule[$schedule->dia_semana];
 
-            $dtstart = $schedule->curso->fecha_inicio->format('Y-m-d') . 'T' . $schedule->hora_inicio;
-            $until = $schedule->curso->fecha_fin->format('Y-m-d');
+        // --- Formateo de fechas y horas ---
+        $dtstart = $schedule->curso->fecha_inicio->format('Y-m-d') . 'T' . $schedule->hora_inicio;
+        $until = $schedule->curso->fecha_fin->format('Y-m-d');
+        
+        // La duración se calcula para que FullCalendar sepa cuánto dura cada evento recurrente
+        $duracion = Carbon::parse($schedule->hora_inicio)
+                          ->diff(Carbon::parse($schedule->hora_fin))
+                          ->format('%H:%I:%S');
 
-            return [
-                'id'      => $schedule->id,
-                'title'   => $schedule->curso->nombre,
-                'rrule'   => [
-                    'dtstart' => $dtstart,
-                    'until'   => $until,
-                    'freq'    => 'WEEKLY',
-                    'byweekday'   => [$byday],
-                ],
-                'duration' => Carbon::parse($schedule->hora_inicio)->diff(Carbon::parse($schedule->hora_fin))->format('%H:%I:%S'),
-                'backgroundColor' => $this->stringToColor($schedule->curso->nombre),
-                'borderColor'     => $this->stringToColor($schedule->curso->nombre, -20),
-                'extendedProps' => [
-                    'profesor' => $schedule->curso->profesor ? $schedule->curso->profesor->nombre . ' ' . $schedule->curso->profesor->apellido1 : 'No asignado',
-                    'aula'     => $schedule->aula,
-                ]
-            ];
-        })->filter();
+        return [
+            'id'        => $schedule->id,
+            'title'     => $schedule->curso->nombre, // Título del evento
+            'duration'  => $duracion,               // Duración de cada ocurrencia
+            
+            // --- La Magia de la Recurrencia ---
+            'rrule'     => [
+                'freq'    => 'weekly',        // Frecuencia: semanal
+                'byweekday' => [$diaDeLaSemana],  // El día de la semana específico
+                'dtstart' => $dtstart,          // Cuándo empieza la primera ocurrencia
+                'until'   => $until,            // Cuándo termina la serie de repeticiones
+            ],
 
-        return response()->json($events);
-    }
+            // --- Información Extra para mostrar en el evento ---
+            'extendedProps' => [
+                'profesor' => optional($schedule->profesor)->nombre . ' ' . optional($schedule->profesor)->apellido1,
+                'aula'     => $schedule->aula,
+                'curso_id' => $schedule->curso->id
+            ],
 
+            // --- Colores (opcional pero muy útil) ---
+            'backgroundColor' => $this->stringToColor($schedule->curso->nombre),
+            'borderColor'     => $this->stringToColor($schedule->curso->nombre, -20),
+        ];
+    })->filter(); // Elimina los eventos nulos que omitimos
+
+    return response()->json($events);
+}
     /**
      * Helper para generar un color consistente a partir de un string.
      */

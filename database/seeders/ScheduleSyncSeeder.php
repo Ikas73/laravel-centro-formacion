@@ -2,17 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Curso;
 use App\Models\Schedule;
 
-class ScheduleSeeder extends Seeder
+class ScheduleSyncSeeder extends Seeder
 {
     public function run(): void
     {
         $this->command->info('========================================');
-        $this->command->info('🔄 NUEVO: Sincronizando horarios reales de cursos...');
+        $this->command->info('Sincronizando horarios reales de cursos...');
         $this->command->info('========================================');
 
         // Limpiar la tabla schedules
