@@ -36,12 +36,15 @@ Incluye:
 
 - **Laravel 12** (PHP 8.3)
 - **Docker** y **Docker Compose**
-- **PostgreSQL 14**
+- **PostgreSQL 14** (puerto 49000)
 - **Node.js & npm** (para assets frontend)
 - **Composer** (gestión de dependencias PHP)
 - **Vite** (build frontend)
 - **TailwindCSS** y **Bootstrap Icons**
-- Servicios adicionales fácilmente integrables: **Redis**, **pgAdmin**, etc.
+- **Redis** (extensión PHP instalada, servicio no incluido por defecto)
+- Servicios adicionales fácilmente integrables: **pgAdmin**, etc.
+- **Testing:** PHPUnit
+- **Scripts útiles:** carpeta `scripts/` para automatizaciones
 
 ---
 
@@ -51,21 +54,31 @@ Incluye:
 proyecto-laravel/
 ├── docker-compose.yml
 ├── Dockerfile
-├── src/
-│   ├── app/
-│   ├── public/
-│   ├── routes/
-│   ├── database/
-│   ├── .env.example
-│   ├── composer.json
-│   ├── package.json
-│   └── ...
+├── app/
+├── public/
+├── routes/
+├── database/
+├── resources/
+├── storage/
+├── scripts/
+├── config/
+├── .env.example
+├── composer.json
+├── package.json
+├── tailwind.config.js
+├── vite.config.js
 └── ...
 ```
 
 - **Dockerfile**: Imagen personalizada para Laravel (PHP-FPM, Node.js, Composer, Redis).
 - **docker-compose.yml**: Orquestación de servicios (app, db).
-- **src/**: Código fuente de la aplicación Laravel.
+- **app/**: Lógica de la aplicación Laravel (modelos, controladores, etc.).
+- **routes/**: Definición de rutas web y API.
+- **database/**: Migraciones, seeders y factories.
+- **resources/**: Vistas Blade, CSS y JS.
+- **storage/**: Archivos generados y logs.
+- **scripts/**: Scripts útiles para desarrollo y despliegue.
+- **config/**: Archivos de configuración de Laravel.
 
 ---
 
@@ -73,7 +86,7 @@ proyecto-laravel/
 
 - **Gestión de Alumnos:** Alta, listado, filtrado, búsqueda y paginación. Soporte para campos como nombre, apellidos, DNI, email, nivel formativo y estado (Activo, Inactivo, Pendiente, Baja).
 - **Gestión de Profesores y Cursos:** Estructura preparada para CRUD completo.
-- **Preinscripciones SEPE:** Migraciones y vistas para gestión de preinscritos.
+- **Preinscripciones:** Migraciones y vistas para gestión de preinscritos.
 - **Panel de Administración:** Dashboard con KPIs, tarjetas resumen, ratio alumno-profesor y tasa de asistencia.
 - **Diseño Responsive:** Layouts personalizados con TailwindCSS y Bootstrap Icons.
 - **Autenticación y Seguridad:** Integración con sistema de usuarios de Laravel.

@@ -18,7 +18,11 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        return view('admin.schedules.index');
+        // Obtenemos los datos necesarios para los selects del formulario del modal
+        $cursos = Curso::orderBy('nombre')->get(['id', 'nombre']);
+        $profesores = Profesor::orderBy('apellido1')->get(['id', 'nombre', 'apellido1']);
+
+        return view('admin.schedules.index', compact('cursos', 'profesores'));
     }
 
     /**
@@ -80,6 +84,23 @@ class ScheduleController extends Controller
 
     return response()->json($events);
 }
+
+    public function store(StoreScheduleRequest $request)
+    {
+        $validated = $request->validated();
+
+        // Lógica correcta: crear directamente el Schedule
+        Schedule::create([
+            'curso_id'     => $validated['curso_id'],
+            'profesor_id'  => $validated['profesor_id'],
+            'dia_semana'   => $validated['weekday'], // Asegúrate que el request usa 'weekday'
+            'hora_inicio'  => $validated['start_time'],
+            'hora_fin'     => $validated['end_time'],
+            'aula'         => $validated['room'],
+        ]);
+
+        return response()->json(['message' => 'Horario creado con éxito.'], 201);
+    }
     /**
      * Helper para generar un color consistente a partir de un string.
      */
