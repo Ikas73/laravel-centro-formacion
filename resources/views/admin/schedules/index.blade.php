@@ -33,6 +33,7 @@
         <form id="scheduleForm" class="mt-6 space-y-4">
             {{-- Campo oculto para el ID del horario (para la edición) --}}
             <input type="hidden" id="schedule_id" name="schedule_id">
+            <input type="hidden" id="form_method" name="_method" value="POST">
 
             {{-- Fila para Curso y Profesor --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

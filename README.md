@@ -1,6 +1,14 @@
 # Centro de Formación – Laravel 12 + Docker
 
-Este proyecto es una base profesional para el desarrollo de aplicaciones web modernas utilizando **Laravel 12** y un entorno de desarrollo completamente orquestado con **Docker**. Incluye servicios para base de datos PostgreSQL y servidor PHP-FPM, y está preparado para integración con herramientas modernas de frontend y servicios adicionales como Redis o pgAdmin si lo necesitas.
+Este proyecto es una aplicación web para la gestión de cursos, alumnos, profesores y horarios en un centro de formación. Está construido con **Laravel 12** y utiliza **Docker** para facilitar la instalación y el desarrollo, sin importar el sistema operativo.
+
+---
+
+## 📚 Documentación Técnica Ampliada
+
+¿Quieres ver la arquitectura, diagramas y detalles técnicos?  
+Consulta la documentación completa aquí:  
+🔗 [Gestión de Cursos y Eventos - DeepWiki](https://deepwiki.com/Ikas73/laravel-centro-formacion/3.1-course-and-event-management)
 
 ---
 
@@ -32,7 +40,17 @@ Incluye:
 
 ---
 
-## Tecnologías y Servicios
+## 🚀 ¿Qué puedes hacer con este proyecto?
+
+- Gestionar alumnos, profesores, cursos y preinscripciones.
+- Visualizar y editar horarios de cursos.
+- Usar un panel de administración con estadísticas y KPIs.
+- Disfrutar de un diseño moderno y responsive.
+- Automatizar tareas con comandos personalizados y scripts.
+
+---
+
+## 🛠️ Tecnologías y Servicios
 
 - **Laravel 12** (PHP 8.3)
 - **Docker** y **Docker Compose**
@@ -48,25 +66,25 @@ Incluye:
 
 ---
 
-## Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
 proyecto-laravel/
 ├── docker-compose.yml
 ├── Dockerfile
-├── app/
-├── public/
-├── routes/
-├── database/
-├── resources/
-├── storage/
-├── scripts/
-├── config/
-├── .env.example
-├── composer.json
-├── package.json
-├── tailwind.config.js
-├── vite.config.js
+├── app/                # Lógica de la aplicación (modelos, controladores, etc.)
+├── public/             # Punto de entrada web
+├── routes/             # Definición de rutas
+├── database/           # Migraciones, seeders y factories
+├── resources/          # Vistas Blade, CSS y JS
+├── storage/            # Archivos generados y logs
+├── scripts/            # Scripts útiles para desarrollo y despliegue
+├── config/             # Configuración de Laravel
+├── .env.example        # Variables de entorno de ejemplo
+├── composer.json       # Dependencias PHP
+├── package.json        # Dependencias JS
+├── tailwind.config.js  # Configuración TailwindCSS
+├── vite.config.js      # Configuración Vite
 └── ...
 ```
 
@@ -87,11 +105,14 @@ proyecto-laravel/
 - **Gestión de Alumnos:** Alta, listado, filtrado, búsqueda y paginación. Soporte para campos como nombre, apellidos, DNI, email, nivel formativo y estado (Activo, Inactivo, Pendiente, Baja).
 - **Gestión de Profesores y Cursos:** Estructura preparada para CRUD completo.
 - **Preinscripciones:** Migraciones y vistas para gestión de preinscritos.
+- **Gestión de Horarios:** Sincronización automática desde el campo `horario` de los cursos y comandos Artisan personalizados.
 - **Panel de Administración:** Dashboard con KPIs, tarjetas resumen, ratio alumno-profesor y tasa de asistencia.
 - **Diseño Responsive:** Layouts personalizados con TailwindCSS y Bootstrap Icons.
 - **Autenticación y Seguridad:** Integración con sistema de usuarios de Laravel.
 - **Frontend Moderno:** Vite, TailwindCSS, Alpine.js y efectos visuales modernos.
 - **Soporte para migraciones y seeders personalizados.**
+- **Testing:** PHPUnit para pruebas automáticas.
+- **Automatización:** Scripts y comandos personalizados para despliegue y sincronización.
 
 ---
 
@@ -103,61 +124,63 @@ proyecto-laravel/
 
 ---
 
-## Instalación y Puesta en Marcha
+## 📝 Instalación y Puesta en Marcha
 
-1. **Clona el repositorio:**
-    ```bash
-    git clone <URL_DEL_REPOSITORIO>
-    cd proyecto-laravel
-    ```
+### 1. Clona el repositorio
 
-2. **Copia el archivo de entorno y configura variables:**
-    ```bash
-    cp src/.env.example src/.env
-    ```
-    Edita `src/.env` según tus necesidades (usuario y contraseña de la base de datos, etc).
+```bash
+git clone <URL_DEL_REPOSITORIO>
+cd proyecto-laravel
+```
 
-3. **Construye y levanta los servicios:**
-    ```bash
-    docker-compose up --build -d
-    ```
+### 2. Copia y configura el archivo de entorno
 
-4. **Instala las dependencias de Laravel:**
-    ```bash
-    docker exec -it centro_app composer install
-    ```
+```bash
+cp .env.example .env
+```
+Edita `.env` si necesitas cambiar usuario/contraseña de la base de datos, etc.
 
-5. **Instala dependencias de frontend:**
-    ```bash
-    docker exec -it centro_app npm install
-    docker exec -it centro_app npm run build
-    ```
+### 3. Construye y levanta los servicios
 
-6. **Genera la clave de la aplicación:**
-    ```bash
-    docker exec -it centro_app php artisan key:generate
-    ```
+```bash
+docker-compose up --build -d
+```
 
-7. **Ejecuta las migraciones de la base de datos:**
-    ```bash
-    docker exec -it centro_app php artisan migrate
-    ```
+### 4. Instala dependencias de Laravel y frontend
+
+```bash
+docker-compose exec app composer install
+docker-compose exec app npm install
+docker-compose exec app npm run build
+```
+
+### 5. Genera la clave de la aplicación
+
+```bash
+docker-compose exec app php artisan key:generate
+```
+
+### 6. Ejecuta las migraciones y seeders
+
+```bash
+docker-compose exec app php artisan migrate --seed
+```
 
 ---
 
-## Comandos Útiles
+## 💡 Comandos Útiles
 
-- **Ver logs de un servicio:**
-    ```bash
-    docker-compose logs <servicio>
-    ```
-- **Detener los servicios:**
-    ```bash
-    docker-compose down
-    ```
-- **Acceder a la aplicación:**
-    - Laravel: [http://localhost:8000](http://localhost:8000)
-    - PostgreSQL: puerto `54321` (ver docker-compose)
+- **Ver logs de un servicio:**  
+  `docker-compose logs <servicio>`
+- **Detener los servicios:**  
+  `docker-compose down`
+- **Acceder a la aplicación:**  
+  - Laravel: [http://localhost:8000](http://localhost:8000)
+  - PostgreSQL: puerto `49000`
+- **Ejecutar comandos Artisan:**  
+  `docker-compose exec app php artisan <comando>`
+- **Ejecutar scripts automáticos:**  
+  `./scripts/git-push.sh`
 
 ---
 
@@ -172,6 +195,13 @@ proyecto-laravel/
     ```
 3. Realiza tus cambios y haz commit.
 4. Envía un pull request.
+
+---
+
+## 🆘 ¿Necesitas ayuda?
+
+- Consulta la documentación técnica en DeepWiki (enlace arriba).
+- Abre un issue en GitHub o contacta con el autor.
 
 ---
 

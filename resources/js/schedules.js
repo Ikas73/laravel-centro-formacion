@@ -64,27 +64,65 @@ document.addEventListener('DOMContentLoaded', function() {
             events: '/admin/schedule/events',
             
             dateClick: function(info) {
-                if(scheduleForm) scheduleForm.reset();
-                if(modalTitle) modalTitle.innerText = 'Añadir Nueva Franja Horaria';
-                if(saveBtn) saveBtn.innerText = 'Guardar Horario';
-                
-                const scheduleIdInput = document.getElementById('schedule_id');
-                if(scheduleIdInput) scheduleIdInput.value = '';
+                // Resetear el formulario al estado de CREACIÓN
+                scheduleForm.reset();
+                scheduleForm.action = '/admin/schedules'; // URL para crear
+                document.getElementById('form_method').value = 'POST';
+                document.getElementById('schedule_id').value = '';
 
+                modalTitle.innerText = 'Añadir Nueva Franja Horaria';
+                saveBtn.innerText = 'Guardar Horario';
+                
                 const date = new Date(info.dateStr);
                 const startTimeInput = document.getElementById('start_time');
                 if(startTimeInput) startTimeInput.value = date.toTimeString().substring(0, 5);
                 
                 const weekdayInput = document.getElementById('weekday');
                 if(weekdayInput) {
-                    const weekday = date.getDay();
-                    weekdayInput.value = (weekday === 0) ? 7 : weekday;
+                    // FullCalendar: 0=Dom, 1=Lun... | BD: 1=Lun, ..., 7=Dom
+                    let weekday = date.getDay(); // 0 para Domingo, 1 para Lunes...
+                    if (weekday === 0) weekday = 7; // Ajustar Domingo a 7
+                    weekdayInput.value = weekday;
                 }
 
                 if(scheduleModal) {
                     scheduleModal.classList.remove('hidden');
-                    scheduleModal.classList.remove('-translate-y-10');
                 }
+            },
+
+            eventClick: function(info) {
+                // 1. Resetear y preparar el formulario para edición
+                scheduleForm.reset();
+                modalTitle.innerText = 'Editar Horario';
+                saveBtn.innerText = 'Actualizar';
+                document.getElementById('form_method').value = 'PATCH';
+                document.getElementById('schedule_id').value = info.event.id;
+
+                // 2. Construir la URL para obtener datos y para actualizar
+                const url = `/admin/schedules/${info.event.id}`;
+                scheduleForm.action = url;
+
+                // 3. Hacer fetch para obtener los datos del horario
+                fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 4. Poblar el formulario con los datos recibidos
+                    document.getElementById('curso_id').value = data.curso_id;
+                    document.getElementById('profesor_id').value = data.profesor_id;
+                    document.getElementById('start_time').value = data.hora_inicio;
+                    document.getElementById('end_time').value = data.hora_fin;
+                    document.getElementById('room').value = data.aula;
+                    document.getElementById('weekday').value = data.dia_semana;
+
+                    // 5. Mostrar el modal
+                    scheduleModal.classList.remove('hidden');
+                })
+                .catch(error => console.error('Error fetching schedule:', error));
             },
 
             eventDidMount: function(info) {
@@ -114,9 +152,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const method = document.getElementById('form_method').value;
 
-            fetch('/admin/schedules', {
-                method: 'POST',
+            // La URL se toma dinámicamente del action del formulario
+            fetch(this.action, {
+                method: 'POST', // Siempre usamos POST
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
@@ -129,11 +169,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!ok) {
                     throw data; // Lanza el objeto de error si la respuesta no es 2xx
                 }
+                // Si la petición fue exitosa (2xx), siempre cerramos modal y refrescamos
                 hideModal();
                 if (calendar) {
                     calendar.refetchEvents();
                 }
-                console.log('Éxito:', data.message);
+                // Opcional: mostrar un mensaje de éxito si existe
+                if (data && data.message) {
+                    console.log('Éxito:', data.message);
+                }
             })
             .catch(errorData => {
                 if (errorData.errors) {

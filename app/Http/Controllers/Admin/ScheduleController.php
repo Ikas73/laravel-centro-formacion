@@ -101,6 +101,33 @@ class ScheduleController extends Controller
 
         return response()->json(['message' => 'Horario creado con éxito.'], 201);
     }
+
+    /**
+     * Devuelve los datos de un horario específico para la edición.
+     */
+    public function show(Schedule $schedule)
+    {
+        return response()->json($schedule);
+    }
+
+    /**
+     * Actualiza un horario existente en la base de datos.
+     */
+    public function update(UpdateScheduleRequest $request, Schedule $schedule)
+    {
+        $validated = $request->validated();
+
+        $schedule->update([
+            'curso_id'     => $validated['curso_id'],
+            'profesor_id'  => $validated['profesor_id'],
+            'dia_semana'   => $validated['weekday'],
+            'hora_inicio'  => $validated['start_time'],
+            'hora_fin'     => $validated['end_time'],
+            'aula'         => $validated['room'],
+        ]);
+
+        return response()->json(['message' => 'Horario actualizado con éxito.']);
+    }
     /**
      * Helper para generar un color consistente a partir de un string.
      */

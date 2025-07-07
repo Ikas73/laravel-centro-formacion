@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Curso; // Importa el modelo Curso
 use App\Models\Profesor;
+use App\Models\Schedule;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB; // Si planeas usar DB::raw
 use Illuminate\Support\Facades\Log;
@@ -126,14 +128,32 @@ public function create()
     }
 
 
-    public function update(UpdateCursoRequest $request, Curso $curso) // <-- CAMBIAR AQUÍ
+    public function update(UpdateCursoRequest $request, Curso $curso)
     {
-        // ¡TAMPOCO NECESITAS $request->validate() AQUÍ!
-        
         $curso->update($request->validated());
 
+        // Eliminar horarios antiguos para evitar duplicados
+        $curso->schedules()->delete();
+
+        $horarioString = $request->validated()['horario'] ?? null;
+
+        if ($horarioString) {
+            $parsedData = $this->parseHorario($horarioString);
+
+            foreach ($parsedData as $data) {
+                Schedule::create([
+                    'curso_id' => $curso->id,
+                    'profesor_id' => $curso->profesor_id,
+                    'dia_semana' => $data['weekday'],
+                    'hora_inicio' => $data['start_time'],
+                    'hora_fin' => $data['end_time'],
+                    'aula' => $curso->centros ?? 'Aula General'
+                ]);
+            }
+        }
+
         return redirect()->route('admin.cursos.index')
-                         ->with('success', 'Curso actualizado con éxito.');
+                         ->with('success', 'Curso actualizado y horarios sincronizados con éxito.');
     }
 
     
@@ -172,4 +192,47 @@ public function create()
             }
         }
 
+    /**
+     * Parsea el string de horario y devuelve un array de datos.
+     *
+     * @param string $horarioString
+     * @return array
+     */
+    private function parseHorario(string $horarioString): array
+    {
+        $parsed = [];
+
+        // Caso 1: Formato "HH:MM-HH:MM L-V (Xh)" o "09:00-15:00 L-V (6h)"
+        if (preg_match('/(\d{1,2}:\d{2})-(\d{1,2}:\d{2})\s+L-V/i', $horarioString, $matches)) {
+            $startTime = Carbon::parse($matches[1])->format('H:i:s');
+            $endTime = Carbon::parse($matches[2])->format('H:i:s');
+            for ($day = 1; $day <= 5; $day++) { // Lunes a Viernes
+                $parsed[] = ['weekday' => $day, 'start_time' => $startTime, 'end_time' => $endTime];
+            }
+            return $parsed;
+        }
+
+        // Caso 2: Formato "HH:MM-HH:MM y HH:MM-HH:MM L-J (Xh Mixto)"
+        if (preg_match('/(\d{1,2}:\d{2})-(\d{1,2}:\d{2})\s+y\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})\s+L-J/i', $horarioString, $matches)) {
+            $startTime1 = Carbon::parse($matches[1])->format('H:i:s');
+            $endTime1 = Carbon::parse($matches[2])->format('H:i:s');
+            $startTime2 = Carbon::parse($matches[3])->format('H:i:s');
+            $endTime2 = Carbon::parse($matches[4])->format('H:i:s');
+            for ($day = 1; $day <= 4; $day++) { // Lunes a Jueves
+                $parsed[] = ['weekday' => $day, 'start_time' => $startTime1, 'end_time' => $endTime1];
+                $parsed[] = ['weekday' => $day, 'start_time' => $startTime2, 'end_time' => $endTime2];
+            }
+            return $parsed;
+        }
+
+        // Caso 3: Formato "Fines de semana (S HH:MM-HH:MM)"
+        if (preg_match('/Fines de semana\s+\(S\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})\)/i', $horarioString, $matches)) {
+            $startTime = Carbon::parse($matches[1])->format('H:i:s');
+            $endTime = Carbon::parse($matches[2])->format('H:i:s');
+            $parsed[] = ['weekday' => 6, 'start_time' => $startTime, 'end_time' => $endTime]; // Sábado
+            return $parsed;
+        }
+
+        return $parsed;
+    }
 }

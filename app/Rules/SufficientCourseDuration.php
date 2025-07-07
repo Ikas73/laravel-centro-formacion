@@ -7,6 +7,7 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 use App\Models\Curso;
 use App\Models\Schedule;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SufficientCourseDuration implements Rule, DataAwareRule
 {
@@ -48,14 +49,17 @@ class SufficientCourseDuration implements Rule, DataAwareRule
         $newHours = Carbon::parse($startTime)->diffInMinutes(Carbon::parse($endTime)) / 60.0;
 
         // 3. Calcular la suma de horas de los horarios YA existentes para este curso
-        $existingHours = Schedule::query()
+        $existingSchedules = Schedule::query()
             ->where('curso_id', $cursoId)
             ->when($this->scheduleIdToIgnore, function ($query) {
                 // Si estamos editando, excluimos el horario actual de la suma
                 $query->where('id', '!=', $this->scheduleIdToIgnore);
             })
-            ->join('time_slots', 'schedules.time_slot_id', '=', 'time_slots.id')
-            ->sum(DB::raw('EXTRACT(EPOCH FROM (time_slots.end_time - time_slots.start_time)) / 3600'));
+            ->get();
+
+        $existingHours = $existingSchedules->reduce(function ($carry, $schedule) {
+            return $carry + (Carbon::parse($schedule->hora_inicio)->diffInMinutes(Carbon::parse($schedule->hora_fin)) / 60.0);
+        }, 0);
 
         // 4. Comprobar si el total excede la duración del curso
         return ($existingHours + $newHours) <= $this->courseTotalHours;
