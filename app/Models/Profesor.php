@@ -67,4 +67,13 @@ class Profesor extends Model
         return $this->hasMany(Schedule::class, 'profesor_id');
     }
 
+    /**
+     * Devuelve el nombre completo del profesor.
+     *
+     * @return string
+     */
+    public function getNombreCompletoAttribute()
+    {
+        return "{$this->nombre} {$this->apellido1} {$this->apellido2}";
+    }
 }

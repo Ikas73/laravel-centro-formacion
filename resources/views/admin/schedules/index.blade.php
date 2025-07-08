@@ -80,6 +80,12 @@
             {{-- Campo oculto para el día de la semana --}}
             <input type="hidden" id="weekday" name="weekday">
 
+            {{-- Mensaje de advertencia de conflicto --}}
+            <div id="conflictWarning" class="hidden p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50" role="alert">
+                <i class="bi bi-exclamation-triangle-fill mr-2"></i>
+                <span class="font-medium">Advertencia:</span> Conflicto de horario detectado.
+            </div>
+
             {{-- Botones de acción --}}
             <div class="pt-6 flex justify-end gap-3 border-t border-gray-200">
                 <button type="button" id="cancelBtn" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">

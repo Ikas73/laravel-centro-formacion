@@ -16,6 +16,47 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancelBtn');
     const scheduleForm = document.getElementById('scheduleForm');
     const saveBtn = document.getElementById('saveBtn');
+    const conflictWarning = document.getElementById('conflictWarning'); // <-- Añadido
+
+    // --- LÓGICA PARA VALIDACIÓN DE CONFLICTOS EN TIEMPO REAL ---
+    const checkConflict = async () => {
+        const formData = new FormData(scheduleForm);
+        const data = Object.fromEntries(formData.entries());
+
+        // No validar si faltan datos clave
+        if (!data.start_time || !data.end_time || !data.weekday || (!data.profesor_id && !data.room)) {
+            conflictWarning.classList.add('hidden');
+            saveBtn.disabled = false;
+            return;
+        }
+
+        try {
+            const response = await fetch('/admin/schedules/check-conflict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.has_conflict) {
+                conflictWarning.innerText = result.message;
+                conflictWarning.classList.remove('hidden');
+                saveBtn.disabled = true;
+            } else {
+                conflictWarning.classList.add('hidden');
+                saveBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error al verificar conflicto:', error);
+            // En caso de error de red, permitir el envío para que valide el backend
+            saveBtn.disabled = false; 
+        }
+    };
 
     // --- LÓGICA PARA CERRAR EL MODAL ---
     const hideModal = () => {
@@ -28,6 +69,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if(closeModalBtn) closeModalBtn.addEventListener('click', hideModal);
     if(cancelBtn) cancelBtn.addEventListener('click', hideModal);
+
+    // --- Listeners para validación en tiempo real ---
+    const fieldsToWatch = ['curso_id', 'profesor_id', 'room', 'weekday', 'start_time', 'end_time'];
+    fieldsToWatch.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', checkConflict);
+        }
+    });
 
     // --- INICIALIZACIÓN DEL CALENDARIO ---
     if (calendarEl) {
@@ -62,6 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
             slotMinTime: "08:00:00",
             slotMaxTime: "22:00:00",
             events: '/admin/schedule/events',
+            editable: true, // <-- Permite arrastrar y redimensionar
+            eventResizableFromStart: true, // Permite redimensionar desde el inicio
+            droppable: true, // Permite que se "suelten" eventos en el calendario
             
             dateClick: function(info) {
                 // Resetear el formulario al estado de CREACIÓN
@@ -140,6 +193,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     extraContent += `<div class="fc-event-aula"><i class="bi bi-geo-alt-fill"></i> ${info.event.extendedProps.aula}</div>`;
                 }
                 titleEl.insertAdjacentHTML('afterend', extraContent);
+            },
+
+            eventDrop: function(info) {
+                updateSchedule(info);
+            },
+
+            eventResize: function(info) {
+                updateSchedule(info);
             }
         });
         
@@ -197,4 +258,87 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // --- FUNCIÓN PARA ACTUALIZAR UN HORARIO (DRAG & DROP, RESIZE) ---
+    const updateSchedule = async (info) => {
+        const event = info.event;
+        const scheduleId = event.id;
+        const newStartTime = event.start.toTimeString().substring(0, 5);
+        const newEndTime = event.end.toTimeString().substring(0, 5);
+        const newWeekday = event.start.getDay() === 0 ? 7 : event.start.getDay(); // Ajuste para domingo
+
+        // 1. Obtener los datos originales del schedule para tener el profesor_id y el room
+        let originalScheduleData;
+        try {
+            const response = await fetch(`/admin/schedules/${scheduleId}`);
+            originalScheduleData = await response.json();
+        } catch (error) {
+            console.error('Error fetching original schedule data:', error);
+            info.revert();
+            alert('No se pudieron obtener los datos originales del horario. No se puede actualizar.');
+            return;
+        }
+
+        const dataToValidate = {
+            schedule_id: scheduleId,
+            start_time: newStartTime,
+            end_time: newEndTime,
+            weekday: newWeekday,
+            profesor_id: originalScheduleData.profesor_id,
+            room: originalScheduleData.aula
+        };
+
+        // 2. Validar el conflicto
+        const conflictResponse = await fetch('/admin/schedules/check-conflict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(dataToValidate)
+        });
+        const conflictResult = await conflictResponse.json();
+
+        if (conflictResult.has_conflict) {
+            alert(`Conflicto detectado: ${conflictResult.message}`);
+            info.revert(); // Revertir el cambio visual
+            return;
+        }
+
+        // 3. Si no hay conflicto, actualizar el horario en el backend
+        const updateData = {
+            curso_id: originalScheduleData.curso_id,
+            profesor_id: originalScheduleData.profesor_id,
+            room: originalScheduleData.aula,
+            start_time: newStartTime, // Sobrescribimos con los nuevos tiempos
+            end_time: newEndTime,
+            weekday: newWeekday,
+            _method: 'PATCH' // Importante para Laravel
+        };
+
+        try {
+            const updateResponse = await fetch(`/admin/schedules/${scheduleId}`, {
+                method: 'POST', // Usar POST para el _method spoofing
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (!updateResponse.ok) {
+                throw await updateResponse.json();
+            }
+
+            console.log('Horario actualizado con éxito');
+            calendar.refetchEvents(); // Refrescar el calendario para asegurar consistencia
+
+        } catch (error) {
+            console.error('Error al actualizar el horario:', error);
+            alert('Ocurrió un error al intentar actualizar el horario.');
+            info.revert();
+        }
+    };
 });

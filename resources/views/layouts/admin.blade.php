@@ -63,9 +63,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}"
+                        <a class="nav-link {{ request()->routeIs('admin.schedules.index') ? 'active' : '' }}"
                         href="{{ route('admin.schedules.index') }}">
                             <i class="bi bi-calendar3-week-fill"></i> Schedule
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.schedules.conflicts') ? 'active' : '' }}"
+                        href="{{ route('admin.schedules.conflicts') }}">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Conflicts
                         </a>
                     </li>
 

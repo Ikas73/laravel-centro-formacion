@@ -10,6 +10,9 @@ use App\Models\Curso;
 use App\Models\Profesor;
 use App\Models\TimeSlot;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Rules\NoScheduleOverlap;
 
 class ScheduleController extends Controller
 {
@@ -144,6 +147,38 @@ class ScheduleController extends Controller
 
         return response()->json(['message' => 'Horario actualizado con éxito.']);
     }
+
+    /**
+     * Verifica si un horario potencial entra en conflicto con los existentes.
+     * Reutiliza la lógica de la regla NoScheduleOverlap.
+     */
+    public function checkConflict(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'start_time'  => ['required', new NoScheduleOverlap($request->input('schedule_id'))],
+            'end_time'    => 'required|after:start_time',
+            'weekday'     => 'required|integer|between:0,6',
+            'profesor_id' => 'nullable|exists:profesores,id',
+            'room'        => 'nullable|string|max:255',
+            'schedule_id' => 'nullable|exists:schedules,id',
+        ]);
+
+        if ($validator->fails()) {
+            // Si la validación falla, significa que hay un conflicto.
+            return response()->json([
+                'has_conflict' => true,
+                // Devolvemos el primer mensaje de error de la regla personalizada.
+                'message' => $validator->errors()->first('start_time')
+            ]);
+        }
+
+        // Si la validación pasa, no hay conflicto.
+        return response()->json([
+            'has_conflict' => false,
+            'message' => 'No hay conflictos de horario.'
+        ]);
+    }
+
     /**
      * Helper para generar un color consistente a partir de un string.
      */
@@ -156,5 +191,74 @@ class ScheduleController extends Controller
         $hue = $hash % 360;
         $lightness = 50 + $lightnessAdjustment;
         return "hsl({$hue}, 80%, {$lightness}%)";
+    }
+
+    /**
+     * Muestra una vista con todos los conflictos de horarios.
+     */
+    public function showConflicts()
+    {
+        $schedules = Schedule::with(['curso', 'profesor'])->orderBy('aula')->orderBy('dia_semana')->orderBy('hora_inicio')->get();
+        $conflicts = $this->detectConflicts($schedules);
+
+        return view('admin.schedules.conflicts', compact('conflicts'));
+    }
+
+    /**
+     * Detecta conflictos de horarios en una colección de schedules.
+     *
+     * @param \Illuminate\Database\Eloquent\Collection $schedules
+     * @return array
+     */
+    private function detectConflicts($schedules)
+    {
+        $conflicts = [];
+        $checked = [];
+
+        foreach ($schedules as $schedule1) {
+            foreach ($schedules as $schedule2) {
+                if ($schedule1->id >= $schedule2->id) {
+                    continue;
+                }
+
+                $isConflict = false;
+
+                // Conflicto de aula
+                if ($schedule1->aula === $schedule2->aula &&
+                    $schedule1->dia_semana === $schedule2->dia_semana &&
+                    $schedule1->hora_inicio < $schedule2->hora_fin &&
+                    $schedule1->hora_fin > $schedule2->hora_inicio) {
+                    $isConflict = true;
+                    $conflictType = 'Aula';
+                }
+
+                // Conflicto de profesor
+                if ($schedule1->profesor_id && $schedule2->profesor_id &&
+                    $schedule1->profesor_id === $schedule2->profesor_id &&
+                    $schedule1->dia_semana === $schedule2->dia_semana &&
+                    $schedule1->hora_inicio < $schedule2->hora_fin &&
+                    $schedule1->hora_fin > $schedule2->hora_inicio) {
+                    $isConflict = true;
+                    $conflictType = isset($conflictType) ? 'Aula y Profesor' : 'Profesor';
+                }
+
+                if ($isConflict) {
+                    $keyArray = [$schedule1->id, $schedule2->id];
+                    sort($keyArray);
+                    $key = implode('-', $keyArray);
+
+                    if (!isset($checked[$key])) {
+                        $conflicts[] = [
+                            'schedule1' => $schedule1,
+                            'schedule2' => $schedule2,
+                            'type' => $conflictType
+                        ];
+                        $checked[$key] = true;
+                    }
+                }
+            }
+        }
+
+        return $conflicts;
     }
 }

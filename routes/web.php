@@ -66,10 +66,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
             Route::resource('preinscritos', PreinscritoSepeController::class); // Asegúrate que este controlador existe
+            Route::post('schedules/check-conflict', [ScheduleController::class, 'checkConflict'])->name('schedules.checkConflict');
             Route::resource('schedules', ScheduleController::class);
             // --- AÑADE ESTA LÍNEA PARA EL CALENDARIO ---
             Route::get('schedule', [\App\Http\Controllers\Admin\ScheduleController::class, 'index'])->name('schedule.index');
             Route::get('schedule/events', [\App\Http\Controllers\Admin\ScheduleController::class, 'fetchEvents'])->name('schedule.events');
+            Route::get('schedules/conflicts', [ScheduleController::class, 'showConflicts'])->name('schedules.conflicts');
 
             
             // Ruta para convertir preinscrito
