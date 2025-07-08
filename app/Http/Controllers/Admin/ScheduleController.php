@@ -21,8 +21,17 @@ class ScheduleController extends Controller
         // Obtenemos los datos necesarios para los selects del formulario del modal
         $cursos = Curso::orderBy('nombre')->get(['id', 'nombre']);
         $profesores = Profesor::orderBy('apellido1')->get(['id', 'nombre', 'apellido1']);
+        
+        // Obtenemos las aulas únicas de los schedules existentes
+        $aulas = Schedule::select('aula')
+            ->whereNotNull('aula')
+            ->where('aula', '!=', '')
+            ->distinct()
+            ->orderBy('aula')
+            ->pluck('aula')
+            ->toArray();
 
-        return view('admin.schedules.index', compact('cursos', 'profesores'));
+        return view('admin.schedules.index', compact('cursos', 'profesores', 'aulas'));
     }
 
     /**
@@ -107,7 +116,14 @@ class ScheduleController extends Controller
      */
     public function show(Schedule $schedule)
     {
-        return response()->json($schedule);
+        return response()->json([
+            'curso_id'    => $schedule->curso_id,
+            'profesor_id' => $schedule->profesor_id,
+            'hora_inicio' => \Carbon\Carbon::parse($schedule->hora_inicio)->format('H:i'),
+            'hora_fin'    => \Carbon\Carbon::parse($schedule->hora_fin)->format('H:i'),
+            'aula'        => $schedule->aula,
+            'dia_semana'  => $schedule->dia_semana,
+        ]);
     }
 
     /**

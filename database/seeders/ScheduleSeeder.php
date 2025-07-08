@@ -25,9 +25,9 @@ class ScheduleSeeder extends Seeder
             return;
         }
 
-        $aulas = ['Aula 101', 'Aula 102', 'Aula 103', 'Laboratorio A', 'Laboratorio B', 'Sala Virtual 1', 'Sala Virtual 2'];
         $processedCount = 0;
         $errorCount = 0;
+        $skippedCount = 0;
 
         foreach ($cursos as $curso) {
             if (!$curso->profesor) {
@@ -43,24 +43,47 @@ class ScheduleSeeder extends Seeder
                 continue;
             }
 
+            $aulaDelCurso = $curso->centros ?? 'Aula General';
+            $schedulesCreados = 0;
+
             foreach ($schedules as $schedule) {
-                Schedule::create([
-                    'curso_id' => $curso->id,
-                    'profesor_id' => $curso->profesor_id,
-                    'dia_semana' => $schedule['dia_semana'],
-                    'hora_inicio' => $schedule['hora_inicio'],
-                    'hora_fin' => $schedule['hora_fin'],
-                    'aula' => $aulas[array_rand($aulas)], // Asignar aula aleatoria
-                ]);
+                // Verificar si hay conflictos antes de crear
+                $conflicto = $this->verificarConflicto(
+                    $schedule['dia_semana'],
+                    $schedule['hora_inicio'],
+                    $schedule['hora_fin'],
+                    $curso->profesor_id,
+                    $aulaDelCurso
+                );
+
+                if (!$conflicto) {
+                    Schedule::create([
+                        'curso_id' => $curso->id,
+                        'profesor_id' => $curso->profesor_id,
+                        'dia_semana' => $schedule['dia_semana'],
+                        'hora_inicio' => $schedule['hora_inicio'],
+                        'hora_fin' => $schedule['hora_fin'],
+                        'aula' => $aulaDelCurso, // Usar el aula del curso
+                    ]);
+                    $schedulesCreados++;
+                } else {
+                    $this->command->warn("⚠️  Conflicto detectado para {$curso->nombre} en día {$schedule['dia_semana']} {$schedule['hora_inicio']}-{$schedule['hora_fin']} en {$aulaDelCurso}");
+                }
             }
 
-            $processedCount++;
-            $this->command->info("✓ Procesado: {$curso->nombre}");
+            if ($schedulesCreados > 0) {
+                $processedCount++;
+                $this->command->info("✓ Procesado: {$curso->nombre} ({$schedulesCreados} horarios)");
+            } else {
+                $skippedCount++;
+                $this->command->warn("⏭️  Omitido: {$curso->nombre} (todos los horarios en conflicto)");
+            }
         }
 
         $this->command->info('========================================');
         $this->command->info("✅ Cursos procesados: {$processedCount}");
         $this->command->info("⚠️  Cursos con errores: {$errorCount}");
+        $this->command->info("⏭️  Cursos omitidos por conflictos: {$skippedCount}");
         $this->command->info("📅 Total de horarios creados: " . Schedule::count());
         $this->command->info('========================================');
     }
@@ -154,5 +177,34 @@ class ScheduleSeeder extends Seeder
         }
 
         return $schedules;
+    }
+
+    /**
+     * Verifica si hay conflictos de horario para un nuevo schedule
+     *
+     * @param int $diaSemana
+     * @param string $horaInicio
+     * @param string $horaFin
+     * @param int $profesorId
+     * @param string $aula
+     * @return bool
+     */
+    private function verificarConflicto($diaSemana, $horaInicio, $horaFin, $profesorId, $aula)
+    {
+        // Verificar conflicto de profesor
+        $profesorConflict = Schedule::where('dia_semana', $diaSemana)
+            ->where('profesor_id', $profesorId)
+            ->where('hora_inicio', '<', $horaFin)
+            ->where('hora_fin', '>', $horaInicio)
+            ->exists();
+            
+        // Verificar conflicto de aula
+        $aulaConflict = Schedule::where('dia_semana', $diaSemana)
+            ->where('aula', $aula)
+            ->where('hora_inicio', '<', $horaFin)
+            ->where('hora_fin', '>', $horaInicio)
+            ->exists();
+            
+        return $profesorConflict || $aulaConflict;
     }
 }

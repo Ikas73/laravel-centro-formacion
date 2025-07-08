@@ -70,6 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('form_method').value = 'POST';
                 document.getElementById('schedule_id').value = '';
 
+                // Resetear el select de aulas a la opción por defecto
+                const roomSelect = document.getElementById('room');
+                if (roomSelect) roomSelect.selectedIndex = 0;
+
                 modalTitle.innerText = 'Añadir Nueva Franja Horaria';
                 saveBtn.innerText = 'Guardar Horario';
                 

@@ -130,30 +130,46 @@ public function create()
 
     public function update(UpdateCursoRequest $request, Curso $curso)
     {
-        $curso->update($request->validated());
+        // Usar transacción para asegurar consistencia
+        DB::beginTransaction();
+        
+        try {
+            // Eliminar horarios antiguos ANTES de actualizar el curso
+            $curso->schedules()->delete();
+            
+            // Actualizar el curso
+            $curso->update($request->validated());
 
-        // Eliminar horarios antiguos para evitar duplicados
-        $curso->schedules()->delete();
+            $horarioString = $request->validated()['horario'] ?? null;
 
-        $horarioString = $request->validated()['horario'] ?? null;
+            if ($horarioString) {
+                $parsedData = $this->parseHorario($horarioString);
 
-        if ($horarioString) {
-            $parsedData = $this->parseHorario($horarioString);
-
-            foreach ($parsedData as $data) {
-                Schedule::create([
-                    'curso_id' => $curso->id,
-                    'profesor_id' => $curso->profesor_id,
-                    'dia_semana' => $data['weekday'],
-                    'hora_inicio' => $data['start_time'],
-                    'hora_fin' => $data['end_time'],
-                    'aula' => $curso->centros ?? 'Aula General'
-                ]);
+                foreach ($parsedData as $data) {
+                    Schedule::create([
+                        'curso_id' => $curso->id,
+                        'profesor_id' => $curso->profesor_id,
+                        'dia_semana' => $data['weekday'],
+                        'hora_inicio' => $data['start_time'],
+                        'hora_fin' => $data['end_time'],
+                        'aula' => $curso->centros ?? 'Aula General'
+                    ]);
+                }
             }
+            
+            DB::commit();
+            
+            return redirect()->route('admin.cursos.index')
+                             ->with('success', 'Curso actualizado y horarios sincronizados con éxito.');
+                             
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error al actualizar curso {$curso->id}: " . $e->getMessage());
+            
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Ocurrió un error al actualizar el curso. Por favor, inténtalo de nuevo.');
         }
-
-        return redirect()->route('admin.cursos.index')
-                         ->with('success', 'Curso actualizado y horarios sincronizados con éxito.');
     }
 
     
@@ -235,4 +251,5 @@ public function create()
 
         return $parsed;
     }
+
 }

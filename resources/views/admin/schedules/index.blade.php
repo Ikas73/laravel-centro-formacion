@@ -67,7 +67,12 @@
                 </div>
                 <div>
                     <label for="room" class="block text-sm font-medium text-gray-700 mb-1">Aula</label>
-                    <input type="text" id="room" name="room" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <select id="room" name="room" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Seleccionar aula...</option>
+                        @foreach($aulas as $aula)
+                            <option value="{{ $aula }}">{{ $aula }}</option>
+                        @endforeach
+                    </select>
                     <p id="error-room" class="text-red-500 text-xs mt-1"></p>
                 </div>
             </div>
@@ -95,6 +100,7 @@
     <script>
         window.cursosData = {!! $cursos->toJson() !!};
         window.profesoresData = {!! $profesores->toJson() !!};
+        window.aulasData = {!! json_encode($aulas) !!};
     </script>
 
     {{-- La única línea necesaria. Vite se encargará de inyectar todo el JS y CSS requerido. --}}
