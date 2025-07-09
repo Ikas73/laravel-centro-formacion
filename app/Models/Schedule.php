@@ -17,6 +17,10 @@ class Schedule extends Model
         'hora_fin',
         'aula',
         'profesor_id',
+        'parent_id',
+        'is_recurring',
+        'original_date',
+        'is_cancelled',
     ];
 
     /* — Relaciones inversas — */

@@ -42,60 +42,98 @@ class ScheduleController extends Controller
      * alineado con la migración real.
      */
     public function fetchEvents()
-{
-    // Carga los horarios junto con la información del curso y del profesor
-    $schedules = Schedule::with(['curso', 'profesor'])->get();
+    {
+        $allSchedules = Schedule::with(['curso', 'profesor'])->get();
 
-    $events = $schedules->map(function ($schedule) {
-        // --- Comprobación de seguridad ---
-        // Si un horario no tiene curso o el curso no tiene fechas, no lo podemos dibujar.
-        if (!$schedule->curso || !$schedule->curso->fecha_inicio || !$schedule->curso->fecha_fin) {
-            return null; // Omitir este evento
+        // 1. Separar las reglas, excepciones y cancelaciones
+        $recurringRules = $allSchedules->where('is_recurring', true);
+        $exceptions = $allSchedules->where('is_recurring', false)->where('is_cancelled', false);
+        $cancellations = $allSchedules->where('is_cancelled', true)->keyBy(function ($item) {
+            return $item['parent_id'] . '_' . $item['original_date'];
+        });
+
+        $events = collect();
+
+        // 2. Procesar las reglas de recurrencia
+        foreach ($recurringRules as $rule) {
+            if (!$rule->curso || !$rule->curso->fecha_inicio || !$rule->curso->fecha_fin) {
+                continue;
+            }
+
+            $diasRrule = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+            $diaDeLaSemana = $diasRrule[$rule->dia_semana];
+            $dtstart = $rule->curso->fecha_inicio->format('Y-m-d') . 'T' . $rule->hora_inicio;
+            $until = $rule->curso->fecha_fin->format('Y-m-d');
+            $duration = Carbon::parse($rule->hora_inicio)->diff(Carbon::parse($rule->hora_fin))->format('%H:%I:%S');
+
+            // Encontrar las cancelaciones para esta regla
+            $exdates = $allSchedules->where('is_cancelled', true)
+                                     ->where('parent_id', $rule->id)
+                                     ->pluck('original_date')
+                                     ->map(function ($date) {
+                                         return Carbon::parse($date)->format('Y-m-d');
+                                     })
+                                     ->all();
+
+            $events->push([
+                'id'        => $rule->id,
+                'title'     => $rule->curso->nombre,
+                'duration'  => $duration,
+                'rrule'     => [
+                    'freq'    => 'weekly',
+                    'byweekday' => [$diaDeLaSemana],
+                    'dtstart' => $dtstart,
+                    'until'   => $until,
+                ],
+                'exdate' => $exdates, // Añadir fechas de exclusión
+                'extendedProps' => [
+                    'profesor' => optional($rule->profesor)->nombre . ' ' . optional($rule->profesor)->apellido1,
+                    'aula'     => $rule->aula,
+                    'curso_id' => $rule->curso->id
+                ],
+                'backgroundColor' => $this->stringToColor($rule->curso->nombre),
+                'borderColor'     => $this->stringToColor($rule->curso->nombre, -20),
+            ]);
         }
 
-        // --- Mapeo del día de la semana ---
-        // Tu BD: 1=Lunes, 2=Martes ... 0=Domingo
-        // RRULE: MO, TU, WE, TH, FR, SA, SU
-        $diasRrule = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
-        $diaDeLaSemana = $diasRrule[$schedule->dia_semana];
-
-        // --- Formateo de fechas y horas ---
-        $dtstart = $schedule->curso->fecha_inicio->format('Y-m-d') . 'T' . $schedule->hora_inicio;
-        $until = $schedule->curso->fecha_fin->format('Y-m-d');
-        
-        // La duración se calcula para que FullCalendar sepa cuánto dura cada evento recurrente
-        $duracion = Carbon::parse($schedule->hora_inicio)
-                          ->diff(Carbon::parse($schedule->hora_fin))
-                          ->format('%H:%I:%S');
-
-        return [
-            'id'        => $schedule->id,
-            'title'     => $schedule->curso->nombre, // Título del evento
-            'duration'  => $duracion,               // Duración de cada ocurrencia
+        // 3. Procesar las excepciones como eventos individuales
+        foreach ($exceptions as $exception) {
+            if (!$exception->curso) {
+                continue;
+            }
             
-            // --- La Magia de la Recurrencia ---
-            'rrule'     => [
-                'freq'    => 'weekly',        // Frecuencia: semanal
-                'byweekday' => [$diaDeLaSemana],  // El día de la semana específico
-                'dtstart' => $dtstart,          // Cuándo empieza la primera ocurrencia
-                'until'   => $until,            // Cuándo termina la serie de repeticiones
-            ],
+            // La fecha del evento es la `original_date` y el día de la semana puede haber cambiado
+            $startDateTime = Carbon::parse($exception->original_date . ' ' . $exception->hora_inicio);
+            $endDateTime = Carbon::parse($exception->original_date . ' ' . $exception->hora_fin);
 
-            // --- Información Extra para mostrar en el evento ---
-            'extendedProps' => [
-                'profesor' => optional($schedule->profesor)->nombre . ' ' . optional($schedule->profesor)->apellido1,
-                'aula'     => $schedule->aula,
-                'curso_id' => $schedule->curso->id
-            ],
+            // Ajustar la fecha al día de la semana correcto si ha cambiado
+            $diaSemanaOriginal = $startDateTime->dayOfWeekIso; // 1-7
 
-            // --- Colores (opcional pero muy útil) ---
-            'backgroundColor' => $this->stringToColor($schedule->curso->nombre),
-            'borderColor'     => $this->stringToColor($schedule->curso->nombre, -20),
-        ];
-    })->filter(); // Elimina los eventos nulos que omitimos
+            if ($exception->dia_semana != $diaSemanaOriginal) {
+                 $diff = $exception->dia_semana - $diaSemanaOriginal;
+                 $startDateTime->addDays($diff);
+                 $endDateTime->addDays($diff);
+            }
 
-    return response()->json($events);
-}
+
+            $events->push([
+                'id'        => $exception->id,
+                'title'     => $exception->curso->nombre,
+                'start'     => $startDateTime->toDateTimeString(),
+                'end'       => $endDateTime->toDateTimeString(),
+                'extendedProps' => [
+                    'profesor' => optional($exception->profesor)->nombre . ' ' . optional($exception->profesor)->apellido1,
+                    'aula'     => $exception->aula,
+                    'curso_id' => $exception->curso->id,
+                    'is_exception' => true // Marcar como excepción
+                ],
+                'backgroundColor' => $this->stringToColor($exception->curso->nombre, 20), // Tono más claro para excepciones
+                'borderColor'     => $this->stringToColor($exception->curso->nombre, 0),
+            ]);
+        }
+
+        return response()->json($events);
+    }
 
     public function store(StoreScheduleRequest $request)
     {
@@ -135,15 +173,51 @@ class ScheduleController extends Controller
     public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
         $validated = $request->validated();
+        $editType = $request->input('edit_type', 'toda_la_serie'); // 'toda_la_serie' o 'solo_este'
 
-        $schedule->update([
-            'curso_id'     => $validated['curso_id'],
-            'profesor_id'  => $validated['profesor_id'],
-            'dia_semana'   => $validated['weekday'],
-            'hora_inicio'  => $validated['start_time'],
-            'hora_fin'     => $validated['end_time'],
-            'aula'         => $validated['room'],
-        ]);
+        if ($editType === 'toda_la_serie') {
+            // Lógica para actualizar la serie completa (comportamiento actual)
+            $schedule->update([
+                'curso_id'     => $validated['curso_id'],
+                'profesor_id'  => $validated['profesor_id'],
+                'dia_semana'   => $validated['weekday'],
+                'hora_inicio'  => $validated['start_time'],
+                'hora_fin'     => $validated['end_time'],
+                'aula'         => $validated['room'],
+            ]);
+        } else {
+            // Lógica para editar solo este evento (crear excepción)
+            $originalDate = $validated['original_date'];
+
+            // 1. Crear la cancelación para la fecha original.
+            // Esto marca la ocurrencia original como "saltada".
+            Schedule::create([
+                'parent_id'     => $schedule->id,
+                'is_recurring'  => false,
+                'is_cancelled'  => true,
+                'original_date' => $originalDate,
+                'curso_id'      => $schedule->curso_id,
+                'profesor_id'   => $schedule->profesor_id,
+                'dia_semana'    => $schedule->dia_semana, // El día original
+                'hora_inicio'   => $schedule->hora_inicio,
+                'hora_fin'      => $schedule->hora_fin,
+                'aula'          => $schedule->aula,
+            ]);
+
+            // 2. Crear la excepción (la nueva ocurrencia en la nueva fecha/hora).
+            Schedule::create([
+                'parent_id'     => $schedule->id,
+                'is_recurring'  => false,
+                'is_cancelled'  => false,
+                'original_date' => $originalDate, // Referencia a qué día se movió
+                'curso_id'      => $validated['curso_id'],
+                'profesor_id'   => $validated['profesor_id'],
+                'dia_semana'    => $validated['weekday'],
+                'hora_inicio'   => $validated['start_time'],
+                'hora_fin'      => $validated['end_time'],
+                'aula'          => $validated['room'],
+            ]);
+        }
 
         return response()->json(['message' => 'Horario actualizado con éxito.']);
     }

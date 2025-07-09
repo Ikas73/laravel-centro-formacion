@@ -98,6 +98,29 @@
         </form>
     </div>
 </div>
+    <!-- Modal de Confirmación de Edición -->
+<div id="editConfirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 transform transition-all">
+        <div class="text-center">
+            <i class="bi bi-question-circle-fill text-5xl text-blue-500 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">¿Cómo quieres guardar este cambio?</h3>
+            <p class="text-gray-600 mb-6">
+                Has modificado un evento que se repite. Elige si quieres aplicar el cambio solo a esta clase o a toda la serie de clases.
+            </p>
+        </div>
+        <div class="flex justify-center gap-4">
+            <button id="editSingleBtn" class="flex-1 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Solo este evento
+            </button>
+            <button id="editSeriesBtn" class="flex-1 px-6 py-3 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Toda la serie
+            </button>
+        </div>
+        <div class="mt-4 text-center">
+            <button id="cancelEditBtn" class="text-sm text-gray-600 hover:underline">Cancelar</button>
+        </div>
+    </div>
+</div>
     </div>
 @endsection
 

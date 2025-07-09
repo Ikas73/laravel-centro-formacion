@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveBtn = document.getElementById('saveBtn');
     const conflictWarning = document.getElementById('conflictWarning'); // <-- Añadido
 
+    // --- OBTENER REFERENCIAS A ELEMENTOS DEL MODAL DE CONFIRMACIÓN DE EDICIÓN ---
+    const editConfirmationModal = document.getElementById('editConfirmationModal');
+    const editSingleBtn = document.getElementById('editSingleBtn');
+    const editSeriesBtn = document.getElementById('editSeriesBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    let currentEventInfo = null; // Variable para almacenar la información del evento temporalmente
+
     // --- LÓGICA PARA VALIDACIÓN DE CONFLICTOS EN TIEMPO REAL ---
     const checkConflict = async () => {
         const formData = new FormData(scheduleForm);
@@ -196,11 +203,13 @@ document.addEventListener('DOMContentLoaded', function() {
             },
 
             eventDrop: function(info) {
-                updateSchedule(info);
+                currentEventInfo = info;
+                editConfirmationModal.classList.remove('hidden');
             },
 
             eventResize: function(info) {
-                updateSchedule(info);
+                currentEventInfo = info;
+                editConfirmationModal.classList.remove('hidden');
             }
         });
         
@@ -259,15 +268,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- LÓGICA DEL MODAL DE CONFIRMACIÓN DE EDICIÓN ---
+    const hideEditModal = () => {
+        editConfirmationModal.classList.add('hidden');
+        currentEventInfo = null;
+    };
+
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => {
+            if (currentEventInfo) {
+                currentEventInfo.revert();
+            }
+            hideEditModal();
+        });
+    }
+
+    if (editSingleBtn) {
+        editSingleBtn.addEventListener('click', () => {
+            if (currentEventInfo) {
+                performUpdate(currentEventInfo, 'solo_este');
+            }
+            hideEditModal();
+        });
+    }
+
+    if (editSeriesBtn) {
+        editSeriesBtn.addEventListener('click', () => {
+            if (currentEventInfo) {
+                performUpdate(currentEventInfo, 'toda_la_serie');
+            }
+            hideEditModal();
+        });
+    }
+
     // --- FUNCIÓN PARA ACTUALIZAR UN HORARIO (DRAG & DROP, RESIZE) ---
-    const updateSchedule = async (info) => {
+    const performUpdate = async (info, editType) => {
         const event = info.event;
         const scheduleId = event.id;
         const newStartTime = event.start.toTimeString().substring(0, 5);
         const newEndTime = event.end.toTimeString().substring(0, 5);
-        const newWeekday = event.start.getDay() === 0 ? 7 : event.start.getDay(); // Ajuste para domingo
+        const newWeekday = event.start.getDay() === 0 ? 7 : event.start.getDay();
 
-        // 1. Obtener los datos originales del schedule para tener el profesor_id y el room
+        // Para 'solo_este', necesitamos la fecha original de la ocurrencia.
+        // En un drop, es la fecha ANTERIOR. En un resize, es la misma fecha.
+        const originalDate = (info.oldEvent ? info.oldEvent.start : event.start).toISOString().slice(0, 10);
+
         let originalScheduleData;
         try {
             const response = await fetch(`/admin/schedules/${scheduleId}`);
@@ -279,16 +324,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const dataToValidate = {
-            schedule_id: scheduleId,
+        const dataToUpdate = {
+            curso_id: originalScheduleData.curso_id,
+            profesor_id: originalScheduleData.profesor_id,
+            room: originalScheduleData.aula,
             start_time: newStartTime,
             end_time: newEndTime,
             weekday: newWeekday,
-            profesor_id: originalScheduleData.profesor_id,
-            room: originalScheduleData.aula
+            _method: 'PATCH',
+            edit_type: editType,
         };
+        
+        if (editType === 'solo_este') {
+            dataToUpdate.original_date = originalDate;
+        }
 
-        // 2. Validar el conflicto
+        // Validar conflicto antes de enviar
+        const dataToValidate = { ...dataToUpdate, schedule_id: scheduleId };
         const conflictResponse = await fetch('/admin/schedules/check-conflict', {
             method: 'POST',
             headers: {
@@ -302,30 +354,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (conflictResult.has_conflict) {
             alert(`Conflicto detectado: ${conflictResult.message}`);
-            info.revert(); // Revertir el cambio visual
+            info.revert();
             return;
         }
 
-        // 3. Si no hay conflicto, actualizar el horario en el backend
-        const updateData = {
-            curso_id: originalScheduleData.curso_id,
-            profesor_id: originalScheduleData.profesor_id,
-            room: originalScheduleData.aula,
-            start_time: newStartTime, // Sobrescribimos con los nuevos tiempos
-            end_time: newEndTime,
-            weekday: newWeekday,
-            _method: 'PATCH' // Importante para Laravel
-        };
-
+        // Si no hay conflicto, proceder con la actualización
         try {
             const updateResponse = await fetch(`/admin/schedules/${scheduleId}`, {
-                method: 'POST', // Usar POST para el _method spoofing
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(updateData)
+                body: JSON.stringify(dataToUpdate)
             });
 
             if (!updateResponse.ok) {
@@ -333,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             console.log('Horario actualizado con éxito');
-            calendar.refetchEvents(); // Refrescar el calendario para asegurar consistencia
+            calendar.refetchEvents();
 
         } catch (error) {
             console.error('Error al actualizar el horario:', error);

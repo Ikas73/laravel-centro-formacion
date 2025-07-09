@@ -27,6 +27,8 @@ class UpdateScheduleRequest extends FormRequest
             'start_time'   => ['required', 'date_format:H:i', new NoScheduleOverlap($scheduleId)],
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
             'room'         => ['required', 'string', 'max:50'],
+            'edit_type'    => ['sometimes', 'string', 'in:toda_la_serie,solo_este'],
+            'original_date' => ['required_if:edit_type,solo_este', 'date_format:Y-m-d'],
         ];
     }
 }
