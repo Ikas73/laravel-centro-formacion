@@ -69,11 +69,12 @@ class ScheduleController extends Controller
             // Encontrar las cancelaciones para esta regla
             $exdates = $allSchedules->where('is_cancelled', true)
                                      ->where('parent_id', $rule->id)
-                                     ->pluck('original_date')
-                                     ->map(function ($date) {
-                                         return Carbon::parse($date)->format('Y-m-d');
+                                     ->map(function ($cancellation) use ($rule) {
+                                         // CRÍTICO: Formatear la fecha de exclusión a UTC ISO 8601
+                                         $localDateTime = Carbon::parse($cancellation->original_date . ' ' . $rule->hora_inicio, config('app.timezone'));
+                                         return $localDateTime->setTimezone('UTC')->format('Y-m-d\TH:i:s\Z');
                                      })
-                                     ->all();
+                                     ->values()->all();
 
             $events->push([
                 'id'        => $rule->id,
@@ -119,8 +120,8 @@ class ScheduleController extends Controller
             $events->push([
                 'id'        => $exception->id,
                 'title'     => $exception->curso->nombre,
-                'start'     => $startDateTime->toDateTimeString(),
-                'end'       => $endDateTime->toDateTimeString(),
+                'start'     => $startDateTime->format('Y-m-d\TH:i:s'),
+                'end'       => $endDateTime->format('Y-m-d\TH:i:s'),
                 'extendedProps' => [
                     'profesor' => optional($exception->profesor)->nombre . ' ' . optional($exception->profesor)->apellido1,
                     'aula'     => $exception->aula,
