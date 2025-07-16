@@ -29,6 +29,7 @@ class UpdateScheduleRequest extends FormRequest
             'room'         => ['required', 'string', 'max:50'],
             'edit_type'    => ['sometimes', 'string', 'in:toda_la_serie,solo_este'],
             'original_date' => ['required_if:edit_type,solo_este', 'date_format:Y-m-d'],
+            'new_date'      => ['required_if:edit_type,solo_este', 'date_format:Y-m-d'],
         ];
     }
 }

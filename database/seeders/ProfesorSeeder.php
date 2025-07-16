@@ -8,17 +8,21 @@ use App\Models\Profesor; // Importa tu modelo Profesor
 
 class ProfesorSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Mensaje informativo (opcional)
-        $this->command->info('Creando 12 profesores de ejemplo...');
+        $this->command->info('Limpiando y creando un único profesor de prueba...');
 
-        // Usar el Factory para crear 12 registros de Profesor
-        Profesor::factory()->count(12)->create();
+        Profesor::truncate();
 
-        $this->command->info('¡12 profesores creados!');
+        Profesor::create([
+            'nombre' => 'Profesor',
+            'apellido1' => 'De',
+            'apellido2' => 'Prueba',
+            'email' => 'profesor@test.com',
+            'telefono' => '123456789',
+            'dni' => '12345678X',
+        ]);
+
+        $this->command->info('¡Profesor de prueba creado!');
     }
 }

@@ -309,6 +309,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const newEndTime = event.end.toTimeString().substring(0, 5);
         const newWeekday = event.start.getDay() === 0 ? 7 : event.start.getDay();
 
+        const newDate = event.start.toISOString().slice(0, 10);
+
         // Para 'solo_este', necesitamos la fecha original de la ocurrencia.
         // En un drop, es la fecha ANTERIOR. En un resize, es la misma fecha.
         const originalDate = (info.oldEvent ? info.oldEvent.start : event.start).toISOString().slice(0, 10);
@@ -337,25 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (editType === 'solo_este') {
             dataToUpdate.original_date = originalDate;
-        }
-
-        // Validar conflicto antes de enviar
-        const dataToValidate = { ...dataToUpdate, schedule_id: scheduleId };
-        const conflictResponse = await fetch('/admin/schedules/check-conflict', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(dataToValidate)
-        });
-        const conflictResult = await conflictResponse.json();
-
-        if (conflictResult.has_conflict) {
-            alert(`Conflicto detectado: ${conflictResult.message}`);
-            info.revert();
-            return;
+            dataToUpdate.new_date = newDate; // <-- AÑADIDO
         }
 
         // Si no hay conflicto, proceder con la actualización

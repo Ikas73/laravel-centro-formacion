@@ -27,9 +27,8 @@ class CursoFactory extends Factory
              throw new \Exception("No se encontraron profesores para asignar al curso. Asegúrate de ejecutar ProfesorSeeder primero.");
          }
 
-        $fechaInicio = fake()->dateTimeBetween('+1 week', '+6 months');
-        $duracionDias = fake()->numberBetween(30, 180); // Duración en días
-        $fechaFin = (clone $fechaInicio)->modify("+$duracionDias days");
+        $fechaInicio = Carbon::create(2025, 7, 1);
+        $fechaFin = Carbon::create(2025, 7, 31);
 
 
         return [
