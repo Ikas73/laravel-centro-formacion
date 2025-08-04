@@ -24,7 +24,7 @@ class UpdateScheduleRequest extends FormRequest
             'curso_id'     => ['required', 'exists:cursos,id', new SufficientCourseDuration($scheduleId)],
             'profesor_id'  => ['required', 'exists:profesores,id'],
             'weekday'      => ['required', 'integer', 'between:0,6'],
-            'start_time'   => ['required', 'date_format:H:i', new NoScheduleOverlap($scheduleId)],
+            'start_time'   => ['required', 'date_format:H:i', (new NoScheduleOverlap($scheduleId))->setData($this->all())],
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
             'room'         => ['required', 'string', 'max:50'],
             'edit_type'    => ['sometimes', 'string', 'in:toda_la_serie,solo_este'],

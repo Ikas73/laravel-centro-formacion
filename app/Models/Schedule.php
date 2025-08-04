@@ -41,6 +41,14 @@ class Schedule extends Model
     }
 
     /**
+     * Relación con el schedule padre (para excepciones y cancelaciones)
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Schedule::class, 'parent_id');
+    }
+
+    /**
      * Devuelve el día de la semana como un string.
      *
      * @return string

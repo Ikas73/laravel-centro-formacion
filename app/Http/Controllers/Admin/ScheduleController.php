@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log; // Importar Log
+use Illuminate\Validation\ValidationException;
 use App\Rules\NoScheduleOverlap;
 
 class ScheduleController extends Controller
@@ -176,72 +177,114 @@ class ScheduleController extends Controller
      */
     public function update(UpdateScheduleRequest $request, Schedule $schedule)
     {
-        $validated = $request->validated();
-        $editType = $request->input('edit_type', 'toda_la_serie');
+        try {
+            $validated = $request->validated();
+            $editType = $request->input('edit_type', 'toda_la_serie');
 
-        if ($editType === 'toda_la_serie') {
-            // Lógica para actualizar la serie completa
-            // Si el evento es una excepción, busca el padre para actualizar la serie real
-            $scheduleToUpdate = $schedule->is_recurring ? $schedule : $schedule->parent;
-            if ($scheduleToUpdate) {
-                $scheduleToUpdate->update([
-                    'curso_id'     => $validated['curso_id'],
-                    'profesor_id'  => $validated['profesor_id'],
-                    'dia_semana'   => $validated['weekday'],
-                    'hora_inicio'  => $validated['start_time'],
-                    'hora_fin'     => $validated['end_time'],
-                    'aula'         => $validated['room'],
-                ]);
+            if ($editType === 'toda_la_serie') {
+                // Lógica para actualizar la serie completa
+                // Si el evento es una excepción, busca el padre para actualizar la serie real
+                $scheduleToUpdate = $schedule->is_recurring ? $schedule : $schedule->parent;
+                if ($scheduleToUpdate) {
+                    $scheduleToUpdate->update([
+                        'curso_id'     => $validated['curso_id'],
+                        'profesor_id'  => $validated['profesor_id'],
+                        'dia_semana'   => $validated['weekday'],
+                        'hora_inicio'  => $validated['start_time'],
+                        'hora_fin'     => $validated['end_time'],
+                        'aula'         => $validated['room'],
+                    ]);
+                }
+            } else { // edit_type es 'solo_este'
+                $newDate = $validated['new_date'];
+
+                if ($schedule->is_recurring) {
+                    // Caso 1: Mover una instancia recurrente por primera vez
+                    $originalDate = $validated['original_date'];
+
+                    // 1. Crear la cancelación para la fecha original
+                    Schedule::create([
+                        'parent_id'     => $schedule->id,
+                        'is_recurring'  => false,
+                        'is_cancelled'  => true,
+                        'original_date' => $originalDate,
+                        'curso_id'      => $schedule->curso_id,
+                        'profesor_id'   => $schedule->profesor_id,
+                        'dia_semana'    => $schedule->dia_semana,
+                        'hora_inicio'   => $schedule->hora_inicio,
+                        'hora_fin'      => $schedule->hora_fin,
+                        'aula'          => $schedule->aula,
+                    ]);
+
+                    // 2. Crear la nueva excepción
+                    Schedule::create([
+                        'parent_id'     => $schedule->id,
+                        'is_recurring'  => false,
+                        'is_cancelled'  => false,
+                        'original_date' => $newDate,
+                        'curso_id'      => $validated['curso_id'],
+                        'profesor_id'   => $validated['profesor_id'],
+                        'dia_semana'    => $validated['weekday'],
+                        'hora_inicio'   => $validated['start_time'],
+                        'hora_fin'      => $validated['end_time'],
+                        'aula'          => $validated['room'],
+                    ]);
+                } else {
+                    // Caso 2: Mover una excepción ya existente
+                    $parent = $schedule->parent;
+                    
+                    // Verificar si estamos moviendo la excepción de vuelta a su horario original
+                    if ($parent && 
+                        $parent->dia_semana == $validated['weekday'] &&
+                        $parent->hora_inicio == $validated['start_time'] &&
+                        $parent->hora_fin == $validated['end_time'] &&
+                        $parent->aula == $validated['room'] &&
+                        $parent->profesor_id == $validated['profesor_id']) {
+                        
+                        Log::info('Moviendo excepción de vuelta al horario original', [
+                            'exception_id' => $schedule->id,
+                            'parent_id' => $parent->id,
+                            'original_date' => $schedule->original_date
+                        ]);
+                        
+                        // Buscar y eliminar la cancelación correspondiente
+                        $cancellation = Schedule::where('parent_id', $parent->id)
+                            ->where('is_cancelled', true)
+                            ->where('original_date', $schedule->original_date)
+                            ->first();
+                            
+                        if ($cancellation) {
+                            Log::info('Eliminando cancelación', ['cancellation_id' => $cancellation->id]);
+                            $cancellation->delete();
+                        }
+                        
+                        // Eliminar la excepción ya que vuelve a su estado original
+                        $schedule->delete();
+                        
+                        return response()->json(['message' => 'El evento ha vuelto a su horario original.']);
+                    } else {
+                        // Actualizar la excepción normalmente
+                        $schedule->update([
+                            'original_date' => $newDate,
+                            'dia_semana'    => $validated['weekday'],
+                            'hora_inicio'   => $validated['start_time'],
+                            'hora_fin'      => $validated['end_time'],
+                            'aula'          => $validated['room'],
+                            'profesor_id'   => $validated['profesor_id'],
+                            'curso_id'      => $validated['curso_id'],
+                        ]);
+                    }
+                }
             }
-        } else { // edit_type es 'solo_este'
-            $newDate = $validated['new_date'];
 
-            if ($schedule->is_recurring) {
-                // Caso 1: Mover una instancia recurrente por primera vez
-                $originalDate = $validated['original_date'];
-
-                // 1. Crear la cancelación para la fecha original
-                Schedule::create([
-                    'parent_id'     => $schedule->id,
-                    'is_recurring'  => false,
-                    'is_cancelled'  => true,
-                    'original_date' => $originalDate,
-                    'curso_id'      => $schedule->curso_id,
-                    'profesor_id'   => $schedule->profesor_id,
-                    'dia_semana'    => $schedule->dia_semana,
-                    'hora_inicio'   => $schedule->hora_inicio,
-                    'hora_fin'      => $schedule->hora_fin,
-                    'aula'          => $schedule->aula,
-                ]);
-
-                // 2. Crear la nueva excepción
-                Schedule::create([
-                    'parent_id'     => $schedule->id,
-                    'is_recurring'  => false,
-                    'is_cancelled'  => false,
-                    'original_date' => $newDate,
-                    'curso_id'      => $validated['curso_id'],
-                    'profesor_id'   => $validated['profesor_id'],
-                    'dia_semana'    => $validated['weekday'],
-                    'hora_inicio'   => $validated['start_time'],
-                    'hora_fin'      => $validated['end_time'],
-                    'aula'          => $validated['room'],
-                ]);
-            } else {
-                // Caso 2: Mover una excepción ya existente
-                $schedule->update([
-                    'original_date' => $newDate,
-                    'dia_semana'    => $validated['weekday'],
-                    'hora_inicio'   => $validated['start_time'],
-                    'hora_fin'      => $validated['end_time'],
-                    'aula'          => $validated['room'],
-                    'profesor_id'   => $validated['profesor_id'],
-                    'curso_id'      => $validated['curso_id'],
-                ]);
-            }
+            return response()->json(['message' => 'Horario actualizado con éxito.']);
+        } catch (ValidationException $e) {
+            Log::error('Error de validación al actualizar horario: ' . $e->getMessage() . '\n' . json_encode($e->errors()));
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
         }
-
-        return response()->json(['message' => 'Horario actualizado con éxito.']);
     }
 
     /**

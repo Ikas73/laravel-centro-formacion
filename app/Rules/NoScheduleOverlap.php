@@ -5,6 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use App\Models\Schedule;
+use Illuminate\Support\Facades\Log;
 
 class NoScheduleOverlap implements Rule, DataAwareRule
 {
@@ -30,40 +31,98 @@ class NoScheduleOverlap implements Rule, DataAwareRule
         $endTime = $this->data['end_time'] ?? null;
         $profesorId = $this->data['profesor_id'] ?? null;
         $room = $this->data['room'] ?? null;
-
+        $editType = $this->data['edit_type'] ?? null;
+        $originalDate = $this->data['original_date'] ?? null;
 
         if (is_null($weekday) || is_null($startTime) || is_null($endTime)) {
             return true;
         }
 
-        $baseQuery = Schedule::query()
+        $query = Schedule::query()
             ->where('dia_semana', $weekday)
             ->where('hora_inicio', '<', $endTime)
-            ->where('hora_fin', '>', $startTime);
+            ->where('hora_fin', '>', $startTime)
+            ->where('is_cancelled', false); // Excluir eventos cancelados
 
+        $idsToIgnore = [];
         if ($this->scheduleIdToIgnore) {
-            $baseQuery->where('id', '!=', $this->scheduleIdToIgnore);
+            $idsToIgnore[] = $this->scheduleIdToIgnore;
         }
 
-        // Verificar conflicto de profesor (si está especificado)
+        // Si estamos moviendo una sola ocurrencia, debemos ignorar el schedule "padre"
+        // en la fecha original para evitar un falso positivo de conflicto.
+        if ($editType === 'solo_este' && $originalDate) {
+            $currentSchedule = Schedule::with('parent')->find($this->scheduleIdToIgnore);
+            
+            Log::info('NoScheduleOverlap - Validando movimiento de excepción', [
+                'scheduleIdToIgnore' => $this->scheduleIdToIgnore,
+                'currentSchedule' => $currentSchedule ? $currentSchedule->toArray() : null,
+                'editType' => $editType,
+                'originalDate' => $originalDate,
+                'newWeekday' => $weekday,
+                'newTime' => $startTime . ' - ' . $endTime
+            ]);
+
+            if ($currentSchedule) {
+                // Si es una excepción (no recurrente con parent_id), agregar el padre
+                if (!$currentSchedule->is_recurring && $currentSchedule->parent_id) {
+                    $idsToIgnore[] = $currentSchedule->parent_id;
+                    Log::info('Agregando parent_id a ignorar', ['parent_id' => $currentSchedule->parent_id]);
+                }
+                
+                // Si es un evento recurrente padre, asegurarnos de ignorarlo
+                if ($currentSchedule->is_recurring) {
+                    // Ya está en idsToIgnore desde arriba
+                    Log::info('Schedule es recurrente (padre)', ['id' => $currentSchedule->id]);
+                }
+            }
+        }
+        
+        if (!empty($idsToIgnore)) {
+            $query->whereNotIn('id', $idsToIgnore);
+            Log::info('IDs a ignorar en la validación', ['idsToIgnore' => $idsToIgnore]);
+        }
+
+        // Clonamos la consulta base para las comprobaciones específicas
+        $baseQuery = clone $query;
+
+        // Verificar conflicto de profesor
         $profesorConflict = false;
         if ($profesorId) {
-            $profesorConflict = (clone $baseQuery)->where('profesor_id', $profesorId)->exists();
+            $profesorQuery = (clone $baseQuery)->where('profesor_id', $profesorId);
+            $profesorConflict = $profesorQuery->exists();
+            if ($profesorConflict) {
+                $conflictingSchedules = $profesorQuery->get();
+                Log::warning('Conflicto de profesor detectado', [
+                    'profesor_id' => $profesorId,
+                    'conflicting_schedules' => $conflictingSchedules->toArray()
+                ]);
+            }
         }
 
-        // Verificar conflicto de aula (si está especificada)
+        // Verificar conflicto de aula
         $aulaConflict = false;
         if ($room) {
-            $aulaConflict = (clone $baseQuery)->where('aula', $room)->exists();
+            $aulaQuery = (clone $baseQuery)->where('aula', $room);
+            $aulaConflict = $aulaQuery->exists();
+            if ($aulaConflict) {
+                $conflictingSchedules = $aulaQuery->get();
+                Log::warning('Conflicto de aula detectado', [
+                    'aula' => $room,
+                    'conflicting_schedules' => $conflictingSchedules->toArray()
+                ]);
+            }
         }
 
-        // Guardar información sobre el tipo de conflicto para el mensaje
         $this->conflictType = [];
-        if ($profesorConflict) $this->conflictType[] = 'profesor';
-        if ($aulaConflict) $this->conflictType[] = 'aula';
+        if ($profesorConflict) {
+            $this->conflictType[] = 'profesor';
+        }
+        if ($aulaConflict) {
+            $this->conflictType[] = 'aula';
+        }
 
-        // Hay conflicto si el profesor YA está ocupado O si el aula YA está ocupada
-        return !($profesorConflict || $aulaConflict);
+        return !$profesorConflict && !$aulaConflict;
     }
 
     public function message()
