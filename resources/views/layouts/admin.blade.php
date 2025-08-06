@@ -81,7 +81,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.configuracion.*') ? 'active' : '' }}" href="{{ route('admin.configuracion.index') }}">
+                        <a class="nav-link {{ request()->routeIs('settings.institution.*') ? 'active' : '' }}" href="{{ route('settings.institution.index') }}">
                             <i class="bi bi-gear-fill"></i>Settings
                         </a>
                     </li>

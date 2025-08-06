@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\PreinscritoSepeController; // Asegúrate que el nombre es exacto
 use App\Http\Controllers\Admin\ScheduleController;   // ← IMPORTANTE
+use App\Http\Controllers\Settings\InstitutionSettingsController;
 
 
 /*
@@ -93,6 +94,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
              // Define una ruta DELETE para desvincular un curso de un alumno
             Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
                 }); // --- Fin del grupo admin ---
+
+    // --- Grupo para Rutas de Configuración ---
+    Route::middleware(['can:access_settings'])->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', function() { return 'Settings Index (Pendiente)'; })->name('index');
+
+        Route::middleware(['can:manage_institution_settings'])->prefix('institution')->name('institution.')->group(function () {
+            Route::get('/', [InstitutionSettingsController::class, 'index'])->name('index');
+            Route::post('/', [InstitutionSettingsController::class, 'update'])->name('update');
+        });
+    });
 
 }); // --- Fin del grupo principal 'auth', 'verified' ---
 
