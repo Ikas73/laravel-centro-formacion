@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\PreinscritoSepeController; // Asegúrate que el nombre es exacto
 use App\Http\Controllers\Admin\ScheduleController;   // ← IMPORTANTE
 use App\Http\Controllers\Settings\InstitutionSettingsController;
+use App\Http\Controllers\Settings\AcademicYearController;
+use App\Http\Controllers\Settings\GradingPeriodController;
 
 
 /*
@@ -103,6 +105,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [InstitutionSettingsController::class, 'index'])->name('index');
             Route::post('/', [InstitutionSettingsController::class, 'update'])->name('update');
         });
+
+        Route::resource('academic-years', AcademicYearController::class);
+        Route::resource('grading-periods', GradingPeriodController::class);
     });
 
 }); // --- Fin del grupo principal 'auth', 'verified' ---

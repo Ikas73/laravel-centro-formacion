@@ -82,7 +82,12 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('settings.institution.*') ? 'active' : '' }}" href="{{ route('settings.institution.index') }}">
-                            <i class="bi bi-gear-fill"></i>Settings
+                            <i class="bi bi-building-gear"></i>Institution
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('settings.academic-years.*') ? 'active' : '' }}" href="{{ route('settings.academic-years.index') }}">
+                            <i class="bi bi-calendar-range"></i>Academic Years
                         </a>
                     </li>
                     {{-- Aquí puedes añadir los otros enlaces que faltan como Events, Messages, Announcements --}}
