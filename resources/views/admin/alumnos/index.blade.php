@@ -222,7 +222,9 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                     @forelse ($alumnos as $alumno)
-                        <tr class="hover:bg-gray-50 transition-colors duration-150 group">
+                        <!-- INICIO: LÍNEA MODIFICADA PARA FILAS RAYADAS -->
+                        <tr class="{{ $loop->even ? 'bg-slate-50' : '' }} hover:bg-indigo-50/50 transition-colors duration-150 group">
+                        <!-- FIN: LÍNEA MODIFICADA -->
                             <td class="px-6 py-5 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-12 w-12">
