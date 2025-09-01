@@ -68,27 +68,35 @@
                             <i class="bi bi-calendar3-week-fill"></i> Schedule
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.schedules.conflicts') ? 'active' : '' }}"
-                        href="{{ route('admin.schedules.conflicts') }}">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Conflicts
+                    <li class="nav-item" x-data="{ open: {{ (request()->routeIs('admin.schedules.conflicts') || request()->routeIs('admin.reportes.*') || request()->routeIs('settings.institution.*') || request()->routeIs('settings.academic-years.*')) ? 'true' : 'false' }} }">
+                        <a href="#" @click.prevent="open = !open" class="nav-link d-flex justify-content-between align-items-center {{ (request()->routeIs('admin.schedules.conflicts') || request()->routeIs('admin.reportes.*') || request()->routeIs('settings.institution.*') || request()->routeIs('settings.academic-years.*')) ? 'active' : '' }}">
+                            <span>
+                                <i class="bi bi-gear-fill"></i>Settings
+                            </span>
+                            <i class="bi bi-chevron-down transition-transform" :class="{'rotate-180': open}"></i>
                         </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.reportes.*') ? 'active' : '' }}" href="{{ route('admin.reportes.index') }}">
-                            <i class="bi bi-file-earmark-bar-graph-fill"></i>Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('settings.institution.*') ? 'active' : '' }}" href="{{ route('settings.institution.index') }}">
-                            <i class="bi bi-building-gear"></i>Institution
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('settings.academic-years.*') ? 'active' : '' }}" href="{{ route('settings.academic-years.index') }}">
-                            <i class="bi bi-calendar-range"></i>Academic Years
-                        </a>
+                        <ul x-show="open" class="nav flex-column ms-3" style="display: none;">
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.schedules.conflicts') ? 'active' : '' }}" href="{{ route('admin.schedules.conflicts') }}">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Conflicts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.reportes.*') ? 'active' : '' }}" href="{{ route('admin.reportes.index') }}">
+                                    <i class="bi bi-file-earmark-bar-graph-fill"></i>Reports
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('settings.institution.*') ? 'active' : '' }}" href="{{ route('settings.institution.index') }}">
+                                    <i class="bi bi-building-gear"></i>Institution
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('settings.academic-years.*') ? 'active' : '' }}" href="{{ route('settings.academic-years.index') }}">
+                                    <i class="bi bi-calendar-range"></i>Academic Years
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     {{-- Aquí puedes añadir los otros enlaces que faltan como Events, Messages, Announcements --}}
                     {{-- Y el enlace de Logout si quieres que esté en la sidebar --}}

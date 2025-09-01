@@ -1,38 +1,62 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Institution Settings') }}
-        </h2>
-    </x-slot>
+@extends('layouts.admin')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    @if (session('success'))
-                        <div class="alert alert-success mb-4">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+@section('title', 'Institution Settings')
 
-                    <form action="{{ route('settings.institution.update') }}" method="POST">
-                        @csrf
-                        <div class="mb-4">
-                            <label for="school_name" class="block text-gray-700 text-sm font-bold mb-2">Nombre de la Institución</label>
-                            <input type="text" name="school_name" id="school_name" value="{{ $settingsService->get('school_name') }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        </div>
+@section('content')
+    <h1 class="text-2xl font-semibold mb-4">Institution Settings</h1>
+    <div>
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-xl">
+                    <section>
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900">
+                                {{ __('Institution Information') }}
+                            </h2>
 
-                        <div class="mb-4">
-                            <label for="school_address" class="block text-gray-700 text-sm font-bold mb-2">Dirección</label>
-                            <input type="text" name="school_address" id="school_address" value="{{ $settingsService->get('school_address') }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        </div>
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ __("Update your institution's profile information.") }}
+                            </p>
+                        </header>
 
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                            Guardar Cambios
-                        </button>
-                    </form>
+                        <form method="post" action="{{ route('settings.institution.update') }}" class="mt-6 space-y-6">
+                            @csrf
+
+                            <div>
+                                <x-input-label for="institution_name" :value="__('Institution Name')" />
+                                <x-text-input id="institution_name" name="institution_name" type="text" class="mt-1 block w-full" :value="old('institution_name', $settingsService->get('institution_name'))" required autofocus />
+                                <x-input-error class="mt-2" :messages="$errors->get('institution_name')" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="institution_address" :value="__('Address')" />
+                                <x-text-input id="institution_address" name="institution_address" type="text" class="mt-1 block w-full" :value="old('institution_address', $settingsService->get('institution_address'))" />
+                                <x-input-error class="mt-2" :messages="$errors->get('institution_address')" />
+                            </div>
+                            
+                            <div>
+                                <x-input-label for="institution_phone" :value="__('Phone')" />
+                                <x-text-input id="institution_phone" name="institution_phone" type="text" class="mt-1 block w-full" :value="old('institution_phone', $settingsService->get('institution_phone'))" />
+                                <x-input-error class="mt-2" :messages="$errors->get('institution_phone')" />
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+                                @if (session('status') === 'institution-settings-updated')
+                                    <p
+                                        x-data="{ show: true }"
+                                        x-show="show"
+                                        x-transition
+                                        x-init="setTimeout(() => show = false, 2000)"
+                                        class="text-sm text-gray-600"
+                                    >{{ __('Saved.') }}</p>
+                                @endif
+                            </div>
+                        </form>
+                    </section>
                 </div>
             </div>
         </div>
     </div>
-</x-app-layout>
+@endsection

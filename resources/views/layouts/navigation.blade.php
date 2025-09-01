@@ -5,7 +5,6 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    {{-- CAMBIO: El logo ahora debería apuntar a la ruta 'welcome' o a 'admin.dashboard' si el usuario está logueado --}}
                     <a href="{{ Auth::check() ? route('admin.dashboard') : route('welcome') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
@@ -16,14 +15,12 @@
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    {{-- Puedes añadir aquí otros enlaces principales si son para usuarios logueados --}}
-                    {{-- Si tienes una parte pública con otras rutas principales, este no es el lugar --}}
                 </div>
             </div>
 
             <!-- Settings Dropdown / Login & Register Links -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                @auth {{-- <--- INICIO BLOQUE @auth --}}
+                @auth
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -48,12 +45,12 @@
                             </form>
                         </x-slot>
                     </x-dropdown>
-                @else {{-- <--- INICIO BLOQUE @else / @guest --}}
+                @else
                     <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}" class="ms-4 font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Register</a>
                     @endif
-                @endauth {{-- <--- FIN BLOQUE @auth --}}
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -74,11 +71,10 @@
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            {{-- Añade aquí otros enlaces responsivos si los tienes --}}
         </div>
 
         <!-- Responsive Settings Options -->
-        @auth {{-- <--- INICIO BLOQUE @auth para opciones responsivas --}}
+        @auth
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <div class="px-4">
                     <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
@@ -97,7 +93,7 @@
                     </form>
                 </div>
             </div>
-        @else {{-- <--- INICIO BLOQUE @else / @guest para responsivo --}}
+        @else
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <x-responsive-nav-link :href="route('login')">
                     {{ __('Log in') }}
@@ -108,6 +104,6 @@
                     </x-responsive-nav-link>
                 @endif
             </div>
-        @endauth {{-- <--- FIN BLOQUE @auth para responsivo --}}
+        @endauth
     </div>
 </nav>
