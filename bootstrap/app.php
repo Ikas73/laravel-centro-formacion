@@ -15,4 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+        ->withProviders([  // Abre el array
+        App\Providers\SettingsServiceProvider::class,
+    ])                 // <-- AÑADE ESTE CORCHETE DE CIERRE
+    ->create();

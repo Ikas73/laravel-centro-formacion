@@ -29,7 +29,9 @@
                  <a class="text-decoration-none" href="{{ route('admin.dashboard') }}">
                      {{-- Puedes usar un <img> si tienes un logo gráfico --}}
                      {{-- <img src="{{ asset('images/logo-east-bridge.png') }}" alt="East Bridge Logo" class="h-8 w-auto mb-1"> --}}
-                     <span class="app-name">EAST BRIDGE</span>
+                     {{-- Usamos el helper para obtener el nombre de la BD.
+                          Si no existe, usamos como fallback el nombre de la app definido en .env --}}
+                     <span class="app-name">{{ setting('institution_name', config('app.name', 'Laravel')) }}</span>
                      <span class="app-subtitle block">High School Dashboard</span>
                  </a>
             </div>
