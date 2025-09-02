@@ -75,8 +75,8 @@
                     <li class="nav-item">
                         {{-- La clase 'active' se aplica si la ruta actual empieza con 'settings.' --}}
                         <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" 
-                        href="{{ route('settings.index') }}">
-                            <i class="bi bi-gear-fill"></i>Configuración
+                        href="{{ route('settings.index') }}" title="Contacto de la sede y gestión del año académico.">
+                            <i class="bi bi-building-gear"></i>Institución
                         </a>
                     </li>
                     @endcan

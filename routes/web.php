@@ -65,11 +65,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
             Route::resource('preinscritos', PreinscritoSepeController::class);
+            // --- RUTAS DE SCHEDULES (ORDEN CORRECTO) ---
             Route::post('schedules/check-conflict', [ScheduleController::class, 'checkConflict'])->name('schedules.checkConflict');
+
+            // 1. Ruta específica para 'conflicts' se define PRIMERO.
+            Route::get('schedules/conflicts', [ScheduleController::class, 'showConflicts'])->name('schedules.conflicts');
+
+            // 2. Ruta resource, que es más genérica, se define DESPUÉS.
             Route::resource('schedules', ScheduleController::class);
+
             Route::get('schedule', [\App\Http\Controllers\Admin\ScheduleController::class, 'index'])->name('schedule.index');
             Route::get('schedule/events', [\App\Http\Controllers\Admin\ScheduleController::class, 'fetchEvents'])->name('schedule.events');
-            Route::get('schedules/conflicts', [ScheduleController::class, 'showConflicts'])->name('schedules.conflicts');
             Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])->name('preinscritos.convertir');
             Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
             Route::get('/alumnos/{alumno}/cursos-disponibles', [AlumnoController::class, 'getCursosDisponibles'])->name('alumnos.cursos.disponibles');
