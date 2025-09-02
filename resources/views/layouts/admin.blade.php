@@ -68,36 +68,51 @@
                             <i class="bi bi-calendar3-week-fill"></i> Schedule
                         </a>
                     </li>
-                    <li class="nav-item" x-data="{ open: {{ (request()->routeIs('admin.schedules.conflicts') || request()->routeIs('admin.reportes.*') || request()->routeIs('settings.institution.*') || request()->routeIs('settings.academic-years.*')) ? 'true' : 'false' }} }">
-                        <a href="#" @click.prevent="open = !open" class="nav-link d-flex justify-content-between align-items-center {{ (request()->routeIs('admin.schedules.conflicts') || request()->routeIs('admin.reportes.*') || request()->routeIs('settings.institution.*') || request()->routeIs('settings.academic-years.*')) ? 'active' : '' }}">
+                    {{-- =============================================================== --}}
+                    {{-- 1. NUEVO ENLACE ÚNICO PARA LA CONFIGURACIÓN DEL SISTEMA --}}
+                    {{-- =============================================================== --}}
+                    @can('access_settings') {{-- El usuario debe tener permiso para ver esto --}}
+                    <li class="nav-item">
+                        {{-- La clase 'active' se aplica si la ruta actual empieza con 'settings.' --}}
+                        <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" 
+                        href="{{ route('settings.index') }}">
+                            <i class="bi bi-gear-fill"></i>Configuración
+                        </a>
+                    </li>
+                    @endcan
+
+                    {{-- =============================================================== --}}
+                    {{-- 2. NUEVO MENÚ DESPLEGABLE PARA HERRAMIENTAS Y ANÁLISIS --}}
+                    {{-- =============================================================== --}}
+                    {{-- Suponemos que estos permisos existirán o se crearán en el futuro --}}
+                    @canany(['view_conflicts', 'view_reports'])
+                    <li class="nav-item" x-data="{ open: {{ request()->routeIs('admin.schedules.conflicts') || request()->routeIs('admin.reportes.*') ? 'true' : 'false' }} }">
+                        <a href="#" @click.prevent="open = !open" 
+                        class="nav-link d-flex justify-content-between align-items-center {{ request()->routeIs('admin.schedules.conflicts') || request()->routeIs('admin.reportes.*') ? 'active' : '' }}">
                             <span>
-                                <i class="bi bi-gear-fill"></i>Settings
+                                <i class="bi bi-tools"></i>Herramientas
                             </span>
                             <i class="bi bi-chevron-down transition-transform" :class="{'rotate-180': open}"></i>
                         </a>
                         <ul x-show="open" class="nav flex-column ms-3" style="display: none;">
+                            @can('view_conflicts') {{-- Permiso específico para ver conflictos --}}
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.schedules.conflicts') ? 'active' : '' }}" href="{{ route('admin.schedules.conflicts') }}">
-                                    <i class="bi bi-exclamation-triangle-fill"></i> Conflicts
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Conflictos
                                 </a>
                             </li>
+                            @endcan
+                            @can('view_reports') {{-- Permiso específico para ver reportes --}}
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('admin.reportes.*') ? 'active' : '' }}" href="{{ route('admin.reportes.index') }}">
-                                    <i class="bi bi-file-earmark-bar-graph-fill"></i>Reports
+                                    <i class="bi bi-file-earmark-bar-graph-fill"></i>Reportes
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('settings.institution.*') ? 'active' : '' }}" href="{{ route('settings.institution.index') }}">
-                                    <i class="bi bi-building-gear"></i>Institution
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('settings.academic-years.*') ? 'active' : '' }}" href="{{ route('settings.academic-years.index') }}">
-                                    <i class="bi bi-calendar-range"></i>Academic Years
-                                </a>
-                            </li>
+                            @endcan
                         </ul>
                     </li>
+                    @endcanany
+
                     {{-- Aquí puedes añadir los otros enlaces que faltan como Events, Messages, Announcements --}}
                     {{-- Y el enlace de Logout si quieres que esté en la sidebar --}}
                 </ul>

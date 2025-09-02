@@ -44,71 +44,65 @@ require __DIR__.'/auth.php';
 // --- Rutas que Requieren Autenticación ---
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // --- Rutas de Perfil de Usuario ---
+    // --- Rutas de Perfil de Usuario (sin cambios) ---
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
 
-    // --- Grupo para Rutas Específicas de Administración ---
+    // --- Grupo para Rutas Específicas de Administración (sin cambios en este bloque) ---
     Route::prefix('admin')
           ->name('admin.')
-          ->middleware(['auth', 'verified'])
-          // Si quieres un middleware de autorización específico para admin (basado en roles/permisos),
-          // lo añadirías aquí además del 'auth' y 'verified' del grupo padre.
-          // Ejemplo: ->middleware(['can:access-admin-panel'])
-          ->group(function () {
+          ->group(function () { // 'auth' y 'verified' ya se aplican por el grupo padre
 
             // Dashboard de Administración
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-            // Recursos CRUD para Administración
+            // ... (todas tus rutas de admin: profesores, alumnos, cursos, etc., permanecen igual) ...
             Route::resource('profesores', ProfesorController::class);
             Route::resource('alumnos', AlumnoController::class);
             Route::resource('cursos', CursoController::class);
             Route::resource('eventos', EventoController::class);
-            Route::resource('preinscritos', PreinscritoSepeController::class); // Asegúrate que este controlador existe
+            Route::resource('preinscritos', PreinscritoSepeController::class);
             Route::post('schedules/check-conflict', [ScheduleController::class, 'checkConflict'])->name('schedules.checkConflict');
             Route::resource('schedules', ScheduleController::class);
-            // --- AÑADE ESTA LÍNEA PARA EL CALENDARIO ---
             Route::get('schedule', [\App\Http\Controllers\Admin\ScheduleController::class, 'index'])->name('schedule.index');
             Route::get('schedule/events', [\App\Http\Controllers\Admin\ScheduleController::class, 'fetchEvents'])->name('schedule.events');
             Route::get('schedules/conflicts', [ScheduleController::class, 'showConflicts'])->name('schedules.conflicts');
-
-            
-            // Ruta para convertir preinscrito
-            Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])
-                  ->name('preinscritos.convertir');
-            
-            // Ruta para desinscribir un alumno de un curso
+            Route::post('/preinscritos/{preinscrito}/convertir', [PreinscritoSepeController::class, 'convertirAAlumno'])->name('preinscritos.convertir');
             Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
-            // Ruta GET para obtener los cursos disponibles para un alumno (para el modal AJAX)
             Route::get('/alumnos/{alumno}/cursos-disponibles', [AlumnoController::class, 'getCursosDisponibles'])->name('alumnos.cursos.disponibles');
-
-            // Ruta POST para procesar la inscripción del alumno en un curso
             Route::post('/alumnos/{alumno}/inscribir', [AlumnoController::class, 'inscribirCurso'])->name('alumnos.cursos.inscribir');
-
-            // Placeholders para otras secciones de admin
             Route::get('/reportes', function () { return 'Admin Reportes (Pendiente)'; })->name('reportes.index');
             Route::get('/finanzas', function () { return 'Admin Finanzas (Pendiente)'; })->name('finanzas.index');
             Route::get('/configuracion', function () { return 'Admin Configuración (Pendiente)'; })->name('configuracion.index');
-             // Define una ruta DELETE para desvincular un curso de un alumno
-            Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
-                }); // --- Fin del grupo admin ---
 
-    // --- Grupo para Rutas de Configuración ---
+    }); // --- Fin del grupo admin ---
+
+    // --- GRUPO PARA RUTAS DE CONFIGURACIÓN (MODIFICADO) ---
+    // El middleware 'can:access_settings' se aplica a todo el grupo
     Route::middleware(['can:access_settings'])->prefix('settings')->name('settings.')->group(function () {
-        Route::get('/', function() { return 'Settings Index (Pendiente)'; })->name('index');
+        
+        // 1. (NUEVO) Ruta principal para la vista unificada con pestañas.
+        Route::get('/', [InstitutionSettingsController::class, 'index'])->name('index');
 
-        Route::middleware(['can:manage_institution_settings'])->prefix('institution')->name('institution.')->group(function () {
-            Route::get('/', [InstitutionSettingsController::class, 'index'])->name('index');
-            Route::post('/', [InstitutionSettingsController::class, 'update'])->name('update');
+        // 2. (MODIFICADO) Rutas para la pestaña "Institution".
+        //    Ya no necesitan su propio prefijo, solo el middleware de autorización específico.
+        Route::middleware(['can:manage_institution_settings'])->group(function () {
+            // La ruta GET '/institution' ya no es necesaria, la maneja la ruta principal 'index'.
+            // La ruta POST ahora no tiene prefijo, es simplemente 'settings.institution.update'.
+            Route::post('/institution', [InstitutionSettingsController::class, 'update'])->name('institution.update');
         });
 
-        Route::resource('academic-years', AcademicYearController::class);
-        Route::resource('grading-periods', GradingPeriodController::class);
-    });
+        // 3. (MODIFICADO) Rutas para la pestaña "Academic".
+        //    Se protegen con su propio middleware y se mantienen como resource.
+        Route::middleware(['can:manage_academic_settings'])->group(function () {
+            Route::resource('academic-years', AcademicYearController::class);
+            Route::resource('grading-periods', GradingPeriodController::class)->except(['index', 'show']); // No necesitamos vistas separadas para estos
+        });
+
+    }); // --- Fin del grupo settings ---
 
 }); // --- Fin del grupo principal 'auth', 'verified' ---
 

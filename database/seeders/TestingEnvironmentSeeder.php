@@ -43,18 +43,19 @@ class TestingEnvironmentSeeder extends Seeder
         // --- Creación de Entidades ---
         $this->command->info('Creando usuarios, profesores, alumnos y cursos...');
 
-        // Crear usuario admin si no existe y asignarle el rol de System Administrator
-        $adminUser = User::firstOrCreate(
-            ['email' => 'admin@admin.com'],
-            [
+        // Usamos updateOrCreate para garantizar que los datos del admin siempre estén correctos.
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@admin.com'], // <- Condición de búsqueda
+            [ // <- Valores a asegurar
                 'name' => 'Admin',
                 'password' => bcrypt('admin'),
             ]
         );
+
         $adminUser->assignRole('System Administrator');
 
         // Crear usuario Secretary
-        $secretaryUser = User::firstOrCreate(
+        $secretaryUser = User::updateOrCreate(
             ['email' => 'secretary@admin.com'],
             [
                 'name' => 'Secretary',
@@ -64,7 +65,7 @@ class TestingEnvironmentSeeder extends Seeder
         $secretaryUser->assignRole('Secretary');
 
         // Crear usuario Teacher
-        $teacherUser = User::firstOrCreate(
+        $teacherUser = User::updateOrCreate(
             ['email' => 'teacher@admin.com'],
             [
                 'name' => 'Teacher',

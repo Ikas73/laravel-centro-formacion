@@ -1,13 +1,4 @@
-@extends('layouts.admin')
 
-@section('title', 'Institution Settings')
-
-@section('content')
-    <h1 class="text-2xl font-semibold mb-4">Institution Settings</h1>
-    <div>
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
                     <section>
                         <header>
                             <h2 class="text-lg font-medium text-gray-900">
@@ -55,8 +46,3 @@
                             </div>
                         </form>
                     </section>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
