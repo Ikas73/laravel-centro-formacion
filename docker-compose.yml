@@ -10,7 +10,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "49000:5432" # o el puerto que prefieras
+      - "49000:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-usuario} -d ${DB_DATABASE:-centro_formacion}"]
       interval: 10s
@@ -27,12 +27,21 @@ services:
     volumes:
       - .:/var/www/html
     ports:
-      - "8000:8000" # PHP artisan serve
-      - "5173:5173" # Vite o PHP artisan serve
+      - "8000:8000" # Puerto para php artisan serve
+      # Se elimina la linea "- 5173:5173", ya que no vamos a ejecutar el servidor de Vite.
     depends_on:
       db:
         condition: service_healthy
     env_file:
       - ./.env
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  cloudflared-tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    depends_on:
+      - app
+    command: tunnel --url http://app:8000
+
 volumes:
   db_data:

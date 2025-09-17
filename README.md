@@ -168,6 +168,62 @@ docker-compose exec app php artisan migrate --seed
 
 ---
 
+### WARP-workflow: Desplegar Cambios de Frontend
+
+Para agilizar el proceso de actualización de la demo después de realizar cambios en el frontend (CSS, JavaScript, etc.), se ha creado un workflow específico para la terminal [Warp](https://www.warp.dev/).
+
+Este workflow automatiza los pasos necesarios para que tus modificaciones visuales se reflejen correctamente en el entorno de producción/demo, evitando el error común de que los estilos no se carguen.
+
+#### El Workflow: `demo-frontend.yml`
+
+Este es el código que necesitas guardar para que Warp lo reconozca.
+
+**Ubicación del archivo:** `~/.warp/workflows/demo-frontend.yml`
+
+```yaml
+name: Demo Laravel: Desplegar con Cambios Frontend
+command: |
+  echo "🎨 Compilando activos de frontend con Vite..."
+  npm run build
+  echo "🔵 Levantando los contenedores en segundo plano..."
+  docker-compose up -d
+  echo "🟢 Contenedores iniciados. Obteniendo la URL del túnel..."
+  echo "--------------------------------------------------------"
+  docker-compose logs cloudflared-tunnel
+  echo "--------------------------------------------------------"
+  echo "✅ Copia la URL pública de arriba para ver tu demo."
+description: Recompila los activos de Vite (CSS/JS) y luego levanta los contenedores y muestra la URL. Úsalo SIEMPRE que modifiques archivos en resources/js o resources/css.
+author: Gemini
+tags:
+  - laravel
+  - docker
+  - vite
+  - frontend
+```
+
+#### ¿Cómo se utiliza?
+
+Una vez que hayas guardado el archivo `.yml` en la ubicación correcta:
+
+1.  **Navega a la raíz** de tu proyecto en la terminal Warp.
+2.  Abre el lanzador de Workflows con `Ctrl + Shift + R`.
+3.  Busca y selecciona **"Demo Laravel: Desplegar con Cambios Frontend"**.
+4.  Presiona `Enter`.
+
+#### ¿Qué hace este workflow?
+
+Al ejecutarlo, el workflow realiza los siguientes pasos en orden:
+
+1.  **`npm run build`**: Toma todos tus archivos de `resources/css` y `resources/js`, los compila y los empaqueta en la carpeta `public/build`. Este es el paso más importante para que tus cambios sean visibles.
+2.  **`docker-compose up -d`**: Inicia (o reinicia) los contenedores de Docker en segundo plano, asegurando que tu aplicación esté corriendo con el código más reciente.
+3.  **`docker-compose logs cloudflared-tunnel`**: Muestra el registro del contenedor de Cloudflare, donde encontrarás la **URL pública y temporal** para acceder a tu demo.
+
+Con un solo comando, te aseguras de que tu demo está compilada, corriendo y accesible.
+
+
+---
+
+
 ## 💡 Comandos Útiles
 
 - **Ver logs de un servicio:**  
