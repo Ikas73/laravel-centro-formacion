@@ -33,4 +33,4 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 EXPOSE 9000
 
 # Comando por defecto (opcional si está en docker-compose.yml)
-# CMD ["php-fpm"]
+CMD ["php-fpm"]

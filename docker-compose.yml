@@ -1,3 +1,5 @@
+# docker-compose.yml MODIFICADO CON NGINX
+
 services:
   db:
     image: postgres:14-alpine
@@ -17,6 +19,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # El servicio 'app' ahora solo ejecuta PHP-FPM y no es accesible desde el exterior.
   app:
     build:
       context: .
@@ -26,22 +29,33 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
-    ports:
-      - "8000:8000" # Puerto para php artisan serve
-      # Se elimina la linea "- 5173:5173", ya que no vamos a ejecutar el servidor de Vite.
+    # SE ELIMINAN 'ports' y 'command'
     depends_on:
       db:
         condition: service_healthy
     env_file:
       - ./.env
-    command: php artisan serve --host=0.0.0.0 --port=8000
 
+  # NUEVO servicio 'nginx' que actúa como servidor web.
+  nginx:
+    image: nginx:stable-alpine
+    container_name: centro_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80" # El puerto 8000 de tu máquina ahora apunta a Nginx.
+    volumes:
+      - .:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  # El túnel ahora apunta a Nginx.
   cloudflared-tunnel:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     depends_on:
-      - app
-    command: tunnel --url http://app:8000
+      - nginx # Ahora depende de nginx
+    command: tunnel --url http://nginx:80 # Y apunta al servicio nginx
 
 volumes:
   db_data:
