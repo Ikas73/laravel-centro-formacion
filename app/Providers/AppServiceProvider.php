@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Forzamos el esquema HTTPS si el entorno es 'production'
         // Puedes quitar el if si quieres que se aplique siempre.
-        if ($this->app->environment('CF-Connecting-IP')) {
+        if (request()->hasHeader('CF-Connecting-IP')) {
              URL::forceScheme('https');
         }
     }

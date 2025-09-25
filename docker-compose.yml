@@ -42,7 +42,7 @@ services:
     container_name: centro_nginx
     restart: unless-stopped
     ports:
-      - "8000:80" # El puerto 8000 de tu máquina ahora apunta a Nginx.
+      - "8001:80" # El puerto 8000 de tu máquina ahora apunta a Nginx.
     volumes:
       - .:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ScheduleController;   // ← IMPORTANTE
 use App\Http\Controllers\Settings\InstitutionSettingsController;
 use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\Settings\GradingPeriodController;
+use App\Http\Controllers\Admin\ReportController;
 
 
 /*
@@ -80,9 +81,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/alumnos/{alumno}/cursos/{curso}', [AlumnoController::class, 'desinscribirCurso'])->name('alumnos.cursos.desinscribir');
             Route::get('/alumnos/{alumno}/cursos-disponibles', [AlumnoController::class, 'getCursosDisponibles'])->name('alumnos.cursos.disponibles');
             Route::post('/alumnos/{alumno}/inscribir', [AlumnoController::class, 'inscribirCurso'])->name('alumnos.cursos.inscribir');
-            Route::get('/reportes', function () { return 'admin.reportes.index'; })->name('reportes.index');
-            Route::get('/finanzas', function () { return 'Admin Finanzas (Pendiente)'; })->name('finanzas.index');
-            Route::get('/configuracion', function () { return 'Admin Configuración (Pendiente)'; })->name('configuracion.index');
+            // ---------------------------
+            // Bloque de rutas para Reportes
+            // ---------------------------
+            Route::prefix('reportes')->name('reportes.')->group(function () {
+                Route::get('/', [ReportController::class, 'index'])->name('index');
+                Route::get('/crear', [ReportController::class, 'create'])->name('create');
+                Route::post('/', [ReportController::class, 'store'])->name('store');
+                Route::get('/archivo', [ReportController::class, 'archive'])->name('archive');
+                Route::get('/{report}', [ReportController::class, 'show'])->name('show');
+            });
+                Route::get('/finanzas', function () { return 'Admin Finanzas (Pendiente)'; })->name('finanzas.index');
+                Route::get('/configuracion', function () { return 'Admin Configuración (Pendiente)'; })->name('configuracion.index');
 
     }); // --- Fin del grupo admin ---
 

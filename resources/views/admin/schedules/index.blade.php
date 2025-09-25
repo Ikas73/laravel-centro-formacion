@@ -133,5 +133,5 @@
     </script>
 
     {{-- La única línea necesaria. Vite se encargará de inyectar todo el JS y CSS requerido. --}}
-    @vite(['resources/js/schedules.js', 'node_modules/@fullcalendar/core/main.css'])
+        @vite(['resources/js/schedules.js'])
 @endpush
